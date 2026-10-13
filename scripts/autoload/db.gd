@@ -111,6 +111,10 @@ func _migrate() -> void:
 		_exec("ALTER TABLE users ADD COLUMN playtime INTEGER NOT NULL DEFAULT 0;")
 	if not "has_password" in cols:
 		_exec("ALTER TABLE users ADD COLUMN has_password INTEGER NOT NULL DEFAULT 1;")
+	# One-time cleanup: remove the old sample player "ryu".
+	if get_setting("sample_players_removed") != "1":
+		_exec("DELETE FROM users WHERE username = 'ryu';")
+		set_setting("sample_players_removed", "1")
 
 
 func get_setting(key: String, default_value := "") -> String:
@@ -223,6 +227,13 @@ func continue_user(user_id: int) -> Dictionary:
 		return {"ok": false, "error": "That player no longer exists."}
 	_exec("UPDATE users SET last_login = datetime('now') WHERE id = ?;", [user_id])
 	return {"ok": true, "error": "", "user": get_user(user_id)}
+
+
+## Deletes a saved player with all their scores, progress, rewards and badges.
+func delete_user(user_id: int) -> bool:
+	if get_user(user_id).is_empty():
+		return false
+	return _exec("DELETE FROM users WHERE id = ?;", [user_id])
 
 
 func get_user(user_id: int) -> Dictionary:

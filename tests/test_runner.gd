@@ -83,6 +83,16 @@ func _test_accounts() -> void:
 	var cont := DB.continue_user(juan_id)
 	check(cont.ok and cont.user.username == "juan", "continue needs no password")
 	check(not DB.continue_user(999999).ok, "continue with a missing player fails")
+	var temp_id: int = DB.register_user("Temp Player", "").user.id
+	check(DB.delete_user(temp_id), "delete a saved player")
+	check(DB.get_user(temp_id).is_empty() and DB.get_users().size() == 2, "deleted player is gone")
+	check(not DB.delete_user(temp_id), "deleting twice fails")
+	# The old sample player "ryu" is removed once when the database opens.
+	DB.register_user("ryu", "")
+	DB.set_setting("sample_players_removed", "0")
+	DB.open(TEST_DB)
+	check(DB.login_user("ryu", "").ok == false, "sample player ryu removed")
+	check(DB.get_setting("sample_players_removed") == "1", "ryu cleanup runs only once")
 	check(DB.register_user("maria", "secret2", "Maria").ok, "register maria")
 
 
