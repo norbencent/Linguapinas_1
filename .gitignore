@@ -1,0 +1,9 @@
+# Godot
+.godot/
+/build/
+
+# Python helper
+__pycache__/
+*.pyc
+.venv/
+tools/marian_server/models/
