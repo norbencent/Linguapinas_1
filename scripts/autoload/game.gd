@@ -14,7 +14,6 @@ const SCENES := {
 	"lesson": "res://scenes/lesson.tscn",
 	"quiz": "res://scenes/quiz.tscn",
 	"results": "res://scenes/results.tscn",
-	"leaderboard": "res://scenes/leaderboard.tscn",
 	"gallery": "res://scenes/gallery.tscn",
 	"stories": "res://scenes/stories.tscn",
 	"spirit": "res://scenes/guiding_spirit.tscn",

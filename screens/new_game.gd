@@ -1,10 +1,10 @@
 extends Control
 ## "Enter your name" card (prototype screen 4). Creates a player profile.
+## The hero is picked from the six island portraits in profile_pic.png.
 
 var name_edit: LineEdit
-var password_edit: LineEdit
 var status: Label
-var avatar := "boy"
+var avatar := "luzon_boy"
 var avatar_buttons := {}
 
 
@@ -41,41 +41,48 @@ func _build_card(root: Control, title: String, intro: String) -> void:
 	name_edit = UI.line_edit(UI.t("name_hint"))
 	name_edit.max_length = 20
 	v.add_child(name_edit)
-	password_edit = UI.line_edit(UI.t("password_hint"), true)
-	v.add_child(password_edit)
 
 	v.add_child(UI.heading(UI.t("choose_avatar"), UI.RED, 22))
-	var row := UI.hbox(30)
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	v.add_child(row)
-	for a in ["boy", "girl"]:
-		var b := TextureButton.new()
-		b.texture_normal = UI.tex["luzon_" + a]
-		b.ignore_texture_size = true
-		b.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
-		b.custom_minimum_size = Vector2(170, 180)
-		b.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		b.pressed.connect(_pick_avatar.bind(a))
-		row.add_child(b)
-		avatar_buttons[a] = b
-	_pick_avatar("boy")
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 24)
+	grid.add_theme_constant_override("v_separation", 6)
+	v.add_child(UI.center(grid))
+	# One row per main island: boy and girl.
+	for region in ["luzon", "visayas", "mindanao"]:
+		for gender in ["boy", "girl"]:
+			var a: String = "%s_%s" % [region, gender]
+			var b := TextureButton.new()
+			b.texture_normal = UI.avatar_portrait(a)
+			b.ignore_texture_size = true
+			b.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
+			b.custom_minimum_size = Vector2(150, 150)
+			b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+			b.pivot_offset = Vector2(75, 75)
+			b.pressed.connect(func():
+				Sound.click()
+				_pick_avatar(a))
+			grid.add_child(b)
+			avatar_buttons[a] = b
+	_pick_avatar(avatar)
 
 	status = UI.label("", 20, UI.RED, true)
 	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(status)
 	v.add_child(UI.gem_button(UI.t("start_adventure"), "red", _submit, 84, 30))
 	name_edit.text_submitted.connect(func(_t): _submit())
-	password_edit.text_submitted.connect(func(_t): _submit())
 
 
 func _pick_avatar(a: String) -> void:
 	avatar = a
 	for key in avatar_buttons:
-		avatar_buttons[key].modulate = Color.WHITE if key == a else Color(1, 1, 1, 0.45)
+		var b: TextureButton = avatar_buttons[key]
+		b.modulate = Color.WHITE if key == a else Color(1, 1, 1, 0.4)
+		b.scale = Vector2.ONE * (1.08 if key == a else 0.92)
 
 
 func _submit() -> void:
-	var result := DB.register_user(name_edit.text, password_edit.text, name_edit.text, avatar)
+	var result := DB.register_user(name_edit.text, name_edit.text, avatar)
 	if result.ok:
 		Game.login(result.user)
 	else:

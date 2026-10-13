@@ -63,12 +63,22 @@ file names. `tools/art/extract_prototype_art.py` shows how each one was cut.
 Fonts: Cinzel, Cinzel Decorative and Lilita One (SIL Open Font License). The
 music and sound effects in `assets/audio` were generated for this project.
 
+Quiz battle scene: the Luzon languages use the backgrounds in
+`assets/ui/Luzon_quiz_scene` (mapping in `QUIZ_SCENES`, `scripts/autoload/ui.gd`);
+the other islands keep `quiz_scene.png`. The enemy warriors are cut from the
+sprite sheets in `assets/ui/{luzon,visayas,mindanao}_warrior_enemy` into
+`assets/ui/enemies/<language>/<difficulty>_<idle|attack|hurt|die>.png` by
+`python tools/art/extract_enemy_sprites.py assets/ui` (needs Pillow, numpy
+and scipy). Run it again after changing a sheet. Hero portraits for the
+name screen, Continue list and Profile come from `assets/ui/profile_pic.png`.
+
 ## Features
 
 | Feature | Status |
 | --- | --- |
 | Portrait Android layout with the prototype art (title, menu, name entry, settings, map, island pages, profile, gallery, quiz) | Implemented |
-| New Game (name, optional password, choose a hero) / Continue (saved players) | Implemented (salted SHA-256 password hashes, stored locally) |
+| New Game (name, choose one of six island hero portraits) / Continue (saved players, no password) with a Delete button per player | Implemented |
+| Quiz battle scene: island background, hero vs. animated enemy warrior of the language and level (idle, attack on a wrong answer, hurt on a right one, defeat at the end) | Implemented |
 | Settings: Filipino/English interface, music and SFX volume, notifications | Implemented |
 | Profile with name, island, language, fragments, crystals, relics, badges, score, playtime | Implemented |
 | Region selection: Luzon, Visayas, Mindanao | Implemented |
@@ -87,7 +97,6 @@ music and sound effects in `assets/audio` were generated for this project.
 | Badges and Language Core restoration, Pearl of the Orient | Implemented |
 | Culture Showcase Gallery (food, festivals, clothing, art, landmarks) | Implemented (text; a region's items unlock after completing any level there) |
 | Stories unlocked by restoring cores | Implemented: one story per region plus the Pearl story |
-| Leaderboard (all players on the device, filter by region) | Implemented |
 | Guiding Spirit: offline dictionary, word-by-word gloss, grammar tips, quiz hints | Implemented |
 | Guiding Spirit: MarianNMT machine translation | Implemented as an optional local server (see below) |
 | Text-to-speech (Coqui TTS / Tacotron2), TensorFlow Lite / ONNX on device | Not implemented |
@@ -95,7 +104,7 @@ music and sound effects in `assets/audio` were generated for this project.
 A region's core is restored when the player passes Easy, Medium and Hard in at
 least one of its languages (`LANGUAGES_TO_RESTORE_CORE` in
 `scripts/autoload/db.gd`). Only "All categories" quizzes unlock levels and
-count on the leaderboard; category practice still earns rewards.
+count toward the score; category practice still earns rewards.
 
 ## MarianNMT (optional)
 
@@ -115,7 +124,7 @@ assets/ui, fonts, audio    Art cut from the prototype, fonts, music and sound ef
 addons/godot-sqlite/       SQLite GDExtension v4.5 (Windows, macOS, Linux, Android)
 database/schema.sql        Database tables
 database/seed_data.json    All learning content: languages, words, sentences, tips, culture, stories
-scripts/autoload/db.gd     SQLite access: accounts, content, progress, rewards, leaderboard
+scripts/autoload/db.gd     SQLite access: accounts, content, progress, rewards, score
 scripts/autoload/game.gd   Session state, navigation, quiz generation and scoring
 scripts/autoload/spirit.gd Guiding Spirit translator (dictionary + MarianNMT)
 scripts/autoload/ui.gd     Prototype look: theme, page frame, banner, nav bar, Filipino/English text
@@ -145,8 +154,8 @@ godot --headless --path . res://tests/test_runner.tscn
 ```
 
 The test uses a separate database. It checks seeding, accounts, quiz
-generation for every language and level, unlocking, rewards, badges, the
-leaderboard and translation, then plays full quizzes through the real quiz
+generation for every language and level, unlocking, rewards, badges, deleting
+players and translation, then plays full quizzes through the real quiz
 screen.
 
 ## Exporting

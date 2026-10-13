@@ -1,6 +1,8 @@
 extends Control
 ## The quiz (prototype quiz screen). Five hearts; a wrong answer costs one.
 ## Tap the guide's medallion for a hint (limited per quiz).
+## Above the questions the hero faces the language's enemy warrior: a right
+## answer hurts the enemy, a wrong one makes it attack.
 
 var questions: Array = []
 var index := 0
@@ -25,6 +27,10 @@ var feedback_label: Label
 var explain_label: Label
 var action_button: Button
 var mark: Control
+var enemy: EnemySprite
+var hero: TextureRect
+var hero_tween: Tween
+const HERO_X := 40.0
 var choice_grid: VBoxContainer
 var option_buttons: Array = []
 
@@ -91,15 +97,8 @@ func _ready() -> void:
 	points_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	hrow2.add_child(points_label)
 
-	# Story scene
-	var scene_img := TextureRect.new()
-	scene_img.texture = UI.tex.quiz_scene
-	scene_img.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	scene_img.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	scene_img.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	scene_img.custom_minimum_size = Vector2(0, 230)
-	scene_img.clip_contents = true
-	col.add_child(scene_img)
+	# Battle scene: background of the language's place, hero vs. enemy
+	col.add_child(_build_scene(lang))
 
 	# Parchment frame
 	var parts := UI.frame()
@@ -177,6 +176,74 @@ func _ready() -> void:
 		Game.goto("difficulty")
 		return
 	_show_question()
+
+
+func _build_scene(lang: Dictionary) -> Control:
+	var scene_img := TextureRect.new()
+	scene_img.texture = UI.quiz_background(lang.code)
+	scene_img.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	scene_img.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	scene_img.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	scene_img.custom_minimum_size = Vector2(0, 260)
+	scene_img.clip_contents = true
+
+	hero = TextureRect.new()
+	hero.texture = UI.character_texture(lang.region_code, Game.user.get("avatar", "boy"))
+	hero.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	hero.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	hero.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	hero.anchor_top = 1.0
+	hero.anchor_bottom = 1.0
+	hero.offset_left = HERO_X
+	hero.offset_right = HERO_X + 190
+	hero.offset_top = -205
+	hero.offset_bottom = -15
+	hero.pivot_offset = Vector2(95, 190)
+	scene_img.add_child(hero)
+	# Gentle breathing so the hero is not a still picture.
+	var bob := hero.create_tween().set_loops()
+	bob.tween_property(hero, "scale", Vector2(1.0, 1.03), 0.8).set_trans(Tween.TRANS_SINE)
+	bob.tween_property(hero, "scale", Vector2.ONE, 0.8).set_trans(Tween.TRANS_SINE)
+
+	enemy = EnemySprite.new()
+	enemy.flip = true
+	enemy.anchor_left = 1.0
+	enemy.anchor_right = 1.0
+	enemy.anchor_top = 1.0
+	enemy.anchor_bottom = 1.0
+	enemy.offset_left = -270
+	enemy.offset_right = -30
+	enemy.offset_top = -250
+	enemy.offset_bottom = -10
+	enemy.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if enemy.setup(lang.code, Game.difficulty):
+		scene_img.add_child(enemy)
+	else:
+		enemy.free()
+		enemy = null
+	return scene_img
+
+
+## Enemy and hero react to an answer.
+func _animate_answer(ok: bool, finished: bool) -> void:
+	if hero_tween != null:
+		hero_tween.kill()
+	hero.position.x = HERO_X
+	hero.modulate = Color.WHITE
+	hero_tween = hero.create_tween()
+	if ok:
+		hero_tween.tween_property(hero, "position:x", HERO_X + 40, 0.12)
+		hero_tween.tween_property(hero, "position:x", HERO_X, 0.2)
+		if enemy != null:
+			enemy.play("die" if finished and hearts > 0 else "hurt")
+	else:
+		if enemy != null:
+			enemy.play("attack")
+		hero_tween.tween_interval(0.25)
+		hero_tween.tween_property(hero, "modulate", Color(1.6, 0.5, 0.5), 0.08)
+		for dx in [-10.0, 10.0, -6.0, 0.0]:
+			hero_tween.tween_property(hero, "position:x", HERO_X + dx, 0.05)
+		hero_tween.tween_property(hero, "modulate", Color(1, 1, 1, 0.3 if hearts <= 0 else 1.0), 0.2)
 
 
 func _draw_mark() -> void:
@@ -398,6 +465,7 @@ func _answer(given: String) -> void:
 	mark.visible = true
 	mark.queue_redraw()
 	var finished := hearts <= 0 or index + 1 >= questions.size()
+	_animate_answer(ok, finished)
 	action_button.text = UI.t("results_btn") if finished else UI.t("next")
 	UI.tint_button(action_button, UI.GREEN if ok else UI.RED)
 	_refresh_bar()

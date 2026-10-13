@@ -64,22 +64,32 @@ func _test_seed() -> void:
 
 
 func _test_accounts() -> void:
-	var r := DB.register_user("juan", "secret1", "Juan")
+	var r := DB.register_user("juan", "Juan")
 	check(r.ok, "register juan")
-	check(not DB.register_user("JUAN", "x12345").ok, "usernames are case-insensitive unique")
-	check(not DB.register_user("a", "secret1").ok, "short name rejected")
-	check(not DB.register_user("bad!name", "secret1").ok, "name with symbols rejected")
-	check(not DB.register_user("maria", "123").ok, "short password rejected")
-	var guest := DB.register_user("Ana  Dela Cruz", "", "", "girl")
-	check(guest.ok and guest.user.username == "Ana Dela Cruz", "name with spaces, no password")
-	check(guest.ok and guest.user.avatar == "girl" and int(guest.user.has_password) == 0, "avatar and passwordless flag")
-	check(DB.login_user("ana dela cruz", "").ok, "passwordless login")
-	check(not DB.login_user("juan", "").ok, "password required when set")
-	check(DB.get_users().size() == 2, "saved player list")
-	check(DB.login_user("juan", "secret1").ok, "login ok")
-	check(not DB.login_user("juan", "wrong").ok, "wrong password rejected")
-	check(not DB.login_user("nobody", "secret1").ok, "unknown user rejected")
-	check(DB.register_user("maria", "secret2", "Maria").ok, "register maria")
+	check(not DB.register_user("JUAN").ok, "usernames are case-insensitive unique")
+	check(not DB.register_user("a").ok, "short name rejected")
+	check(not DB.register_user("bad!name").ok, "name with symbols rejected")
+	var guest := DB.register_user("Ana  Dela Cruz", "", "visayas_girl")
+	check(guest.ok and guest.user.username == "Ana Dela Cruz", "name with spaces")
+	check(guest.ok and guest.user.avatar == "visayas_girl", "island avatar saved")
+	check(DB.register_user("Leo", "", "not-an-avatar").user.avatar == "luzon_boy", "unknown avatar falls back")
+	check(DB.login_user("ana dela cruz").ok, "continue without password")
+	check(DB.get_users().size() == 3, "saved player list")
+	check(not DB.login_user("nobody").ok, "unknown user rejected")
+	var leo: int = DB.login_user("leo").user.id
+	DB.record_quiz(leo, "tl", 1, "", 100, 9, 10, 4, true)
+	check(DB.delete_user(leo), "delete player")
+	check(DB.get_users().size() == 2 and DB.get_user(leo).is_empty(), "deleted player is gone")
+	check(DB.get_total_score(leo) == 0 and DB.get_rewards(leo).word_fragment == 0, "deleted player's points are gone")
+	check(DB.register_user("maria", "Maria").ok, "register maria")
+	# The old sample player "Ryu" is removed on the next start.
+	var ryu: int = DB.register_user("Ryu").user.id
+	DB.record_quiz(ryu, "tl", 1, "", 100, 9, 10, 4, true)
+	DB.set_setting("sample_player_removed", "0")
+	DB.open(TEST_DB)
+	check(DB.get_user(ryu).is_empty() and DB.get_total_score(ryu) == 0, "sample player Ryu removed")
+	check(UI.avatar_portrait("mindanao_girl") != null and UI.avatar_portrait("boy") != null, "avatar portraits")
+	check(UI.character_texture("luzon", "visayas_girl") == UI.tex.visayas_girl, "hero follows avatar island")
 
 
 func _test_quiz_generation() -> void:
@@ -103,7 +113,7 @@ func _test_quiz_generation() -> void:
 
 
 func _test_progression() -> void:
-	var uid: int = DB.login_user("juan", "secret1").user.id
+	var uid: int = DB.login_user("juan").user.id
 	check(not DB.is_difficulty_unlocked(uid, "tl", 2), "medium locked at start")
 	DB.record_quiz(uid, "tl", 1, "", 50, 5, 10, 0, false)
 	check(not DB.is_difficulty_unlocked(uid, "tl", 2), "failed quiz does not unlock")
@@ -127,16 +137,13 @@ func _test_progression() -> void:
 	check(DB.get_badges(uid).size() == 4, "4 badges")
 	var rewards := DB.get_rewards(uid)
 	check(rewards.word_fragment == 3 + 9 + 8 + 9 + 9, "word fragments counted (%d)" % rewards.word_fragment)
-	var maria: int = DB.login_user("maria", "secret2").user.id
+	var maria: int = DB.login_user("maria").user.id
 	DB.record_quiz(maria, "hil", 1, "", 150, 10, 10, 5, true)
-	var board := DB.get_leaderboard()
-	check(board.size() == 2 and board[0].display_name == "Juan", "leaderboard ordered")
 	DB.add_playtime(uid, 125)
 	check(int(DB.get_user(uid).playtime) == 125, "playtime saved")
 	check(DB.get_last_language(uid).code == "cbk", "last language")
-	check(int(board[0].total_score) == 120 + 200 + 300 + 600, "juan total score")
-	var visayas := DB.get_leaderboard(20, "visayas")
-	check(visayas.size() == 2 and int(visayas[0].total_score) == 300, "region leaderboard")
+	check(DB.get_total_score(uid) == 120 + 200 + 300 + 600, "juan total score")
+	check(DB.get_total_score(maria) == 150, "maria total score")
 
 
 func _test_spirit() -> void:
@@ -156,7 +163,7 @@ func _frames(n := 3) -> void:
 
 
 func _test_screens() -> void:
-	Game.user = DB.login_user("juan", "secret1").user
+	Game.user = DB.login_user("juan").user
 	Game.region_code = "visayas"
 	Game.language_code = "tl"
 	Game.difficulty = 2
@@ -171,7 +178,7 @@ func _test_screens() -> void:
 
 
 func _test_play_quiz_through_ui() -> void:
-	var uid := DB.register_user("tester", "secret3").user.id as int
+	var uid := DB.register_user("tester").user.id as int
 	Game.user = DB.get_user(uid)
 	Game.language_code = "war"
 	Game.category_code = ""
@@ -180,6 +187,7 @@ func _test_play_quiz_through_ui() -> void:
 		Game.goto("quiz")
 		await _frames()
 		var quiz := get_tree().current_scene
+		check(quiz.enemy != null and quiz.enemy.has_animation("idle"), "difficulty %d enemy animates" % d)
 		var total: int = quiz.questions.size()
 		for i in total:
 			var q: Dictionary = quiz.questions[quiz.index]

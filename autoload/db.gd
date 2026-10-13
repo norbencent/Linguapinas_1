@@ -9,7 +9,6 @@ extends Node
 const SCHEMA_PATH := "res://database/schema.sql"
 const SEED_PATH := "res://database/seed_data.json"
 const DEFAULT_DB_PATH := "user://linguapinas.db"
-const HASH_ROUNDS := 2000
 ## How many languages of a region must be mastered (all three difficulties
 ## passed) to restore that region's Language Core.
 const LANGUAGES_TO_RESTORE_CORE := 1
@@ -110,7 +109,16 @@ func _migrate() -> void:
 	if not "playtime" in cols:
 		_exec("ALTER TABLE users ADD COLUMN playtime INTEGER NOT NULL DEFAULT 0;")
 	if not "has_password" in cols:
-		_exec("ALTER TABLE users ADD COLUMN has_password INTEGER NOT NULL DEFAULT 1;")
+		_exec("ALTER TABLE users ADD COLUMN has_password INTEGER NOT NULL DEFAULT 0;")
+	# Players no longer have passwords: tapping a saved player continues it.
+	_exec("UPDATE users SET password_hash = '', salt = '', has_password = 0 WHERE has_password != 0;")
+	# The sample player "Ryu" from early builds is removed once, with all of
+	# his progress, rewards and badges (ON DELETE CASCADE).
+	if get_setting("sample_player_removed", "0") != "1":
+		var ryu := _select_one("SELECT id FROM users WHERE username = 'Ryu';")
+		if not ryu.is_empty():
+			delete_user(int(ryu.id))
+		set_setting("sample_player_removed", "1")
 
 
 func get_setting(key: String, default_value := "") -> String:
@@ -170,33 +178,27 @@ func _seed_content() -> void:
 
 # ---------------------------------------------------------------- accounts
 
-func _hash_password(password: String, salt: String) -> String:
-	var digest := (salt + password).sha256_text()
-	for i in HASH_ROUNDS:
-		digest = (digest + salt).sha256_text()
-	return digest
+## Hero portraits a player can pick: one boy and one girl per main island.
+const AVATARS := ["luzon_boy", "luzon_girl", "visayas_boy", "visayas_girl", "mindanao_boy", "mindanao_girl"]
 
 
-## Creates a player. The name is also the login name; the password is
-## optional (an empty password makes a device-only profile).
+## Creates a player. The name is also the login name (no password).
 ## Returns {"ok": bool, "error": String, "user": Dictionary}.
-func register_user(username: String, password: String, display_name := "", avatar := "boy") -> Dictionary:
+func register_user(username: String, display_name := "", avatar := "luzon_boy") -> Dictionary:
 	username = " ".join(username.strip_edges().split(" ", false))
 	display_name = display_name.strip_edges()
 	if username.length() < 2 or username.length() > 20:
 		return {"ok": false, "error": "Name must be 2 to 20 characters."}
 	if not _is_simple_name(username):
 		return {"ok": false, "error": "Use only letters, numbers, spaces, - and _ in the name."}
-	if password != "" and password.length() < 4:
-		return {"ok": false, "error": "Password must be at least 4 characters (or leave it empty)."}
 	if not _select_one("SELECT id FROM users WHERE username = ?;", [username]).is_empty():
 		return {"ok": false, "error": "That name is already taken."}
 	if display_name == "":
 		display_name = username
-	var salt := Crypto.new().generate_random_bytes(16).hex_encode()
-	if not _exec("INSERT INTO users(username, display_name, password_hash, salt, avatar, has_password) VALUES(?, ?, ?, ?, ?, ?);",
-			[username, display_name, _hash_password(password, salt), salt, avatar if avatar in ["boy", "girl"] else "boy",
-			1 if password != "" else 0]):
+	if not avatar in AVATARS:
+		avatar = "luzon_boy"
+	if not _exec("INSERT INTO users(username, display_name, password_hash, salt, avatar, has_password) VALUES(?, ?, '', '', ?, 0);",
+			[username, display_name, avatar]):
 		return {"ok": false, "error": "Could not create the player."}
 	return {"ok": true, "error": "", "user": get_user(db.last_insert_rowid)}
 
@@ -206,23 +208,28 @@ func _is_simple_name(s: String) -> bool:
 	return re.search(s) != null
 
 
-## Returns {"ok": bool, "error": String, "user": Dictionary}.
-func login_user(username: String, password: String) -> Dictionary:
-	var row := _select_one("SELECT * FROM users WHERE username = ?;", [username.strip_edges()])
-	if row.is_empty() or _hash_password(password, row.salt) != row.password_hash:
-		return {"ok": false, "error": "Wrong username or password."}
+## Continues a saved player. Returns {"ok": bool, "error": String, "user": Dictionary}.
+func login_user(username: String) -> Dictionary:
+	var row := _select_one("SELECT id FROM users WHERE username = ?;", [username.strip_edges()])
+	if row.is_empty():
+		return {"ok": false, "error": "Player not found."}
 	_exec("UPDATE users SET last_login = datetime('now') WHERE id = ?;", [row.id])
 	return {"ok": true, "error": "", "user": get_user(row.id)}
 
 
+## Deletes a saved player with all their progress, attempts, rewards and badges.
+func delete_user(user_id: int) -> bool:
+	return _exec("DELETE FROM users WHERE id = ?;", [user_id])
+
+
 func get_user(user_id: int) -> Dictionary:
-	return _select_one("""SELECT id, username, display_name, created_at, last_login, avatar, playtime, has_password
+	return _select_one("""SELECT id, username, display_name, created_at, last_login, avatar, playtime
 		FROM users WHERE id = ?;""", [user_id])
 
 
 ## Players saved on this device, most recently played first.
 func get_users() -> Array:
-	return _select("""SELECT id, username, display_name, avatar, has_password, playtime FROM users
+	return _select("""SELECT id, username, display_name, avatar, playtime FROM users
 		ORDER BY COALESCE(last_login, created_at) DESC;""")
 
 
@@ -340,7 +347,7 @@ func record_quiz(user_id: int, language_code: String, difficulty: int, category_
 	_exec("""INSERT INTO quiz_attempts(user_id, language_code, difficulty, category_code, score, correct, total,
 		hearts_left, passed) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);""",
 		[user_id, language_code, difficulty, category_code, score, correct, total, hearts_left, 1 if passed else 0])
-	# Only full (all-category) quizzes count toward unlocking and the leaderboard.
+	# Only full (all-category) quizzes count toward unlocking levels and the score.
 	var counts := category_code == ""
 	if counts:
 		_exec("""INSERT INTO progress(user_id, language_code, difficulty, best_score, completed) VALUES(?, ?, ?, ?, ?)
@@ -425,22 +432,9 @@ func get_recent_attempts(user_id: int, limit := 10) -> Array:
 		WHERE a.user_id = ? ORDER BY a.id DESC LIMIT ?;""", [user_id, limit])
 
 
-# ---------------------------------------------------------------- leaderboard
+# ---------------------------------------------------------------- score
 
-## Total points = sum of each player's best score on every level.
-func get_leaderboard(limit := 20, region_code := "") -> Array:
-	var where := "" if region_code == "" else "AND l.region_code = ?"
-	var bindings: Array = [] if region_code == "" else [region_code]
-	bindings.append(limit)
-	return _select("""SELECT u.id, u.display_name, u.username,
-		COALESCE(SUM(p.best_score), 0) AS total_score,
-		COALESCE(SUM(p.completed), 0) AS levels_completed
-		FROM users u JOIN progress p ON p.user_id = u.id
-		JOIN languages l ON l.code = p.language_code
-		WHERE p.completed = 1 %s
-		GROUP BY u.id ORDER BY total_score DESC, levels_completed DESC, u.display_name LIMIT ?;""" % where, bindings)
-
-
+## Total points = sum of the player's best score on every level.
 func get_total_score(user_id: int) -> int:
 	var row := _select_one("SELECT COALESCE(SUM(best_score), 0) AS s FROM progress WHERE user_id = ? AND completed = 1;", [user_id])
 	return int(row.get("s", 0))
