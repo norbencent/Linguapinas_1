@@ -1,0 +1,2078 @@
+{
+ "version": 1,
+ "regions": [
+  {
+   "code": "luzon",
+   "name": "Luzon",
+   "core_name": "Luzon Core",
+   "color": "#3a7bd5",
+   "sort_order": 1,
+   "description": "The Language Core of the North, guardian of the languages of Luzon."
+  },
+  {
+   "code": "visayas",
+   "name": "Visayas",
+   "core_name": "Visayas Core",
+   "color": "#f2c14e",
+   "sort_order": 2,
+   "description": "The Language Core of the islands at the heart of the archipelago."
+  },
+  {
+   "code": "mindanao",
+   "name": "Mindanao",
+   "core_name": "Mindanao Core",
+   "color": "#e04f5f",
+   "sort_order": 3,
+   "description": "The Language Core of the South, keeper of Mindanao's many voices."
+  }
+ ],
+ "languages": [
+  {
+   "code": "tl",
+   "region_code": "luzon",
+   "name": "Tagalog",
+   "description": "Basis of Filipino, the national language. Spoken in Metro Manila and much of central and southern Luzon.",
+   "playable": 1,
+   "sort_order": 1
+  },
+  {
+   "code": "ilo",
+   "region_code": "luzon",
+   "name": "Ilocano",
+   "description": "Lingua franca of Northern Luzon, spoken across the Ilocos Region, Cagayan Valley and beyond.",
+   "playable": 1,
+   "sort_order": 2
+  },
+  {
+   "code": "pag",
+   "region_code": "luzon",
+   "name": "Pangasinan",
+   "description": "Lessons for this language are coming soon.",
+   "playable": 0,
+   "sort_order": 3
+  },
+  {
+   "code": "pam",
+   "region_code": "luzon",
+   "name": "Kapampangan",
+   "description": "Spoken in Pampanga and parts of Tarlac. Famous for its rich culinary vocabulary.",
+   "playable": 1,
+   "sort_order": 4
+  },
+  {
+   "code": "bcl",
+   "region_code": "luzon",
+   "name": "Bikolano",
+   "description": "Central Bikol, spoken in the Bicol Region around Naga City and Legazpi.",
+   "playable": 1,
+   "sort_order": 5
+  },
+  {
+   "code": "ibg",
+   "region_code": "luzon",
+   "name": "Ibanag",
+   "description": "Lessons for this language are coming soon.",
+   "playable": 0,
+   "sort_order": 6
+  },
+  {
+   "code": "kne",
+   "region_code": "luzon",
+   "name": "Kankanaey",
+   "description": "Lessons for this language are coming soon.",
+   "playable": 0,
+   "sort_order": 7
+  },
+  {
+   "code": "ivv",
+   "region_code": "luzon",
+   "name": "Ivatan",
+   "description": "Lessons for this language are coming soon.",
+   "playable": 0,
+   "sort_order": 8
+  },
+  {
+   "code": "ifk",
+   "region_code": "luzon",
+   "name": "Ifugao",
+   "description": "Lessons for this language are coming soon.",
+   "playable": 0,
+   "sort_order": 9
+  },
+  {
+   "code": "kal",
+   "region_code": "luzon",
+   "name": "Kalinga",
+   "description": "Lessons for this language are coming soon.",
+   "playable": 0,
+   "sort_order": 10
+  },
+  {
+   "code": "ceb",
+   "region_code": "visayas",
+   "name": "Cebuano",
+   "description": "One of the most widely spoken Philippine languages, centered in Cebu, Bohol and Negros Oriental.",
+   "playable": 1,
+   "sort_order": 11
+  },
+  {
+   "code": "hil",
+   "region_code": "visayas",
+   "name": "Hiligaynon",
+   "description": "Also called Ilonggo; spoken in Iloilo, Guimaras and Negros Occidental. Known for its gentle tone.",
+   "playable": 1,
+   "sort_order": 12
+  },
+  {
+   "code": "war",
+   "region_code": "visayas",
+   "name": "Waray-Waray",
+   "description": "Spoken in Samar, Leyte and Biliran in Eastern Visayas.",
+   "playable": 1,
+   "sort_order": 13
+  },
+  {
+   "code": "akl",
+   "region_code": "visayas",
+   "name": "Aklanon",
+   "description": "Lessons for this language are coming soon.",
+   "playable": 0,
+   "sort_order": 14
+  },
+  {
+   "code": "krj",
+   "region_code": "visayas",
+   "name": "Kinaray-a",
+   "description": "Lessons for this language are coming soon.",
+   "playable": 0,
+   "sort_order": 15
+  },
+  {
+   "code": "cps",
+   "region_code": "visayas",
+   "name": "Capiznon",
+   "description": "Lessons for this language are coming soon.",
+   "playable": 0,
+   "sort_order": 16
+  },
+  {
+   "code": "msb",
+   "region_code": "visayas",
+   "name": "Masbateño",
+   "description": "Lessons for this language are coming soon.",
+   "playable": 0,
+   "sort_order": 17
+  },
+  {
+   "code": "rol",
+   "region_code": "visayas",
+   "name": "Romblomanon",
+   "description": "Lessons for this language are coming soon.",
+   "playable": 0,
+   "sort_order": 18
+  },
+  {
+   "code": "cyo",
+   "region_code": "visayas",
+   "name": "Cuyonon",
+   "description": "Lessons for this language are coming soon.",
+   "playable": 0,
+   "sort_order": 19
+  },
+  {
+   "code": "prh",
+   "region_code": "visayas",
+   "name": "Porohanon",
+   "description": "Lessons for this language are coming soon.",
+   "playable": 0,
+   "sort_order": 20
+  },
+  {
+   "code": "bis",
+   "region_code": "mindanao",
+   "name": "Bisaya",
+   "description": "The Cebuano-based Bisaya used as a common language across much of Mindanao.",
+   "playable": 1,
+   "sort_order": 21
+  },
+  {
+   "code": "tsg",
+   "region_code": "mindanao",
+   "name": "Tausug",
+   "description": "Language of the Tausug people of the Sulu Archipelago.",
+   "playable": 1,
+   "sort_order": 22
+  },
+  {
+   "code": "mdh",
+   "region_code": "mindanao",
+   "name": "Maguindanaon",
+   "description": "Lessons for this language are coming soon.",
+   "playable": 0,
+   "sort_order": 23
+  },
+  {
+   "code": "mrw",
+   "region_code": "mindanao",
+   "name": "Maranao",
+   "description": "Lessons for this language are coming soon.",
+   "playable": 0,
+   "sort_order": 24
+  },
+  {
+   "code": "mba",
+   "region_code": "mindanao",
+   "name": "Higaonon",
+   "description": "Lessons for this language are coming soon.",
+   "playable": 0,
+   "sort_order": 25
+  },
+  {
+   "code": "sgd",
+   "region_code": "mindanao",
+   "name": "Surigaonon",
+   "description": "Lessons for this language are coming soon.",
+   "playable": 0,
+   "sort_order": 26
+  },
+  {
+   "code": "sub",
+   "region_code": "mindanao",
+   "name": "Subanen",
+   "description": "Lessons for this language are coming soon.",
+   "playable": 0,
+   "sort_order": 27
+  },
+  {
+   "code": "bla",
+   "region_code": "mindanao",
+   "name": "Blaan",
+   "description": "Lessons for this language are coming soon.",
+   "playable": 0,
+   "sort_order": 28
+  },
+  {
+   "code": "cbk",
+   "region_code": "mindanao",
+   "name": "Chavacano",
+   "description": "Spanish-based creole spoken in Zamboanga City and nearby areas.",
+   "playable": 1,
+   "sort_order": 29
+  },
+  {
+   "code": "yka",
+   "region_code": "mindanao",
+   "name": "Yakan",
+   "description": "Lessons for this language are coming soon.",
+   "playable": 0,
+   "sort_order": 30
+  }
+ ],
+ "categories": [
+  {
+   "code": "greetings",
+   "name": "Greetings & Courtesy",
+   "sort_order": 1
+  },
+  {
+   "code": "family",
+   "name": "Family",
+   "sort_order": 2
+  },
+  {
+   "code": "food",
+   "name": "Food & Drink",
+   "sort_order": 3
+  },
+  {
+   "code": "nature",
+   "name": "Home & Nature",
+   "sort_order": 4
+  },
+  {
+   "code": "numbers",
+   "name": "Numbers",
+   "sort_order": 5
+  },
+  {
+   "code": "expressions",
+   "name": "Expressions",
+   "sort_order": 6
+  }
+ ],
+ "words": [
+  {
+   "language_code": "tl",
+   "category_code": "greetings",
+   "native": "Kumusta",
+   "english": "Hello / How are you",
+   "note": ""
+  },
+  {
+   "language_code": "tl",
+   "category_code": "greetings",
+   "native": "Salamat",
+   "english": "Thank you",
+   "note": "Add 'po' when speaking to elders: Salamat po."
+  },
+  {
+   "language_code": "tl",
+   "category_code": "greetings",
+   "native": "Magandang umaga",
+   "english": "Good morning",
+   "note": ""
+  },
+  {
+   "language_code": "tl",
+   "category_code": "greetings",
+   "native": "Paalam",
+   "english": "Goodbye",
+   "note": ""
+  },
+  {
+   "language_code": "tl",
+   "category_code": "greetings",
+   "native": "Oo",
+   "english": "Yes",
+   "note": "Polite form: Opo."
+  },
+  {
+   "language_code": "tl",
+   "category_code": "greetings",
+   "native": "Hindi",
+   "english": "No",
+   "note": ""
+  },
+  {
+   "language_code": "tl",
+   "category_code": "family",
+   "native": "Nanay",
+   "english": "Mother",
+   "note": ""
+  },
+  {
+   "language_code": "tl",
+   "category_code": "family",
+   "native": "Tatay",
+   "english": "Father",
+   "note": ""
+  },
+  {
+   "language_code": "tl",
+   "category_code": "family",
+   "native": "Kapatid",
+   "english": "Sibling",
+   "note": ""
+  },
+  {
+   "language_code": "tl",
+   "category_code": "food",
+   "native": "Tubig",
+   "english": "Water",
+   "note": ""
+  },
+  {
+   "language_code": "tl",
+   "category_code": "food",
+   "native": "Kanin",
+   "english": "Cooked rice",
+   "note": ""
+  },
+  {
+   "language_code": "tl",
+   "category_code": "food",
+   "native": "Isda",
+   "english": "Fish",
+   "note": ""
+  },
+  {
+   "language_code": "tl",
+   "category_code": "nature",
+   "native": "Bahay",
+   "english": "House",
+   "note": ""
+  },
+  {
+   "language_code": "tl",
+   "category_code": "nature",
+   "native": "Araw",
+   "english": "Sun / Day",
+   "note": ""
+  },
+  {
+   "language_code": "tl",
+   "category_code": "nature",
+   "native": "Buwan",
+   "english": "Moon / Month",
+   "note": ""
+  },
+  {
+   "language_code": "tl",
+   "category_code": "nature",
+   "native": "Puno",
+   "english": "Tree",
+   "note": ""
+  },
+  {
+   "language_code": "tl",
+   "category_code": "numbers",
+   "native": "Isa",
+   "english": "One",
+   "note": ""
+  },
+  {
+   "language_code": "tl",
+   "category_code": "numbers",
+   "native": "Dalawa",
+   "english": "Two",
+   "note": ""
+  },
+  {
+   "language_code": "tl",
+   "category_code": "numbers",
+   "native": "Tatlo",
+   "english": "Three",
+   "note": ""
+  },
+  {
+   "language_code": "tl",
+   "category_code": "expressions",
+   "native": "Mahal kita",
+   "english": "I love you",
+   "note": ""
+  },
+  {
+   "language_code": "ilo",
+   "category_code": "greetings",
+   "native": "Kumusta",
+   "english": "Hello / How are you",
+   "note": ""
+  },
+  {
+   "language_code": "ilo",
+   "category_code": "greetings",
+   "native": "Agyamanak",
+   "english": "Thank you",
+   "note": ""
+  },
+  {
+   "language_code": "ilo",
+   "category_code": "greetings",
+   "native": "Naimbag a bigat",
+   "english": "Good morning",
+   "note": ""
+  },
+  {
+   "language_code": "ilo",
+   "category_code": "greetings",
+   "native": "Wen",
+   "english": "Yes",
+   "note": ""
+  },
+  {
+   "language_code": "ilo",
+   "category_code": "greetings",
+   "native": "Saan",
+   "english": "No",
+   "note": ""
+  },
+  {
+   "language_code": "ilo",
+   "category_code": "family",
+   "native": "Nanang",
+   "english": "Mother",
+   "note": ""
+  },
+  {
+   "language_code": "ilo",
+   "category_code": "family",
+   "native": "Tatang",
+   "english": "Father",
+   "note": ""
+  },
+  {
+   "language_code": "ilo",
+   "category_code": "food",
+   "native": "Danum",
+   "english": "Water",
+   "note": ""
+  },
+  {
+   "language_code": "ilo",
+   "category_code": "food",
+   "native": "Inapoy",
+   "english": "Cooked rice",
+   "note": ""
+  },
+  {
+   "language_code": "ilo",
+   "category_code": "food",
+   "native": "Ikan",
+   "english": "Fish",
+   "note": ""
+  },
+  {
+   "language_code": "ilo",
+   "category_code": "nature",
+   "native": "Balay",
+   "english": "House",
+   "note": ""
+  },
+  {
+   "language_code": "ilo",
+   "category_code": "nature",
+   "native": "Init",
+   "english": "Sun",
+   "note": ""
+  },
+  {
+   "language_code": "ilo",
+   "category_code": "nature",
+   "native": "Bulan",
+   "english": "Moon / Month",
+   "note": ""
+  },
+  {
+   "language_code": "ilo",
+   "category_code": "nature",
+   "native": "Kayo",
+   "english": "Tree / Wood",
+   "note": ""
+  },
+  {
+   "language_code": "ilo",
+   "category_code": "numbers",
+   "native": "Maysa",
+   "english": "One",
+   "note": ""
+  },
+  {
+   "language_code": "ilo",
+   "category_code": "numbers",
+   "native": "Dua",
+   "english": "Two",
+   "note": ""
+  },
+  {
+   "language_code": "ilo",
+   "category_code": "numbers",
+   "native": "Tallo",
+   "english": "Three",
+   "note": ""
+  },
+  {
+   "language_code": "ilo",
+   "category_code": "expressions",
+   "native": "Ay-ayaten ka",
+   "english": "I love you",
+   "note": ""
+  },
+  {
+   "language_code": "pam",
+   "category_code": "greetings",
+   "native": "Kumusta",
+   "english": "Hello / How are you",
+   "note": ""
+  },
+  {
+   "language_code": "pam",
+   "category_code": "greetings",
+   "native": "Dakal a salamat",
+   "english": "Thank you very much",
+   "note": ""
+  },
+  {
+   "language_code": "pam",
+   "category_code": "greetings",
+   "native": "Mayap a abak",
+   "english": "Good morning",
+   "note": ""
+  },
+  {
+   "language_code": "pam",
+   "category_code": "greetings",
+   "native": "Wa",
+   "english": "Yes",
+   "note": ""
+  },
+  {
+   "language_code": "pam",
+   "category_code": "greetings",
+   "native": "Ali",
+   "english": "No",
+   "note": ""
+  },
+  {
+   "language_code": "pam",
+   "category_code": "family",
+   "native": "Indu",
+   "english": "Mother",
+   "note": ""
+  },
+  {
+   "language_code": "pam",
+   "category_code": "family",
+   "native": "Tatang",
+   "english": "Father",
+   "note": ""
+  },
+  {
+   "language_code": "pam",
+   "category_code": "food",
+   "native": "Danum",
+   "english": "Water",
+   "note": ""
+  },
+  {
+   "language_code": "pam",
+   "category_code": "food",
+   "native": "Nasi",
+   "english": "Cooked rice",
+   "note": ""
+  },
+  {
+   "language_code": "pam",
+   "category_code": "food",
+   "native": "Asan",
+   "english": "Fish",
+   "note": ""
+  },
+  {
+   "language_code": "pam",
+   "category_code": "nature",
+   "native": "Bale",
+   "english": "House",
+   "note": ""
+  },
+  {
+   "language_code": "pam",
+   "category_code": "nature",
+   "native": "Aldo",
+   "english": "Sun / Day",
+   "note": ""
+  },
+  {
+   "language_code": "pam",
+   "category_code": "nature",
+   "native": "Bulan",
+   "english": "Moon / Month",
+   "note": ""
+  },
+  {
+   "language_code": "pam",
+   "category_code": "numbers",
+   "native": "Metung",
+   "english": "One",
+   "note": ""
+  },
+  {
+   "language_code": "pam",
+   "category_code": "numbers",
+   "native": "Adwa",
+   "english": "Two",
+   "note": ""
+  },
+  {
+   "language_code": "pam",
+   "category_code": "numbers",
+   "native": "Atlu",
+   "english": "Three",
+   "note": ""
+  },
+  {
+   "language_code": "pam",
+   "category_code": "expressions",
+   "native": "Kaluguran da ka",
+   "english": "I love you",
+   "note": ""
+  },
+  {
+   "language_code": "bcl",
+   "category_code": "greetings",
+   "native": "Marhay na aga",
+   "english": "Good morning",
+   "note": ""
+  },
+  {
+   "language_code": "bcl",
+   "category_code": "greetings",
+   "native": "Dios mabalos",
+   "english": "Thank you",
+   "note": "Literally 'May God repay you'."
+  },
+  {
+   "language_code": "bcl",
+   "category_code": "greetings",
+   "native": "Paaram",
+   "english": "Goodbye",
+   "note": ""
+  },
+  {
+   "language_code": "bcl",
+   "category_code": "greetings",
+   "native": "Iyo",
+   "english": "Yes",
+   "note": ""
+  },
+  {
+   "language_code": "bcl",
+   "category_code": "greetings",
+   "native": "Dai",
+   "english": "No",
+   "note": ""
+  },
+  {
+   "language_code": "bcl",
+   "category_code": "family",
+   "native": "Nanay",
+   "english": "Mother",
+   "note": ""
+  },
+  {
+   "language_code": "bcl",
+   "category_code": "family",
+   "native": "Tatay",
+   "english": "Father",
+   "note": ""
+  },
+  {
+   "language_code": "bcl",
+   "category_code": "food",
+   "native": "Tubig",
+   "english": "Water",
+   "note": ""
+  },
+  {
+   "language_code": "bcl",
+   "category_code": "food",
+   "native": "Kanon",
+   "english": "Cooked rice",
+   "note": ""
+  },
+  {
+   "language_code": "bcl",
+   "category_code": "food",
+   "native": "Sira",
+   "english": "Fish",
+   "note": ""
+  },
+  {
+   "language_code": "bcl",
+   "category_code": "nature",
+   "native": "Harong",
+   "english": "House",
+   "note": ""
+  },
+  {
+   "language_code": "bcl",
+   "category_code": "nature",
+   "native": "Aldaw",
+   "english": "Sun / Day",
+   "note": ""
+  },
+  {
+   "language_code": "bcl",
+   "category_code": "nature",
+   "native": "Bulan",
+   "english": "Moon / Month",
+   "note": ""
+  },
+  {
+   "language_code": "bcl",
+   "category_code": "numbers",
+   "native": "Saro",
+   "english": "One",
+   "note": ""
+  },
+  {
+   "language_code": "bcl",
+   "category_code": "numbers",
+   "native": "Duwa",
+   "english": "Two",
+   "note": ""
+  },
+  {
+   "language_code": "bcl",
+   "category_code": "numbers",
+   "native": "Tolo",
+   "english": "Three",
+   "note": ""
+  },
+  {
+   "language_code": "bcl",
+   "category_code": "expressions",
+   "native": "Namumutan ta ka",
+   "english": "I love you",
+   "note": ""
+  },
+  {
+   "language_code": "ceb",
+   "category_code": "greetings",
+   "native": "Kumusta",
+   "english": "Hello / How are you",
+   "note": ""
+  },
+  {
+   "language_code": "ceb",
+   "category_code": "greetings",
+   "native": "Salamat",
+   "english": "Thank you",
+   "note": ""
+  },
+  {
+   "language_code": "ceb",
+   "category_code": "greetings",
+   "native": "Maayong buntag",
+   "english": "Good morning",
+   "note": ""
+  },
+  {
+   "language_code": "ceb",
+   "category_code": "greetings",
+   "native": "Amping",
+   "english": "Take care (goodbye)",
+   "note": ""
+  },
+  {
+   "language_code": "ceb",
+   "category_code": "greetings",
+   "native": "Oo",
+   "english": "Yes",
+   "note": ""
+  },
+  {
+   "language_code": "ceb",
+   "category_code": "greetings",
+   "native": "Dili",
+   "english": "No",
+   "note": ""
+  },
+  {
+   "language_code": "ceb",
+   "category_code": "family",
+   "native": "Inahan",
+   "english": "Mother",
+   "note": ""
+  },
+  {
+   "language_code": "ceb",
+   "category_code": "family",
+   "native": "Amahan",
+   "english": "Father",
+   "note": ""
+  },
+  {
+   "language_code": "ceb",
+   "category_code": "food",
+   "native": "Tubig",
+   "english": "Water",
+   "note": ""
+  },
+  {
+   "language_code": "ceb",
+   "category_code": "food",
+   "native": "Kan-on",
+   "english": "Cooked rice",
+   "note": ""
+  },
+  {
+   "language_code": "ceb",
+   "category_code": "food",
+   "native": "Isda",
+   "english": "Fish",
+   "note": ""
+  },
+  {
+   "language_code": "ceb",
+   "category_code": "nature",
+   "native": "Balay",
+   "english": "House",
+   "note": ""
+  },
+  {
+   "language_code": "ceb",
+   "category_code": "nature",
+   "native": "Adlaw",
+   "english": "Sun / Day",
+   "note": ""
+  },
+  {
+   "language_code": "ceb",
+   "category_code": "nature",
+   "native": "Bulan",
+   "english": "Moon / Month",
+   "note": ""
+  },
+  {
+   "language_code": "ceb",
+   "category_code": "nature",
+   "native": "Kahoy",
+   "english": "Tree / Wood",
+   "note": ""
+  },
+  {
+   "language_code": "ceb",
+   "category_code": "numbers",
+   "native": "Usa",
+   "english": "One",
+   "note": ""
+  },
+  {
+   "language_code": "ceb",
+   "category_code": "numbers",
+   "native": "Duha",
+   "english": "Two",
+   "note": ""
+  },
+  {
+   "language_code": "ceb",
+   "category_code": "numbers",
+   "native": "Tulo",
+   "english": "Three",
+   "note": ""
+  },
+  {
+   "language_code": "ceb",
+   "category_code": "expressions",
+   "native": "Gihigugma tika",
+   "english": "I love you",
+   "note": ""
+  },
+  {
+   "language_code": "hil",
+   "category_code": "greetings",
+   "native": "Kamusta",
+   "english": "Hello / How are you",
+   "note": ""
+  },
+  {
+   "language_code": "hil",
+   "category_code": "greetings",
+   "native": "Salamat",
+   "english": "Thank you",
+   "note": ""
+  },
+  {
+   "language_code": "hil",
+   "category_code": "greetings",
+   "native": "Maayong aga",
+   "english": "Good morning",
+   "note": ""
+  },
+  {
+   "language_code": "hil",
+   "category_code": "greetings",
+   "native": "Huo",
+   "english": "Yes",
+   "note": ""
+  },
+  {
+   "language_code": "hil",
+   "category_code": "greetings",
+   "native": "Indi",
+   "english": "No",
+   "note": ""
+  },
+  {
+   "language_code": "hil",
+   "category_code": "family",
+   "native": "Iloy",
+   "english": "Mother",
+   "note": ""
+  },
+  {
+   "language_code": "hil",
+   "category_code": "family",
+   "native": "Tatay",
+   "english": "Father",
+   "note": ""
+  },
+  {
+   "language_code": "hil",
+   "category_code": "food",
+   "native": "Tubig",
+   "english": "Water",
+   "note": ""
+  },
+  {
+   "language_code": "hil",
+   "category_code": "food",
+   "native": "Kan-on",
+   "english": "Cooked rice",
+   "note": ""
+  },
+  {
+   "language_code": "hil",
+   "category_code": "food",
+   "native": "Isda",
+   "english": "Fish",
+   "note": ""
+  },
+  {
+   "language_code": "hil",
+   "category_code": "nature",
+   "native": "Balay",
+   "english": "House",
+   "note": ""
+  },
+  {
+   "language_code": "hil",
+   "category_code": "nature",
+   "native": "Adlaw",
+   "english": "Sun / Day",
+   "note": ""
+  },
+  {
+   "language_code": "hil",
+   "category_code": "nature",
+   "native": "Bulan",
+   "english": "Moon / Month",
+   "note": ""
+  },
+  {
+   "language_code": "hil",
+   "category_code": "numbers",
+   "native": "Isa",
+   "english": "One",
+   "note": ""
+  },
+  {
+   "language_code": "hil",
+   "category_code": "numbers",
+   "native": "Duha",
+   "english": "Two",
+   "note": ""
+  },
+  {
+   "language_code": "hil",
+   "category_code": "numbers",
+   "native": "Tatlo",
+   "english": "Three",
+   "note": ""
+  },
+  {
+   "language_code": "hil",
+   "category_code": "expressions",
+   "native": "Palangga ta ka",
+   "english": "I love you",
+   "note": ""
+  },
+  {
+   "language_code": "war",
+   "category_code": "greetings",
+   "native": "Kumusta",
+   "english": "Hello / How are you",
+   "note": ""
+  },
+  {
+   "language_code": "war",
+   "category_code": "greetings",
+   "native": "Salamat",
+   "english": "Thank you",
+   "note": ""
+  },
+  {
+   "language_code": "war",
+   "category_code": "greetings",
+   "native": "Maupay nga aga",
+   "english": "Good morning",
+   "note": ""
+  },
+  {
+   "language_code": "war",
+   "category_code": "greetings",
+   "native": "Oo",
+   "english": "Yes",
+   "note": ""
+  },
+  {
+   "language_code": "war",
+   "category_code": "greetings",
+   "native": "Diri",
+   "english": "No",
+   "note": ""
+  },
+  {
+   "language_code": "war",
+   "category_code": "family",
+   "native": "Nanay",
+   "english": "Mother",
+   "note": ""
+  },
+  {
+   "language_code": "war",
+   "category_code": "family",
+   "native": "Tatay",
+   "english": "Father",
+   "note": ""
+  },
+  {
+   "language_code": "war",
+   "category_code": "food",
+   "native": "Tubig",
+   "english": "Water",
+   "note": ""
+  },
+  {
+   "language_code": "war",
+   "category_code": "food",
+   "native": "Kan-on",
+   "english": "Cooked rice",
+   "note": ""
+  },
+  {
+   "language_code": "war",
+   "category_code": "food",
+   "native": "Isda",
+   "english": "Fish",
+   "note": ""
+  },
+  {
+   "language_code": "war",
+   "category_code": "nature",
+   "native": "Balay",
+   "english": "House",
+   "note": ""
+  },
+  {
+   "language_code": "war",
+   "category_code": "nature",
+   "native": "Adlaw",
+   "english": "Sun / Day",
+   "note": ""
+  },
+  {
+   "language_code": "war",
+   "category_code": "nature",
+   "native": "Bulan",
+   "english": "Moon / Month",
+   "note": ""
+  },
+  {
+   "language_code": "war",
+   "category_code": "numbers",
+   "native": "Usa",
+   "english": "One",
+   "note": ""
+  },
+  {
+   "language_code": "war",
+   "category_code": "numbers",
+   "native": "Duha",
+   "english": "Two",
+   "note": ""
+  },
+  {
+   "language_code": "war",
+   "category_code": "numbers",
+   "native": "Tulo",
+   "english": "Three",
+   "note": ""
+  },
+  {
+   "language_code": "war",
+   "category_code": "expressions",
+   "native": "Hinigugma ta ka",
+   "english": "I love you",
+   "note": ""
+  },
+  {
+   "language_code": "bis",
+   "category_code": "greetings",
+   "native": "Kumusta",
+   "english": "Hello / How are you",
+   "note": ""
+  },
+  {
+   "language_code": "bis",
+   "category_code": "greetings",
+   "native": "Salamat kaayo",
+   "english": "Thank you very much",
+   "note": ""
+  },
+  {
+   "language_code": "bis",
+   "category_code": "greetings",
+   "native": "Maayong buntag",
+   "english": "Good morning",
+   "note": ""
+  },
+  {
+   "language_code": "bis",
+   "category_code": "greetings",
+   "native": "Amping",
+   "english": "Take care (goodbye)",
+   "note": ""
+  },
+  {
+   "language_code": "bis",
+   "category_code": "greetings",
+   "native": "Oo",
+   "english": "Yes",
+   "note": ""
+  },
+  {
+   "language_code": "bis",
+   "category_code": "greetings",
+   "native": "Dili",
+   "english": "No",
+   "note": ""
+  },
+  {
+   "language_code": "bis",
+   "category_code": "family",
+   "native": "Nanay",
+   "english": "Mother",
+   "note": ""
+  },
+  {
+   "language_code": "bis",
+   "category_code": "family",
+   "native": "Tatay",
+   "english": "Father",
+   "note": ""
+  },
+  {
+   "language_code": "bis",
+   "category_code": "food",
+   "native": "Tubig",
+   "english": "Water",
+   "note": ""
+  },
+  {
+   "language_code": "bis",
+   "category_code": "food",
+   "native": "Kan-on",
+   "english": "Cooked rice",
+   "note": ""
+  },
+  {
+   "language_code": "bis",
+   "category_code": "food",
+   "native": "Isda",
+   "english": "Fish",
+   "note": ""
+  },
+  {
+   "language_code": "bis",
+   "category_code": "nature",
+   "native": "Balay",
+   "english": "House",
+   "note": ""
+  },
+  {
+   "language_code": "bis",
+   "category_code": "nature",
+   "native": "Adlaw",
+   "english": "Sun / Day",
+   "note": ""
+  },
+  {
+   "language_code": "bis",
+   "category_code": "nature",
+   "native": "Bulan",
+   "english": "Moon / Month",
+   "note": ""
+  },
+  {
+   "language_code": "bis",
+   "category_code": "numbers",
+   "native": "Usa",
+   "english": "One",
+   "note": ""
+  },
+  {
+   "language_code": "bis",
+   "category_code": "numbers",
+   "native": "Duha",
+   "english": "Two",
+   "note": ""
+  },
+  {
+   "language_code": "bis",
+   "category_code": "numbers",
+   "native": "Tulo",
+   "english": "Three",
+   "note": ""
+  },
+  {
+   "language_code": "bis",
+   "category_code": "expressions",
+   "native": "Gihigugma tika",
+   "english": "I love you",
+   "note": ""
+  },
+  {
+   "language_code": "tsg",
+   "category_code": "greetings",
+   "native": "Assalamu alaikum",
+   "english": "Peace be upon you (greeting)",
+   "note": ""
+  },
+  {
+   "language_code": "tsg",
+   "category_code": "greetings",
+   "native": "Magsukul",
+   "english": "Thank you",
+   "note": ""
+  },
+  {
+   "language_code": "tsg",
+   "category_code": "family",
+   "native": "Ina'",
+   "english": "Mother",
+   "note": ""
+  },
+  {
+   "language_code": "tsg",
+   "category_code": "family",
+   "native": "Ama'",
+   "english": "Father",
+   "note": ""
+  },
+  {
+   "language_code": "tsg",
+   "category_code": "food",
+   "native": "Tubig",
+   "english": "Water",
+   "note": ""
+  },
+  {
+   "language_code": "tsg",
+   "category_code": "food",
+   "native": "Kaunun",
+   "english": "Cooked rice",
+   "note": ""
+  },
+  {
+   "language_code": "tsg",
+   "category_code": "food",
+   "native": "Ista",
+   "english": "Fish",
+   "note": ""
+  },
+  {
+   "language_code": "tsg",
+   "category_code": "nature",
+   "native": "Bay",
+   "english": "House",
+   "note": ""
+  },
+  {
+   "language_code": "tsg",
+   "category_code": "nature",
+   "native": "Suga",
+   "english": "Sun",
+   "note": ""
+  },
+  {
+   "language_code": "tsg",
+   "category_code": "nature",
+   "native": "Bulan",
+   "english": "Moon / Month",
+   "note": ""
+  },
+  {
+   "language_code": "tsg",
+   "category_code": "numbers",
+   "native": "Isa",
+   "english": "One",
+   "note": ""
+  },
+  {
+   "language_code": "tsg",
+   "category_code": "numbers",
+   "native": "Duwa",
+   "english": "Two",
+   "note": ""
+  },
+  {
+   "language_code": "tsg",
+   "category_code": "numbers",
+   "native": "Tu",
+   "english": "Three",
+   "note": ""
+  },
+  {
+   "language_code": "cbk",
+   "category_code": "greetings",
+   "native": "Buenas dias",
+   "english": "Good morning",
+   "note": ""
+  },
+  {
+   "language_code": "cbk",
+   "category_code": "greetings",
+   "native": "Gracias",
+   "english": "Thank you",
+   "note": ""
+  },
+  {
+   "language_code": "cbk",
+   "category_code": "greetings",
+   "native": "Adios",
+   "english": "Goodbye",
+   "note": ""
+  },
+  {
+   "language_code": "cbk",
+   "category_code": "greetings",
+   "native": "Si",
+   "english": "Yes",
+   "note": ""
+  },
+  {
+   "language_code": "cbk",
+   "category_code": "greetings",
+   "native": "No",
+   "english": "No",
+   "note": ""
+  },
+  {
+   "language_code": "cbk",
+   "category_code": "family",
+   "native": "Nana",
+   "english": "Mother",
+   "note": ""
+  },
+  {
+   "language_code": "cbk",
+   "category_code": "family",
+   "native": "Tata",
+   "english": "Father",
+   "note": ""
+  },
+  {
+   "language_code": "cbk",
+   "category_code": "food",
+   "native": "Agua",
+   "english": "Water",
+   "note": ""
+  },
+  {
+   "language_code": "cbk",
+   "category_code": "food",
+   "native": "Morisqueta",
+   "english": "Cooked rice",
+   "note": ""
+  },
+  {
+   "language_code": "cbk",
+   "category_code": "food",
+   "native": "Pescado",
+   "english": "Fish",
+   "note": ""
+  },
+  {
+   "language_code": "cbk",
+   "category_code": "nature",
+   "native": "Casa",
+   "english": "House",
+   "note": ""
+  },
+  {
+   "language_code": "cbk",
+   "category_code": "nature",
+   "native": "Sol",
+   "english": "Sun",
+   "note": ""
+  },
+  {
+   "language_code": "cbk",
+   "category_code": "nature",
+   "native": "Luna",
+   "english": "Moon",
+   "note": ""
+  },
+  {
+   "language_code": "cbk",
+   "category_code": "numbers",
+   "native": "Uno",
+   "english": "One",
+   "note": ""
+  },
+  {
+   "language_code": "cbk",
+   "category_code": "numbers",
+   "native": "Dos",
+   "english": "Two",
+   "note": ""
+  },
+  {
+   "language_code": "cbk",
+   "category_code": "numbers",
+   "native": "Tres",
+   "english": "Three",
+   "note": ""
+  },
+  {
+   "language_code": "cbk",
+   "category_code": "expressions",
+   "native": "Te quiere yo",
+   "english": "I love you",
+   "note": ""
+  }
+ ],
+ "sentences": [
+  {
+   "language_code": "tl",
+   "native": "Kumusta ka?",
+   "english": "How are you?",
+   "context": "You meet a friend you haven't seen in a while."
+  },
+  {
+   "language_code": "tl",
+   "native": "Salamat po.",
+   "english": "Thank you. (polite)",
+   "context": "An elder hands you a plate of food."
+  },
+  {
+   "language_code": "tl",
+   "native": "Ano ang pangalan mo?",
+   "english": "What is your name?",
+   "context": "You want to know the name of a new classmate."
+  },
+  {
+   "language_code": "tl",
+   "native": "Gusto ko ng tubig.",
+   "english": "I want water.",
+   "context": "You are thirsty after playing outside."
+  },
+  {
+   "language_code": "tl",
+   "native": "Saan ka pupunta?",
+   "english": "Where are you going?",
+   "context": "You see your neighbor leaving the house."
+  },
+  {
+   "language_code": "tl",
+   "native": "Magandang umaga po.",
+   "english": "Good morning. (polite)",
+   "context": "You greet your grandmother early in the morning."
+  },
+  {
+   "language_code": "tl",
+   "native": "Kumain ka na ba?",
+   "english": "Have you eaten?",
+   "context": "A visitor arrives at lunchtime and you want to be hospitable."
+  },
+  {
+   "language_code": "ilo",
+   "native": "Kumusta ka?",
+   "english": "How are you?",
+   "context": "You meet a friend you haven't seen in a while."
+  },
+  {
+   "language_code": "ilo",
+   "native": "Agyamanak unay.",
+   "english": "Thank you very much.",
+   "context": "Someone helps you carry heavy bags."
+  },
+  {
+   "language_code": "ilo",
+   "native": "Ania ti naganmo?",
+   "english": "What is your name?",
+   "context": "You want to know the name of a new classmate."
+  },
+  {
+   "language_code": "ilo",
+   "native": "Kayat ko ti danum.",
+   "english": "I want water.",
+   "context": "You are thirsty after playing outside."
+  },
+  {
+   "language_code": "ilo",
+   "native": "Papanam?",
+   "english": "Where are you going?",
+   "context": "You see your neighbor leaving the house."
+  },
+  {
+   "language_code": "ilo",
+   "native": "Nangankan?",
+   "english": "Have you eaten?",
+   "context": "A visitor arrives at lunchtime and you want to be hospitable."
+  },
+  {
+   "language_code": "pam",
+   "native": "Kumusta na ka?",
+   "english": "How are you?",
+   "context": "You meet a friend you haven't seen in a while."
+  },
+  {
+   "language_code": "pam",
+   "native": "Dakal a salamat.",
+   "english": "Thank you very much.",
+   "context": "Someone helps you carry heavy bags."
+  },
+  {
+   "language_code": "pam",
+   "native": "Nanu ing lagyu mu?",
+   "english": "What is your name?",
+   "context": "You want to know the name of a new classmate."
+  },
+  {
+   "language_code": "pam",
+   "native": "Mengan na ka?",
+   "english": "Have you eaten?",
+   "context": "A visitor arrives at lunchtime and you want to be hospitable."
+  },
+  {
+   "language_code": "bcl",
+   "native": "Kumusta ka?",
+   "english": "How are you?",
+   "context": "You meet a friend you haven't seen in a while."
+  },
+  {
+   "language_code": "bcl",
+   "native": "Dios mabalos po.",
+   "english": "Thank you. (polite)",
+   "context": "An elder hands you a plate of food."
+  },
+  {
+   "language_code": "bcl",
+   "native": "Ano an pangaran mo?",
+   "english": "What is your name?",
+   "context": "You want to know the name of a new classmate."
+  },
+  {
+   "language_code": "bcl",
+   "native": "Gusto ko nin tubig.",
+   "english": "I want water.",
+   "context": "You are thirsty after playing outside."
+  },
+  {
+   "language_code": "bcl",
+   "native": "Marhay na aga po.",
+   "english": "Good morning. (polite)",
+   "context": "You greet your grandmother early in the morning."
+  },
+  {
+   "language_code": "ceb",
+   "native": "Kumusta ka?",
+   "english": "How are you?",
+   "context": "You meet a friend you haven't seen in a while."
+  },
+  {
+   "language_code": "ceb",
+   "native": "Daghang salamat.",
+   "english": "Thank you very much.",
+   "context": "Someone helps you carry heavy bags."
+  },
+  {
+   "language_code": "ceb",
+   "native": "Unsa imong ngalan?",
+   "english": "What is your name?",
+   "context": "You want to know the name of a new classmate."
+  },
+  {
+   "language_code": "ceb",
+   "native": "Gusto ko og tubig.",
+   "english": "I want water.",
+   "context": "You are thirsty after playing outside."
+  },
+  {
+   "language_code": "ceb",
+   "native": "Asa ka padulong?",
+   "english": "Where are you going?",
+   "context": "You see your neighbor leaving the house."
+  },
+  {
+   "language_code": "ceb",
+   "native": "Nikaon na ka?",
+   "english": "Have you eaten?",
+   "context": "A visitor arrives at lunchtime and you want to be hospitable."
+  },
+  {
+   "language_code": "hil",
+   "native": "Kamusta ka?",
+   "english": "How are you?",
+   "context": "You meet a friend you haven't seen in a while."
+  },
+  {
+   "language_code": "hil",
+   "native": "Madamo gid nga salamat.",
+   "english": "Thank you very much.",
+   "context": "Someone helps you carry heavy bags."
+  },
+  {
+   "language_code": "hil",
+   "native": "Ano ang ngalan mo?",
+   "english": "What is your name?",
+   "context": "You want to know the name of a new classmate."
+  },
+  {
+   "language_code": "hil",
+   "native": "Gusto ko sang tubig.",
+   "english": "I want water.",
+   "context": "You are thirsty after playing outside."
+  },
+  {
+   "language_code": "hil",
+   "native": "Diin ka makadto?",
+   "english": "Where are you going?",
+   "context": "You see your neighbor leaving the house."
+  },
+  {
+   "language_code": "hil",
+   "native": "Nakakaon ka na?",
+   "english": "Have you eaten?",
+   "context": "A visitor arrives at lunchtime and you want to be hospitable."
+  },
+  {
+   "language_code": "war",
+   "native": "Kumusta ka?",
+   "english": "How are you?",
+   "context": "You meet a friend you haven't seen in a while."
+  },
+  {
+   "language_code": "war",
+   "native": "Damo nga salamat.",
+   "english": "Thank you very much.",
+   "context": "Someone helps you carry heavy bags."
+  },
+  {
+   "language_code": "war",
+   "native": "Ano an imo ngaran?",
+   "english": "What is your name?",
+   "context": "You want to know the name of a new classmate."
+  },
+  {
+   "language_code": "war",
+   "native": "Karuyag ko hin tubig.",
+   "english": "I want water.",
+   "context": "You are thirsty after playing outside."
+  },
+  {
+   "language_code": "war",
+   "native": "Makain ka?",
+   "english": "Where are you going?",
+   "context": "You see your neighbor leaving the house."
+  },
+  {
+   "language_code": "war",
+   "native": "Nakaon ka na?",
+   "english": "Have you eaten?",
+   "context": "A visitor arrives at lunchtime and you want to be hospitable."
+  },
+  {
+   "language_code": "bis",
+   "native": "Kumusta ka?",
+   "english": "How are you?",
+   "context": "You meet a friend you haven't seen in a while."
+  },
+  {
+   "language_code": "bis",
+   "native": "Salamat kaayo.",
+   "english": "Thank you very much.",
+   "context": "Someone helps you carry heavy bags."
+  },
+  {
+   "language_code": "bis",
+   "native": "Unsa imong pangalan?",
+   "english": "What is your name?",
+   "context": "You want to know the name of a new classmate."
+  },
+  {
+   "language_code": "bis",
+   "native": "Gusto ko og tubig.",
+   "english": "I want water.",
+   "context": "You are thirsty after playing outside."
+  },
+  {
+   "language_code": "bis",
+   "native": "Asa ka paingon?",
+   "english": "Where are you going?",
+   "context": "You see your neighbor leaving the house."
+  },
+  {
+   "language_code": "bis",
+   "native": "Nikaon na ka?",
+   "english": "Have you eaten?",
+   "context": "A visitor arrives at lunchtime and you want to be hospitable."
+  },
+  {
+   "language_code": "tsg",
+   "native": "Hawnu-unu kaw?",
+   "english": "How are you?",
+   "context": "You meet a friend you haven't seen in a while."
+  },
+  {
+   "language_code": "tsg",
+   "native": "Magsukul tuud.",
+   "english": "Thank you very much.",
+   "context": "Someone helps you carry heavy bags."
+  },
+  {
+   "language_code": "tsg",
+   "native": "Unu in ngan mu?",
+   "english": "What is your name?",
+   "context": "You want to know the name of a new classmate."
+  },
+  {
+   "language_code": "tsg",
+   "native": "Assalamu alaikum.",
+   "english": "Peace be upon you. (greeting)",
+   "context": "You enter the home of a family you are visiting."
+  },
+  {
+   "language_code": "cbk",
+   "native": "Que tal tu?",
+   "english": "How are you?",
+   "context": "You meet a friend you haven't seen in a while."
+  },
+  {
+   "language_code": "cbk",
+   "native": "Muchas gracias.",
+   "english": "Thank you very much.",
+   "context": "Someone helps you carry heavy bags."
+  },
+  {
+   "language_code": "cbk",
+   "native": "Cosa tu nombre?",
+   "english": "What is your name?",
+   "context": "You want to know the name of a new classmate."
+  },
+  {
+   "language_code": "cbk",
+   "native": "Quiere yo agua.",
+   "english": "I want water.",
+   "context": "You are thirsty after playing outside."
+  },
+  {
+   "language_code": "cbk",
+   "native": "Donde tu anda?",
+   "english": "Where are you going?",
+   "context": "You see your neighbor leaving the house."
+  },
+  {
+   "language_code": "cbk",
+   "native": "Ya come ya tu?",
+   "english": "Have you eaten?",
+   "context": "A visitor arrives at lunchtime and you want to be hospitable."
+  }
+ ],
+ "tips": [
+  {
+   "language_code": "tl",
+   "tip": "Add 'po' or 'opo' to show respect to elders: 'Salamat po', 'Opo'."
+  },
+  {
+   "language_code": "tl",
+   "tip": "Tagalog often puts the verb first: 'Kumain ako' literally means 'Ate I'."
+  },
+  {
+   "language_code": "tl",
+   "tip": "'Ng' marks the object (Gusto ko ng tubig) while 'ang' marks the topic of the sentence."
+  },
+  {
+   "language_code": "ilo",
+   "tip": "'Apo' is a respectful way to address an elder or someone of high status."
+  },
+  {
+   "language_code": "ilo",
+   "tip": "'Unay' intensifies: 'Agyamanak unay' means 'Thank you very much'."
+  },
+  {
+   "language_code": "pam",
+   "tip": "'Pu' is the Kapampangan politeness marker, like Tagalog 'po'."
+  },
+  {
+   "language_code": "pam",
+   "tip": "'Ing' works like the Tagalog 'ang' to mark the topic: 'Nanu ing lagyu mu?'"
+  },
+  {
+   "language_code": "bcl",
+   "tip": "'Dios mabalos' (May God repay you) is the usual way to say thank you."
+  },
+  {
+   "language_code": "bcl",
+   "tip": "'Nin' marks the object, like Tagalog 'ng': 'Gusto ko nin tubig'."
+  },
+  {
+   "language_code": "ceb",
+   "tip": "Cebuano uses 'og' before an indefinite object: 'Gusto ko og tubig'."
+  },
+  {
+   "language_code": "ceb",
+   "tip": "'Dili' negates future or habitual actions; 'wala' negates past actions."
+  },
+  {
+   "language_code": "hil",
+   "tip": "Hiligaynon uses 'sang' before an indefinite object: 'Gusto ko sang tubig'."
+  },
+  {
+   "language_code": "hil",
+   "tip": "'Gid' adds emphasis: 'Madamo gid nga salamat' is a heartfelt thank you."
+  },
+  {
+   "language_code": "war",
+   "tip": "Waray uses 'hi' before personal names: 'Ako hi Juan'."
+  },
+  {
+   "language_code": "war",
+   "tip": "'Hin' marks an indefinite object: 'Karuyag ko hin tubig'."
+  },
+  {
+   "language_code": "bis",
+   "tip": "Mindanao Bisaya often borrows Tagalog words, e.g. 'pangalan' instead of Cebuano 'ngalan'."
+  },
+  {
+   "language_code": "bis",
+   "tip": "'Kaayo' means 'very': 'Salamat kaayo' means 'Thank you very much'."
+  },
+  {
+   "language_code": "tsg",
+   "tip": "'Magsukul' comes from the Arabic 'shukr', meaning gratitude."
+  },
+  {
+   "language_code": "tsg",
+   "tip": "Tausug greetings often follow Islamic custom: 'Assalamu alaikum'."
+  },
+  {
+   "language_code": "cbk",
+   "tip": "Chavacano words come mostly from Spanish, but the grammar is Philippine: 'Quiere yo agua' puts the verb first."
+  },
+  {
+   "language_code": "cbk",
+   "tip": "'Ya' marks a completed action: 'Ya come ya tu?' means 'Have you eaten?'."
+  }
+ ],
+ "culture_items": [
+  {
+   "region_code": "luzon",
+   "kind": "Landmark",
+   "title": "Banaue Rice Terraces",
+   "description": "Carved into the mountains of Ifugao by hand around 2,000 years ago. The Rice Terraces of the Philippine Cordilleras are a UNESCO World Heritage Site."
+  },
+  {
+   "region_code": "luzon",
+   "kind": "Landmark",
+   "title": "Mayon Volcano",
+   "description": "Albay's famous volcano, admired for its almost perfect cone shape."
+  },
+  {
+   "region_code": "luzon",
+   "kind": "Heritage",
+   "title": "Vigan",
+   "description": "A Spanish colonial town in Ilocos Sur with cobblestone streets and ancestral houses, listed as a UNESCO World Heritage Site."
+  },
+  {
+   "region_code": "luzon",
+   "kind": "Festival",
+   "title": "Pahiyas Festival",
+   "description": "Held every May in Lucban, Quezon, to thank San Isidro Labrador for a good harvest. Houses are decorated with colorful kiping (rice wafers)."
+  },
+  {
+   "region_code": "luzon",
+   "kind": "Food",
+   "title": "Pinakbet",
+   "description": "An Ilocano vegetable dish of squash, eggplant, ampalaya and okra, flavored with bagoong."
+  },
+  {
+   "region_code": "luzon",
+   "kind": "Food",
+   "title": "Bicol Express",
+   "description": "A spicy Bicolano dish of pork cooked in coconut milk with plenty of chili."
+  },
+  {
+   "region_code": "luzon",
+   "kind": "Clothing",
+   "title": "Barong Tagalog",
+   "description": "The embroidered formal shirt of Filipino men, often woven from piña (pineapple) fiber."
+  },
+  {
+   "region_code": "visayas",
+   "kind": "Festival",
+   "title": "Sinulog",
+   "description": "Cebu's grand January festival honoring the Santo Niño, with dancers moving to the rhythm of drums."
+  },
+  {
+   "region_code": "visayas",
+   "kind": "Festival",
+   "title": "Ati-Atihan",
+   "description": "A festival in Kalibo, Aklan, where participants paint their faces and dance in the streets."
+  },
+  {
+   "region_code": "visayas",
+   "kind": "Festival",
+   "title": "Dinagyang",
+   "description": "Iloilo City's festival featuring energetic warrior-dance performances."
+  },
+  {
+   "region_code": "visayas",
+   "kind": "Landmark",
+   "title": "Chocolate Hills",
+   "description": "More than a thousand cone-shaped hills in Bohol that turn brown in the dry season."
+  },
+  {
+   "region_code": "visayas",
+   "kind": "Food",
+   "title": "La Paz Batchoy",
+   "description": "A rich noodle soup from Iloilo topped with pork, crushed chicharon and garlic."
+  },
+  {
+   "region_code": "visayas",
+   "kind": "Food",
+   "title": "Lechon",
+   "description": "Whole roasted pig. Cebu's version is famous for its crisp skin and herb-stuffed meat."
+  },
+  {
+   "region_code": "mindanao",
+   "kind": "Landmark",
+   "title": "Mount Apo",
+   "description": "The highest mountain in the Philippines, rising between Davao and Cotabato."
+  },
+  {
+   "region_code": "mindanao",
+   "kind": "Festival",
+   "title": "Kadayawan",
+   "description": "Davao City's thanksgiving festival celebrating the harvest and its indigenous cultures."
+  },
+  {
+   "region_code": "mindanao",
+   "kind": "Art",
+   "title": "Okir",
+   "description": "Flowing, curving designs carved in wood and brass by the Maranao and other Mindanao peoples."
+  },
+  {
+   "region_code": "mindanao",
+   "kind": "Textile",
+   "title": "T'nalak",
+   "description": "A sacred abaca cloth woven by T'boli women, whose patterns are said to come to them in dreams."
+  },
+  {
+   "region_code": "mindanao",
+   "kind": "Clothing",
+   "title": "Malong",
+   "description": "A tube-shaped woven cloth worn as a skirt, blanket, or hammock across Mindanao."
+  },
+  {
+   "region_code": "mindanao",
+   "kind": "Food",
+   "title": "Pastil",
+   "description": "Steamed rice topped with shredded chicken or beef, wrapped in banana leaf. A Maguindanaon favorite."
+  }
+ ],
+ "stories": [
+  {
+   "region_code": "luzon",
+   "title": "The Legend of Daragang Magayon",
+   "body": "Long ago in Bicol lived Daragang Magayon, a maiden whose name means 'beautiful lady'. She fell in love with Panganoron, a brave chieftain's son, but a jealous suitor named Pagtuga waged war to take her. In the battle both lovers were lost, and they were buried together. From their grave rose a mountain of perfect beauty: Mayon Volcano. Its clouds are said to be Panganoron embracing his beloved, and its eruptions the anger of Pagtuga."
+  },
+  {
+   "region_code": "visayas",
+   "title": "The Legend of the Chocolate Hills",
+   "body": "One telling from Bohol says that two giants once quarreled across the land. For days they hurled rocks and sand at each other until they grew tired, made peace, and left the island together. They never cleaned up after their battle, and the scattered mounds became the Chocolate Hills. The legend reminds Boholanos that even a great quarrel can end in friendship."
+  },
+  {
+   "region_code": "mindanao",
+   "title": "The Darangen",
+   "body": "The Darangen is the epic of the Maranao people of Lake Lanao. Sung over several days, it tells of the hero Bantugan and the kingdom of Bembaran, of courage, love, and the customs that bind a community. In 2005 UNESCO recognized the Darangen as a Masterpiece of the Oral and Intangible Heritage of Humanity."
+  },
+  {
+   "region_code": "pearl",
+   "title": "The Pearl of the Orient",
+   "body": "With the Luzon, Visayas and Mindanao Cores restored, their light joins together over the seas. Thirty voices become one song, many languages, one people. You have unlocked the Pearl of the Orient, a symbol of Filipino unity, identity and heritage. Keep speaking, keep listening, and keep these languages alive."
+  }
+ ]
+}
