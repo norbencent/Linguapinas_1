@@ -2,7 +2,6 @@ extends Control
 ## "Enter your name" card (prototype screen 4). Creates a player profile.
 
 var name_edit: LineEdit
-var password_edit: LineEdit
 var status: Label
 var avatar := "boy"
 var avatar_buttons := {}
@@ -41,8 +40,6 @@ func _build_card(root: Control, title: String, intro: String) -> void:
 	name_edit = UI.line_edit(UI.t("name_hint"))
 	name_edit.max_length = 20
 	v.add_child(name_edit)
-	password_edit = UI.line_edit(UI.t("password_hint"), true)
-	v.add_child(password_edit)
 
 	v.add_child(UI.heading(UI.t("choose_avatar"), UI.RED, 22))
 	var row := UI.hbox(30)
@@ -65,7 +62,6 @@ func _build_card(root: Control, title: String, intro: String) -> void:
 	v.add_child(status)
 	v.add_child(UI.gem_button(UI.t("start_adventure"), "red", _submit, 84, 30))
 	name_edit.text_submitted.connect(func(_t): _submit())
-	password_edit.text_submitted.connect(func(_t): _submit())
 
 
 func _pick_avatar(a: String) -> void:
@@ -75,7 +71,7 @@ func _pick_avatar(a: String) -> void:
 
 
 func _submit() -> void:
-	var result := DB.register_user(name_edit.text, password_edit.text, name_edit.text, avatar)
+	var result := DB.register_user(name_edit.text, "", name_edit.text, avatar)
 	if result.ok:
 		Game.login(result.user)
 	else:

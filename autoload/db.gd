@@ -215,6 +215,16 @@ func login_user(username: String, password: String) -> Dictionary:
 	return {"ok": true, "error": "", "user": get_user(row.id)}
 
 
+## Picks up a saved player from the CONTINUE screen; no password asked.
+## Returns {"ok": bool, "error": String, "user": Dictionary}.
+func continue_user(user_id: int) -> Dictionary:
+	var user := get_user(user_id)
+	if user.is_empty():
+		return {"ok": false, "error": "That player no longer exists."}
+	_exec("UPDATE users SET last_login = datetime('now') WHERE id = ?;", [user_id])
+	return {"ok": true, "error": "", "user": get_user(user_id)}
+
+
 func get_user(user_id: int) -> Dictionary:
 	return _select_one("""SELECT id, username, display_name, created_at, last_login, avatar, playtime, has_password
 		FROM users WHERE id = ?;""", [user_id])

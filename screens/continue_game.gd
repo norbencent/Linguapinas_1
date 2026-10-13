@@ -1,11 +1,8 @@
 extends Control
-## CONTINUE: pick a saved player (and type the password if it has one).
+## CONTINUE: pick a saved player and carry on playing (no password).
 
 var list: VBoxContainer
-var password_box: VBoxContainer
-var password_edit: LineEdit
 var status: Label
-var chosen: Dictionary = {}
 
 
 func _ready() -> void:
@@ -59,32 +56,13 @@ func _ready() -> void:
 		h.add_child(go)
 		list.add_child(row)
 
-	password_box = UI.vbox(10)
-	password_box.visible = false
-	v.add_child(password_box)
-	password_edit = UI.line_edit(UI.t("password"), true)
-	password_edit.text_submitted.connect(func(_t): _login())
-	password_box.add_child(password_edit)
-	password_box.add_child(UI.gem_button(UI.t("continue"), "blue", _login, 80, 30))
 	status = UI.label("", 20, UI.RED, true)
 	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(status)
 
 
 func _choose(u: Dictionary) -> void:
-	chosen = u
-	if int(u.has_password) == 0:
-		_login()
-		return
-	status.text = "%s: %s" % [u.display_name, UI.t("password")]
-	password_box.visible = true
-	password_edit.grab_focus()
-
-
-func _login() -> void:
-	if chosen.is_empty():
-		return
-	var result := DB.login_user(chosen.username, password_edit.text)
+	var result := DB.continue_user(int(u.id))
 	if result.ok:
 		Game.login(result.user)
 	else:

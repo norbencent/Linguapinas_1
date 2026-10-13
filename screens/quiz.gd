@@ -1,6 +1,10 @@
 extends Control
 ## The quiz (prototype quiz screen). Five hearts; a wrong answer costs one.
 ## Tap the guide's medallion for a hint (limited per quiz).
+## Above the questions the player's hero battles the language's warrior:
+## a right answer is an attack on the warrior, a wrong one lets it strike back.
+
+const BattleStage = preload("res://scripts/battle/battle_stage.gd")
 
 var questions: Array = []
 var index := 0
@@ -27,6 +31,7 @@ var action_button: Button
 var mark: Control
 var choice_grid: VBoxContainer
 var option_buttons: Array = []
+var battle: TextureRect
 
 # build-question state
 var built: Array = []
@@ -91,15 +96,16 @@ func _ready() -> void:
 	points_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	hrow2.add_child(points_label)
 
-	# Story scene
-	var scene_img := TextureRect.new()
-	scene_img.texture = UI.tex.quiz_scene
-	scene_img.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	scene_img.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	scene_img.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	scene_img.custom_minimum_size = Vector2(0, 230)
-	scene_img.clip_contents = true
-	col.add_child(scene_img)
+	# Battle scene: the hero against this language's warrior
+	battle = BattleStage.new()
+	battle.texture = UI.tex.quiz_scene
+	battle.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	battle.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	battle.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	battle.custom_minimum_size = Vector2(0, 260)
+	col.add_child(battle)
+	battle.setup(lang.region_code, str(Game.user.get("avatar", "boy")), lang, Game.difficulty,
+		questions.size())
 
 	# Parchment frame
 	var parts := UI.frame()
@@ -374,18 +380,23 @@ func _answer(given: String) -> void:
 	answered = true
 	var q: Dictionary = questions[index]
 	var ok := Game.check_answer(q, given)
+	var last := index + 1 >= questions.size()
 	if ok:
 		correct_count += 1
 		var earned := Game.POINTS_PER_CORRECT * Game.difficulty
-		points += earned / 2 if hint_used_on_question else earned
+		earned = earned / 2 if hint_used_on_question else earned
+		points += earned
 		feedback_label.text = UI.t("correct")
 		feedback_label.add_theme_color_override("font_color", UI.GREEN)
 		Sound.play("correct")
+		var won := last and hearts > 0
+		battle.player_attack("+%d" % earned, 0 if won else questions.size() - correct_count, won)
 	else:
 		hearts -= 1
 		feedback_label.text = "%s %s" % [UI.t("wrong"), q.answer]
 		feedback_label.add_theme_color_override("font_color", UI.RED)
 		Sound.play("wrong")
+		battle.enemy_attack(hearts <= 0)
 	explain_label.text = q.explain
 	for b in option_buttons:
 		b.disabled = true

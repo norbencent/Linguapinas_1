@@ -79,6 +79,10 @@ func _test_accounts() -> void:
 	check(DB.login_user("juan", "secret1").ok, "login ok")
 	check(not DB.login_user("juan", "wrong").ok, "wrong password rejected")
 	check(not DB.login_user("nobody", "secret1").ok, "unknown user rejected")
+	var juan_id: int = DB.login_user("juan", "secret1").user.id
+	var cont := DB.continue_user(juan_id)
+	check(cont.ok and cont.user.username == "juan", "continue needs no password")
+	check(not DB.continue_user(999999).ok, "continue with a missing player fails")
 	check(DB.register_user("maria", "secret2", "Maria").ok, "register maria")
 
 
