@@ -57,7 +57,6 @@ func _ready() -> void:
 	var row := UI.hbox(8)
 	content.add_child(row)
 	var items := [
-		[UI.t("leaderboard"), UI.GOLD.darkened(0.15), func(): Game.goto("leaderboard")],
 		[UI.t("stories"), UI.BLUE, func(): Game.goto("stories")],
 		[UI.t("spirit"), Color("6b3fa0"), func():
 			Game.return_to = "map"

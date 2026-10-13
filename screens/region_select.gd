@@ -34,7 +34,7 @@ func _ready() -> void:
 	for a in ["boy", "girl"]:
 		var img := UI.image(UI.tex["%s_%s" % [code, a]], Vector2(230, 215))
 		img.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		if a == Game.user.get("avatar", "boy"):
+		if a == UI.avatar_gender(Game.user.get("avatar", "boy")):
 			img.modulate = Color(1.08, 1.08, 1.08)
 		heroes.add_child(img)
 	content.add_child(heroes)

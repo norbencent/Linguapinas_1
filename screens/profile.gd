@@ -7,14 +7,14 @@ func _ready() -> void:
 	var uid := Game.user_id()
 	var content := UI.page(self, UI.t("profile"), "map")
 	var last := DB.get_last_language(uid)
-	var region: String = last.get("region_code", Game.region_code if Game.region_code != "" else "luzon")
+	var home := UI.avatar_region(Game.user.get("avatar", ""))
+	var region: String = last.get("region_code", home if home != "" else (Game.region_code if Game.region_code != "" else "luzon"))
 
 	var portrait := PanelContainer.new()
 	var sb := UI._box(Color("fffaf0"), 120, Color("c99a2e"), 8, 8)
 	portrait.add_theme_stylebox_override("panel", sb)
 	portrait.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	var face := UI.image(UI.character_texture(region, Game.user.get("avatar", "boy")), Vector2(210, 210))
-	face.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	var face := UI.image(UI.avatar_portrait(Game.user.get("avatar", "luzon_boy"), region), Vector2(210, 210))
 	portrait.add_child(face)
 	content.add_child(portrait)
 

@@ -38,7 +38,7 @@ func _ready() -> void:
 	if summary.reward_amount > 0:
 		v.add_child(UI.label("+%d %s" % [summary.reward_amount, DB.REWARD_NAMES[summary.reward_kind]], 24, UI.GREEN, true, UI.font_body_black))
 	if not summary.counts:
-		v.add_child(UI.label("Category practice earns rewards, but only full quizzes unlock levels and count on the leaderboard.", 16, UI.INK_SOFT, true))
+		v.add_child(UI.label("Category practice earns rewards, but only full quizzes unlock levels and count toward your score.", 16, UI.INK_SOFT, true))
 	elif r.passed and Game.difficulty < DB.HARD:
 		v.add_child(UI.label("%s unlocked!" % Game.difficulty_name(Game.difficulty + 1), 22, UI.GREEN, true))
 	content.add_child(card)
@@ -59,4 +59,3 @@ func _ready() -> void:
 		content.add_child(UI.gem_button(UI.t("lesson"), "gold", func(): Game.goto("lesson"), 88, 30))
 	if not summary.new_badges.is_empty():
 		content.add_child(UI.gem_button(UI.t("stories").to_upper(), "purple", func(): Game.goto("stories"), 88, 30))
-	content.add_child(UI.gem_button(UI.t("leaderboard").to_upper(), "red", func(): Game.goto("leaderboard"), 88, 30))

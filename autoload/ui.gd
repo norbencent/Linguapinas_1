@@ -48,12 +48,14 @@ const STRINGS := {
 	"name_intro": ["Sabihin ang iyong pangalan, bayani! Magsisimula na ang iyong paglalakbay sa LinguaPinas!",
 		"Tell us your name, hero! Your journey in LinguaPinas begins now!"],
 	"name_hint": ["Ilagay ang pangalan...", "Enter your name..."],
-	"password_hint": ["Password (opsyonal)", "Password (optional)"],
-	"password": ["Password", "Password"],
 	"choose_avatar": ["Piliin ang iyong bayani", "Choose your hero"],
 	"start_adventure": ["SIMULAN ANG PAKIKIPAGSAPALARAN", "START ADVENTURE"],
 	"choose_player": ["Piliin ang Manlalaro", "Choose a Player"],
 	"no_players": ["Wala pang naka-save na laro. Pindutin ang Bagong Laro.", "No saved games yet. Tap New Game."],
+	"delete": ["BURAHIN", "DELETE"],
+	"delete_title": ["Burahin ang Manlalaro", "Delete Player"],
+	"delete_confirm": ["Burahin si %s at ang lahat ng kanyang puntos at progreso?",
+		"Delete %s and all of their points and progress?"],
 	"language": ["WIKA", "LANGUAGE"],
 	"music": ["LAKAS NG MUSIKA", "MUSIC VOLUME"],
 	"sfx": ["LAKAS NG TUNOG", "SFX VOLUME"],
@@ -77,7 +79,6 @@ const STRINGS := {
 	"home": ["HOME", "HOME"],
 	"gallery": ["Gallery", "Gallery"],
 	"profile": ["Profile", "Profile"],
-	"leaderboard": ["Leaderboard", "Leaderboard"],
 	"stories": ["Mga Kuwento", "Stories"],
 	"spirit": ["Gabay na Espiritu", "Guiding Spirit"],
 	"results": ["Resulta", "Results"],
@@ -110,6 +111,14 @@ func _ready() -> void:
 		for n in ["guide_%s", "btn_region_%s", "%s_boy", "%s_girl"]:
 			var key: String = n % r
 			tex[key] = load("res://assets/ui/%s.png" % key)
+	# profile_pic.png: six round portraits side by side, in DB.AVATARS order.
+	var portraits: Texture2D = load("res://assets/ui/profile_pic.png")
+	var pw := (portraits.get_width() - 26) / 6.0
+	for i in DB.AVATARS.size():
+		var at := AtlasTexture.new()
+		at.atlas = portraits
+		at.region = Rect2(13 + i * pw, 120, pw, portraits.get_height() - 240)
+		tex["profile_" + DB.AVATARS[i]] = at
 	theme = _make_theme()
 	get_tree().root.theme = theme
 
@@ -555,8 +564,54 @@ func level_gems(progress: Dictionary) -> HBoxContainer:
 	return row
 
 
+## "boy" or "girl" for an avatar such as "visayas_girl" (or the old "girl").
+func avatar_gender(avatar: String) -> String:
+	return "girl" if avatar.ends_with("girl") else "boy"
+
+
+## Island of an avatar such as "visayas_girl"; old avatars ("boy") give "".
+func avatar_region(avatar: String) -> String:
+	var r := avatar.get_slice("_", 0)
+	return r if r in GUIDES else ""
+
+
+## Full-body hero. The avatar's own island wins over [param region].
 func character_texture(region: String, avatar: String) -> Texture2D:
-	return tex["%s_%s" % [region if region in GUIDES else "luzon", avatar if avatar in ["boy", "girl"] else "boy"]]
+	var r := avatar_region(avatar)
+	if r == "":
+		r = region if region in GUIDES else "luzon"
+	return tex["%s_%s" % [r, avatar_gender(avatar)]]
+
+
+## Round portrait from profile_pic.png for the player's avatar.
+func avatar_portrait(avatar: String, region := "luzon") -> Texture2D:
+	var r := avatar_region(avatar)
+	if r == "":
+		r = region if region in GUIDES else "luzon"
+	return tex["profile_%s_%s" % [r, avatar_gender(avatar)]]
+
+
+## Quiz scene backgrounds (assets/ui/Luzon_quiz_scene) for each Luzon language.
+const QUIZ_SCENES := {
+	"tl": "tagalog_Manila Harbor quiz_scene",
+	"ilo": "Ilocos Coastal Heritage Pixel Landscape",
+	"pag": "Pangasinan Coastal Townscape Odyssey",
+	"pam": "Riverside Valley Town in Pixel Art",
+	"bcl": "Pixel Art Coastal Mountain Panorama",
+	"ibg": "Cagayan Valley Pixel Adventure",
+	"kne": "Tropical Lakeside Town Pixelscape",
+	"ivv": "Pixel-Art Coastal Village Panorama",
+	"ifk": "Pixel-Art Mountain Valley Terraces",
+	"kal": "Pixel Art Coastal Heritage Town",
+}
+
+
+func quiz_background(language_code: String) -> Texture2D:
+	if QUIZ_SCENES.has(language_code):
+		var path := "res://assets/ui/Luzon_quiz_scene/%s.png" % QUIZ_SCENES[language_code]
+		if ResourceLoader.exists(path):
+			return load(path)
+	return tex.quiz_scene
 
 
 func stat_lines(user_id: int) -> VBoxContainer:
@@ -583,6 +638,23 @@ func message(parent: Node, title: String, text: String) -> void:
 	d.get_label().add_theme_color_override("font_color", INK)
 	d.popup_centered()
 	d.confirmed.connect(d.queue_free)
+	d.canceled.connect(d.queue_free)
+
+
+## Yes / cancel question. [param on_yes] runs when the player confirms.
+func confirm(parent: Node, title: String, text: String, on_yes: Callable) -> void:
+	var d := ConfirmationDialog.new()
+	d.title = title
+	d.dialog_text = text
+	d.dialog_autowrap = true
+	d.min_size = Vector2i(560, 0)
+	d.ok_button_text = t("delete")
+	parent.add_child(d)
+	d.get_label().add_theme_color_override("font_color", INK)
+	d.popup_centered()
+	d.confirmed.connect(func():
+		d.queue_free()
+		on_yes.call())
 	d.canceled.connect(d.queue_free)
 
 
