@@ -98,10 +98,10 @@ func t(key: String) -> String:
 
 func _ready() -> void:
 	lang = DB.get_setting("ui_language", "fil")
-	font_title = load("res://assets/fonts/CinzelDecorative-Black.woff2")
-	font_body = load("res://assets/fonts/Cinzel-Bold.woff2")
-	font_body_black = load("res://assets/fonts/Cinzel-Black.woff2")
-	font_button = load("res://assets/fonts/LilitaOne-Regular.woff2")
+	font_title = _font("CinzelDecorative-Black.woff2")
+	font_body = _font("Cinzel-Bold.woff2")
+	font_body_black = _font("Cinzel-Black.woff2")
+	font_button = _font("LilitaOne-Regular.woff2")
 	for n in ["bg_village", "logo", "badge", "back", "banner", "frame", "nav_bar", "quiz_scene",
 			"btn_green", "btn_gold", "btn_red", "btn_blue", "btn_purple",
 			"map_luzon", "map_visayas", "map_mindanao"]:
@@ -112,6 +112,12 @@ func _ready() -> void:
 			tex[key] = load("res://assets/ui/%s.png" % key)
 	theme = _make_theme()
 	get_tree().root.theme = theme
+
+
+## Loads a font from assets/fonts, or Godot's built-in font if it is missing.
+func _font(file: String) -> Font:
+	var path := "res://assets/fonts/" + file
+	return load(path) if ResourceLoader.exists(path) else ThemeDB.fallback_font
 
 
 func _box(color: Color, radius := 12, border := Color.TRANSPARENT, border_w := 2, pad := 12) -> StyleBoxFlat:
