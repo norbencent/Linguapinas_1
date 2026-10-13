@@ -139,6 +139,7 @@ func _strike(attacker: Control, target: Control, from: Vector2, to: Vector2, dir
 		on_done.call()
 		return
 	busy = true
+	Sound.play("slash")
 	attacker.z_index = 1
 	target.z_index = 0
 	var reach := to + Vector2(-dir * size.x * 0.2, 0)
@@ -167,6 +168,7 @@ func _lunge(node: Control, dir: float) -> void:
 
 
 func _hit(target: Control) -> void:
+	Sound.play("hit")
 	if target.has_method("play") and target.has_animation("hurt"):
 		target.play("hurt", 10.0, false)
 	var t := create_tween()

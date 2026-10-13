@@ -48,6 +48,7 @@ func _ready() -> void:
 	questions = Game.build_quiz(Game.language_code, Game.difficulty,
 		Game.category_code if Game.difficulty == DB.EASY else "")
 	UI.background(self)
+	Sound.play_music("battle")
 
 	var margin := MarginContainer.new()
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -183,6 +184,10 @@ func _ready() -> void:
 		Game.goto("difficulty")
 		return
 	_show_question()
+
+
+func _exit_tree() -> void:
+	Sound.play_music("main")
 
 
 func _draw_mark() -> void:
