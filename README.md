@@ -60,7 +60,12 @@ frame, map, heroes, guides, quiz scene, navigation bar) were cut out of the
 prototype slide screenshots, so they are low resolution. For sharper
 graphics, replace those PNG files with your original artwork, using the same
 file names. `tools/art/extract_prototype_art.py` shows how each one was cut.
-Fonts: Cinzel, Cinzel Decorative and Lilita One (SIL Open Font License). The
+The language maps (`assets/ui/lang_map_luzon.png`, `lang_map_visayas.png`,
+`lang_map_mindanao.png`) are shown on each island's language list; tap one to
+see it full screen. Quiz backgrounds are in `assets/quiz_scenes` and the
+warrior sprite sheets in `assets/enemies`.
+Fonts: Cinzel, Cinzel Decorative and Lilita One (SIL Open Font License, see
+`assets/fonts/OFL.txt`). The
 music and sound effects in `assets/audio` were generated for this project.
 
 ## Features
@@ -111,7 +116,9 @@ using the dictionary.
 ```
 project.godot              Godot project (main scene: scenes/title.tscn, portrait 720x1280)
 export_presets.cfg         Android export preset
-assets/ui, fonts, audio    Art cut from the prototype, fonts, music and sound effects
+assets/ui, fonts, audio    UI art and language maps, fonts, music and sound effects
+assets/quiz_scenes         Quiz background scenes
+assets/enemies             Warrior sprite sheets per region
 addons/godot-sqlite/       SQLite GDExtension v4.5 (Windows, macOS, Linux, Android)
 database/schema.sql        Database tables
 database/seed_data.json    All learning content: languages, words, sentences, tips, culture, stories

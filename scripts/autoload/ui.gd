@@ -98,20 +98,42 @@ func t(key: String) -> String:
 
 func _ready() -> void:
 	lang = DB.get_setting("ui_language", "fil")
-	font_title = load("res://assets/fonts/CinzelDecorative-Black.woff2")
-	font_body = load("res://assets/fonts/Cinzel-Bold.woff2")
-	font_body_black = load("res://assets/fonts/Cinzel-Black.woff2")
-	font_button = load("res://assets/fonts/LilitaOne-Regular.woff2")
+	font_title = _font("CinzelDecorative-Black")
+	font_body = _font("Cinzel-Bold")
+	font_body_black = _font("Cinzel-Black")
+	font_button = _font("LilitaOne-Regular")
 	for n in ["bg_village", "logo", "badge", "back", "banner", "frame", "nav_bar", "quiz_scene",
 			"btn_green", "btn_gold", "btn_red", "btn_blue", "btn_purple",
 			"map_luzon", "map_visayas", "map_mindanao"]:
-		tex[n] = load("res://assets/ui/%s.png" % n)
+		tex[n] = _tex(n)
 	for r in ["luzon", "visayas", "mindanao"]:
-		for n in ["guide_%s", "btn_region_%s", "%s_boy", "%s_girl"]:
+		for n in ["guide_%s", "btn_region_%s", "%s_boy", "%s_girl", "lang_map_%s"]:
 			var key: String = n % r
-			tex[key] = load("res://assets/ui/%s.png" % key)
+			tex[key] = _tex(key)
 	theme = _make_theme()
 	get_tree().root.theme = theme
+
+
+## Loads a font from assets/fonts; falls back to Godot's built-in font so a
+## missing file never leaves a null font (which crashes the gem buttons).
+func _font(name: String) -> Font:
+	for ext in ["ttf", "otf", "woff2", "woff"]:
+		var path := "res://assets/fonts/%s.%s" % [name, ext]
+		if ResourceLoader.exists(path):
+			return load(path)
+	push_warning("Font missing: " + name)
+	return ThemeDB.fallback_font
+
+
+## Loads a picture from assets/ui; a missing file becomes a small placeholder.
+func _tex(name: String) -> Texture2D:
+	var path := "res://assets/ui/%s.png" % name
+	if ResourceLoader.exists(path):
+		return load(path)
+	push_warning("Picture missing: " + path)
+	var img := Image.create(4, 4, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	return ImageTexture.create_from_image(img)
 
 
 func _box(color: Color, radius := 12, border := Color.TRANSPARENT, border_w := 2, pad := 12) -> StyleBoxFlat:

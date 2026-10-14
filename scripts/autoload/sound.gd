@@ -7,24 +7,29 @@ var streams := {}
 var music_volume := 70
 var sfx_volume := 80
 
+const MUSIC_PATH := "res://assets/audio/music_loop.wav"
+
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	for n in ["click", "correct", "wrong", "win"]:
-		streams[n] = load("res://assets/audio/sfx_%s.wav" % n)
-	var loop: AudioStreamWAV = load("res://assets/audio/music_loop.wav")
-	loop.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	loop.loop_begin = 0
-	loop.loop_end = int(loop.get_length() * loop.mix_rate)
+		var path := "res://assets/audio/sfx_%s.wav" % n
+		if ResourceLoader.exists(path):
+			streams[n] = load(path)
 	music = AudioStreamPlayer.new()
-	music.stream = loop
+	if ResourceLoader.exists(MUSIC_PATH):
+		var loop: AudioStreamWAV = load(MUSIC_PATH)
+		loop.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		loop.loop_begin = 0
+		loop.loop_end = int(loop.get_length() * loop.mix_rate)
+		music.stream = loop
 	add_child(music)
 	for i in 4:
 		var p := AudioStreamPlayer.new()
 		add_child(p)
 		sfx_players.append(p)
 	apply(int(DB.get_setting("music_volume", "70")), int(DB.get_setting("sfx_volume", "80")))
-	if not DisplayServer.get_name() == "headless":
+	if music.stream and DisplayServer.get_name() != "headless":
 		music.play()
 
 
