@@ -27,6 +27,16 @@ var action_button: Button
 var mark: Control
 var choice_grid: VBoxContainer
 var option_buttons: Array = []
+var stage: BattleStage
+
+## Quiz backgrounds made for a language (others use the default scene).
+const SCENES := {
+	"tl": "res://assets/quiz_scenes/luzon/tagalog_Manila Harbor quiz_scene.png",
+	"ilo": "res://assets/quiz_scenes/luzon/Ilocos Coastal Heritage Pixel Landscape.png",
+	"pag": "res://assets/quiz_scenes/luzon/Pangasinan Coastal Townscape Odyssey.png",
+	"ibg": "res://assets/quiz_scenes/luzon/Cagayan Valley Pixel Adventure.png",
+	"ifk": "res://assets/quiz_scenes/luzon/Pixel-Art Mountain Valley Terraces.png",
+}
 
 # build-question state
 var built: Array = []
@@ -94,13 +104,17 @@ func _ready() -> void:
 
 	# Story scene
 	var scene_img := TextureRect.new()
-	scene_img.texture = UI.tex.quiz_scene
+	var scene_path: String = SCENES.get(Game.language_code, "")
+	scene_img.texture = load(scene_path) if scene_path != "" and ResourceLoader.exists(scene_path) else UI.tex.quiz_scene
 	scene_img.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	scene_img.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	scene_img.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	scene_img.custom_minimum_size = Vector2(0, 230)
 	scene_img.clip_contents = true
 	col.add_child(scene_img)
+	stage = BattleStage.new()
+	scene_img.add_child(stage)
+	stage.setup(Game.language_code, Game.difficulty, lang.region_code, Game.user.get("avatar", "boy"))
 
 	# Parchment frame
 	var parts := UI.frame()
@@ -382,11 +396,13 @@ func _answer(given: String) -> void:
 		feedback_label.text = UI.t("correct")
 		feedback_label.add_theme_color_override("font_color", UI.GREEN)
 		Sound.play("correct")
+		stage.hero_strikes()
 	else:
 		hearts -= 1
 		feedback_label.text = "%s %s" % [UI.t("wrong"), q.answer]
 		feedback_label.add_theme_color_override("font_color", UI.RED)
 		Sound.play("wrong")
+		stage.enemy_strikes()
 	explain_label.text = q.explain
 	for b in option_buttons:
 		b.disabled = true
@@ -399,6 +415,10 @@ func _answer(given: String) -> void:
 	mark.visible = true
 	mark.queue_redraw()
 	var finished := hearts <= 0 or index + 1 >= questions.size()
+	if finished:
+		get_tree().create_timer(0.6).timeout.connect(func():
+			if is_instance_valid(stage):
+				stage.finish(hearts > 0))
 	action_button.text = UI.t("results_btn") if finished else UI.t("next")
 	UI.tint_button(action_button, UI.GREEN if ok else UI.RED)
 	_refresh_bar()
