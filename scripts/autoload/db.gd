@@ -226,17 +226,6 @@ func get_users() -> Array:
 		ORDER BY COALESCE(last_login, created_at) DESC;""")
 
 
-## Checks a player's password without logging them in. A player without a
-## password always passes.
-func check_password(user_id: int, password: String) -> bool:
-	var row := _select_one("SELECT password_hash, salt, has_password FROM users WHERE id = ?;", [user_id])
-	if row.is_empty():
-		return false
-	if int(row.has_password) == 0:
-		return true
-	return _hash_password(password, row.salt) == row.password_hash
-
-
 ## Removes a player and everything saved for them (scores, progress,
 ## rewards, badges). Returns true if the player existed and was deleted.
 func delete_user(user_id: int) -> bool:

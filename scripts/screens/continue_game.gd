@@ -1,6 +1,6 @@
 extends Control
 ## CONTINUE: pick a saved player (and type the password if it has one),
-## or delete a player (sample or old profiles) after confirming.
+## or delete a player (sample or old profiles) with one tap.
 
 var list: VBoxContainer
 var password_box: VBoxContainer
@@ -80,7 +80,7 @@ func _refresh_list() -> void:
 		var go := UI.pill_button(UI.t("continue"), UI.BLUE, _choose.bind(u), 52, 20)
 		go.custom_minimum_size.x = 170
 		buttons.add_child(go)
-		var del := UI.pill_button(UI.t("delete"), UI.RED, _ask_delete.bind(u), 40, 16)
+		var del := UI.pill_button(UI.t("delete"), UI.RED, _delete.bind(u), 40, 16)
 		del.name = "delete"
 		buttons.add_child(del)
 		list.add_child(row)
@@ -108,67 +108,7 @@ func _login() -> void:
 
 # ---------------------------------------------------------------- delete
 
-## Confirmation pop-up. Players with a password must type it to be deleted.
-func _ask_delete(u: Dictionary) -> void:
-	var needs_password := int(u.has_password) == 1
-	var overlay := ColorRect.new()
-	overlay.name = "DeletePopup"
-	overlay.color = Color(0, 0, 0, 0.6)
-	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
-	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
-	add_child(overlay)
-	Game.overlays.append(overlay)
-
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	overlay.add_child(center)
-	var card := PanelContainer.new()
-	var sb := UI._box(UI.PARCHMENT, 18, UI.RED, 6, 26)
-	sb.shadow_color = Color(0, 0, 0, 0.5)
-	sb.shadow_size = 16
-	card.add_theme_stylebox_override("panel", sb)
-	card.custom_minimum_size = Vector2(560, 0)
-	center.add_child(card)
-	var v := UI.vbox(14)
-	card.add_child(v)
-	v.add_child(UI.heading(UI.t("delete_title"), UI.RED, 30))
-	v.add_child(UI.label(UI.t("delete_confirm") % u.display_name, 21, UI.INK, true))
-
-	var pw: LineEdit = null
-	if needs_password:
-		v.add_child(UI.label(UI.t("delete_password") % u.display_name, 19, UI.INK_SOFT, true))
-		pw = UI.line_edit(UI.t("password"), true)
-		v.add_child(pw)
-	var err := UI.label("", 19, UI.RED, true)
-	v.add_child(err)
-
-	var row := UI.hbox(12)
-	v.add_child(row)
-	var cancel := UI.pill_button(UI.t("cancel"), UI.INK_SOFT, func(): _close_popup(overlay), 60, 22)
-	cancel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(cancel)
-	var confirm := func():
-		if pw != null and not DB.check_password(int(u.id), pw.text):
-			err.text = UI.t("wrong_password")
-			Sound.play("wrong")
-			return
-		_delete(u)
-		_close_popup(overlay)
-	var ok := UI.pill_button(UI.t("delete"), UI.RED, confirm, 60, 22)
-	ok.name = "confirm_delete"
-	ok.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(ok)
-	if pw != null:
-		pw.text_submitted.connect(func(_t): confirm.call())
-		pw.grab_focus.call_deferred()
-
-
-func _close_popup(overlay: Node) -> void:
-	Game.overlays.erase(overlay)
-	if is_instance_valid(overlay):
-		overlay.queue_free()
-
-
+## Deletes the player right away (no confirmation, no password).
 func _delete(u: Dictionary) -> void:
 	var id := int(u.id)
 	if not DB.delete_user(id):

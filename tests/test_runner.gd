@@ -307,19 +307,8 @@ func _test_delete_player() -> void:
 	await _frames(4)
 	check(_row(sample) != null and _row(locked) != null, "continue lists the sample players")
 
-	# Delete, then cancel: nothing is removed.
+	# One tap on DELETE removes the player straight away.
 	await _click(_row(sample).find_child("delete", true, false))
-	await _frames(2)
-	var popup := get_tree().current_scene.find_child("DeletePopup", true, false)
-	check(popup != null, "delete asks for confirmation")
-	Game.handle_back()
-	await _frames(2)
-	check(not is_instance_valid(popup) and not DB.get_user(sample).is_empty(), "back key cancels the delete")
-
-	# Delete and confirm.
-	await _click(_row(sample).find_child("delete", true, false))
-	await _frames(2)
-	await _click(get_tree().current_scene.find_child("confirm_delete", true, false))
 	await _frames(3)
 	check(DB.get_user(sample).is_empty(), "sample player deleted")
 	for table in ["quiz_attempts", "progress", "rewards", "badges"]:
@@ -327,19 +316,11 @@ func _test_delete_player() -> void:
 		check(left == 0, "deleted player's %s removed" % table)
 	check(_row(sample) == null, "deleted player leaves the list")
 
-	# A player with a password needs it to be deleted.
+	# No password is asked, even for a player who has one.
 	await _click(_row(locked).find_child("delete", true, false))
-	await _frames(2)
-	var scene := get_tree().current_scene
-	var pw: LineEdit = scene.find_child("DeletePopup", true, false).find_children("*", "LineEdit", true, false)[0]
-	pw.text = "nope"
-	await _click(scene.find_child("confirm_delete", true, false))
-	await _frames(2)
-	check(not DB.get_user(locked).is_empty(), "wrong password does not delete")
-	pw.text = "pass1234"
-	await _click(scene.find_child("confirm_delete", true, false))
 	await _frames(3)
-	check(DB.get_user(locked).is_empty(), "right password deletes")
+	check(DB.get_user(locked).is_empty(), "player with a password deleted without it")
+	check(_row(locked) == null, "list refreshed")
 	check(not DB.delete_user(locked), "deleting a missing player fails cleanly")
 
 
