@@ -93,17 +93,10 @@ func _on_settings() -> void:
 	Game.open_settings("title")
 
 
+## Enter starts the game. Esc / the Android back key are handled by Game,
+## which closes the game from the title screen.
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_accept"):
 		get_viewport().set_input_as_handled()
 		Sound.click()
 		_on_start()
-	elif event.is_action_pressed("ui_cancel"):
-		get_viewport().set_input_as_handled()
-		get_tree().quit()
-
-
-func _notification(what: int) -> void:
-	# Android back button on the title screen closes the game.
-	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
-		get_tree().quit()

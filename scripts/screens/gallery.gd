@@ -7,7 +7,7 @@ var tabs: Dictionary = {}
 
 
 func _ready() -> void:
-	var content := UI.page(self, UI.t("gallery"), "map")
+	var content := UI.page(self, UI.t("gallery"), Game.BACK)
 	var row := UI.hbox(8)
 	content.add_child(row)
 	for region in DB.get_regions():

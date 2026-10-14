@@ -97,3 +97,4 @@ func _show_map(code: String) -> void:
 			Sound.click()
 			overlay.queue_free())
 	add_child(overlay)
+	Game.overlays.append(overlay)

@@ -6,7 +6,7 @@ var region_codes: Array = [""]
 
 
 func _ready() -> void:
-	var content := UI.page(self, UI.t("leaderboard"), "map")
+	var content := UI.page(self, UI.t("leaderboard"), Game.BACK)
 	var picker := OptionButton.new()
 	picker.add_item("All regions")
 	for r in DB.get_regions():

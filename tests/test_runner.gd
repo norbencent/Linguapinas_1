@@ -37,6 +37,7 @@ func _run() -> void:
 	_test_progression()
 	await _test_spirit()
 	await _test_screens()
+	await _test_back_navigation()
 	await _test_play_quiz_through_ui()
 	DB.close()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_DB))
@@ -168,6 +169,79 @@ func _test_screens() -> void:
 		var current := get_tree().current_scene
 		check(current != null and current.scene_file_path == Game.SCENES[screen], "screen %s loads" % screen)
 		check(current != null and current.get_child_count() > 0, "screen %s builds its UI" % screen)
+
+
+func _scene_is(screen: String) -> bool:
+	var cur := get_tree().current_scene
+	return cur != null and cur.scene_file_path == Game.SCENES[screen]
+
+
+func _test_back_navigation() -> void:
+	# Every screen except the title has a back target, and pressing it
+	# (back button, Esc or Android back all call handle_back) opens a screen.
+	for screen in Game.SCENES:
+		Game.history.clear()
+		Game.goto(screen)
+		await _frames()
+		if screen == "title":
+			check(Game.back_action == null, "title has no back target")
+			continue
+		check(Game.back_action != null, "screen %s has a back button" % screen)
+		Game.handle_back()
+		await _frames()
+		var cur := get_tree().current_scene
+		check(cur != null and cur.scene_file_path != Game.SCENES[screen] or screen == "map",
+			"back from %s leaves the screen" % screen)
+	# Fixed targets along the learning path.
+	var expected := {"menu": "title", "new_game": "menu", "continue": "menu", "map": "menu",
+		"island": "map", "language": "island", "difficulty": "language", "lesson": "difficulty",
+		"quiz": "difficulty", "results": "difficulty"}
+	for screen in expected:
+		Game.goto(screen)
+		await _frames()
+		Game.handle_back()
+		await _frames()
+		check(_scene_is(expected[screen]), "back from %s goes to %s" % [screen, expected[screen]])
+	# Shared screens return to wherever they were opened from.
+	Game.goto("results")
+	await _frames()
+	Game.goto("leaderboard")
+	await _frames()
+	Game.goto("profile")
+	await _frames()
+	Game.goto("gallery")
+	await _frames()
+	for want in ["profile", "leaderboard", "results"]:
+		Game.handle_back()
+		await _frames()
+		check(_scene_is(want), "history back reaches %s" % want)
+	# Settings goes back to where it was opened.
+	Game.goto("island")
+	await _frames()
+	Game.open_settings("island")
+	await _frames()
+	Game.handle_back()
+	await _frames()
+	check(_scene_is("island"), "settings back returns to island")
+	# The back key closes a pop-up before leaving the screen.
+	Game.region_code = "luzon"
+	Game.goto("language")
+	await _frames()
+	get_tree().current_scene._show_map("luzon")
+	await _frames()
+	Game.handle_back()
+	await _frames()
+	check(_scene_is("language") and Game.overlays.is_empty(), "back closes the map pop-up first")
+	# The island map previews a region's language map on hover.
+	Game.goto("map")
+	await _frames()
+	var map := get_tree().current_scene
+	map.find_child("visayas", true, false).mouse_entered.emit()
+	await _frames()
+	check(map._preview.visible and map._preview_map.texture == UI.tex.lang_map_visayas, "hover shows the Visayas map")
+	map.find_child("visayas", true, false).mouse_exited.emit()
+	await _frames(20)
+	check(not map._preview.visible, "preview hides after hover ends")
 
 
 func _test_play_quiz_through_ui() -> void:

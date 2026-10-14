@@ -13,8 +13,7 @@ var lang_codes: Array = []
 
 
 func _ready() -> void:
-	var back := Game.return_to if Game.return_to != "" else "map"
-	var content := UI.page(self, UI.t("spirit"), back)
+	var content := UI.page(self, UI.t("spirit"), Game.BACK)
 	var region: String = Game.region_code if Game.region_code in UI.GUIDES else "luzon"
 	var head := UI.hbox(12)
 	head.add_child(UI.image(UI.tex["guide_" + region], Vector2(96, 96)))
