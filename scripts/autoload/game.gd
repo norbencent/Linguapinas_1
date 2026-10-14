@@ -71,6 +71,29 @@ func _process(delta: float) -> void:
 func _ready() -> void:
 	# The Android back key goes back a screen instead of closing the app.
 	get_tree().quit_on_go_back = false
+	_fit_window.call_deferred()
+
+
+## On a PC, shrinks the portrait window so it fits above the taskbar
+## (a 450x800 window does not fit a 1366x768 laptop screen).
+func _fit_window() -> void:
+	if OS.has_feature("mobile") or DisplayServer.get_name() == "headless":
+		return
+	if Engine.has_method("is_embedded_in_editor") and Engine.call("is_embedded_in_editor"):
+		return  # the editor's Game window sizes itself; resize or maximize it there
+	if DisplayServer.window_get_mode() != DisplayServer.WINDOW_MODE_WINDOWED:
+		return
+	var screen := DisplayServer.window_get_current_screen()
+	var usable := DisplayServer.screen_get_usable_rect(screen)
+	const TITLE_BAR := 40  # room for the window's title bar and border
+	var size := DisplayServer.window_get_size()
+	var max_h := usable.size.y - TITLE_BAR - 20
+	if size.y <= max_h:
+		return
+	var h := max_h
+	var w := int(h * 9.0 / 16.0)
+	DisplayServer.window_set_size(Vector2i(w, h))
+	DisplayServer.window_set_position(usable.position + Vector2i((usable.size.x - w) / 2, TITLE_BAR))
 
 
 func _notification(what: int) -> void:
