@@ -20,6 +20,7 @@ func _ready() -> void:
 
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE  # let clicks reach the back button
 	add_child(center)
 	var outer := PanelContainer.new()
 	var osb := UI._box(Color("7a1414"), 24, Color("d9a43a"), 10, 14)

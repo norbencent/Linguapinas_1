@@ -1,5 +1,6 @@
 extends Control
-## CONTINUE: pick a saved player (and type the password if it has one).
+## CONTINUE: pick a saved player (and type the password if it has one),
+## or delete a player (sample or old profiles) with one tap.
 
 var list: VBoxContainer
 var password_box: VBoxContainer
@@ -19,6 +20,7 @@ func _ready() -> void:
 
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE  # let clicks reach the back button
 	add_child(center)
 	var card := PanelContainer.new()
 	var sb := UI._box(UI.PARCHMENT, 18, Color("c99a2e"), 8, 30)
@@ -38,26 +40,7 @@ func _ready() -> void:
 	list = UI.vbox(10)
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(list)
-	var users := DB.get_users()
-	if users.is_empty():
-		list.add_child(UI.label(UI.t("no_players"), 22, UI.INK, true))
-	for u in users:
-		var row := UI.row_panel()
-		var h := UI.hbox(14)
-		row.add_child(h)
-		var face := UI.image(UI.character_texture("luzon", u.avatar), Vector2(64, 64))
-		face.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		h.add_child(face)
-		var info := UI.vbox(2)
-		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		h.add_child(info)
-		info.add_child(UI.label(u.display_name, 26, UI.INK, true, UI.font_body_black))
-		info.add_child(UI.label("Score %d" % DB.get_total_score(u.id), 18, UI.INK_SOFT))
-		var go := UI.pill_button(UI.t("continue"), UI.BLUE, _choose.bind(u), 56, 22)
-		go.custom_minimum_size.x = 170
-		go.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		h.add_child(go)
-		list.add_child(row)
+	_refresh_list()
 
 	password_box = UI.vbox(10)
 	password_box.visible = false
@@ -69,6 +52,38 @@ func _ready() -> void:
 	status = UI.label("", 20, UI.RED, true)
 	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(status)
+
+
+func _refresh_list() -> void:
+	for c in list.get_children():
+		list.remove_child(c)
+		c.queue_free()
+	var users := DB.get_users()
+	if users.is_empty():
+		list.add_child(UI.label(UI.t("no_players"), 22, UI.INK, true))
+	for u in users:
+		var row := UI.row_panel()
+		row.name = "player_%d" % int(u.id)
+		var h := UI.hbox(14)
+		row.add_child(h)
+		var face := UI.image(UI.character_texture("luzon", u.avatar), Vector2(64, 64))
+		face.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		h.add_child(face)
+		var info := UI.vbox(2)
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		h.add_child(info)
+		info.add_child(UI.label(u.display_name, 26, UI.INK, true, UI.font_body_black))
+		info.add_child(UI.label("Score %d" % DB.get_total_score(u.id), 18, UI.INK_SOFT))
+		var buttons := UI.vbox(6)
+		buttons.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		h.add_child(buttons)
+		var go := UI.pill_button(UI.t("continue"), UI.BLUE, _choose.bind(u), 52, 20)
+		go.custom_minimum_size.x = 170
+		buttons.add_child(go)
+		var del := UI.pill_button(UI.t("delete"), UI.RED, _delete.bind(u), 40, 16)
+		del.name = "delete"
+		buttons.add_child(del)
+		list.add_child(row)
 
 
 func _choose(u: Dictionary) -> void:
@@ -89,3 +104,21 @@ func _login() -> void:
 		Game.login(result.user)
 	else:
 		status.text = result.error
+
+
+# ---------------------------------------------------------------- delete
+
+## Deletes the player right away (no confirmation, no password).
+func _delete(u: Dictionary) -> void:
+	var id := int(u.id)
+	if not DB.delete_user(id):
+		status.text = DB.last_error
+		return
+	if Game.user_id() == id:
+		Game.user = {}
+	if int(chosen.get("id", -1)) == id:
+		chosen = {}
+		password_box.visible = false
+	status.text = ""
+	UI.toast(UI.t("deleted") % u.display_name)
+	_refresh_list()

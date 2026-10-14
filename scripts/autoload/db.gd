@@ -226,6 +226,21 @@ func get_users() -> Array:
 		ORDER BY COALESCE(last_login, created_at) DESC;""")
 
 
+## Removes a player and everything saved for them (scores, progress,
+## rewards, badges). Returns true if the player existed and was deleted.
+func delete_user(user_id: int) -> bool:
+	if get_user(user_id).is_empty():
+		return false
+	if not _exec("BEGIN;"):
+		return false
+	var ok := true
+	for table in ["quiz_attempts", "progress", "rewards", "badges"]:
+		ok = ok and _exec("DELETE FROM %s WHERE user_id = ?;" % table, [user_id])
+	ok = ok and _exec("DELETE FROM users WHERE id = ?;", [user_id])
+	_exec("COMMIT;" if ok else "ROLLBACK;")
+	return ok
+
+
 func add_playtime(user_id: int, seconds: int) -> void:
 	if seconds > 0:
 		_exec("UPDATE users SET playtime = playtime + ? WHERE id = ?;", [seconds, user_id])

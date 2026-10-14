@@ -53,6 +53,8 @@ const STRINGS := {
 	"choose_avatar": ["Piliin ang iyong bayani", "Choose your hero"],
 	"start_adventure": ["SIMULAN ANG PAKIKIPAGSAPALARAN", "START ADVENTURE"],
 	"choose_player": ["Piliin ang Manlalaro", "Choose a Player"],
+	"delete": ["BURAHIN", "DELETE"],
+	"deleted": ["Nabura si %s.", "%s was deleted."],
 	"no_players": ["Wala pang naka-save na laro. Pindutin ang Bagong Laro.", "No saved games yet. Tap New Game."],
 	"language": ["WIKA", "LANGUAGE"],
 	"music": ["LAKAS NG MUSIKA", "MUSIC VOLUME"],

@@ -23,6 +23,7 @@ func _build_card(root: Control, title: String, intro: String) -> void:
 
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE  # let clicks reach the back button
 	root.add_child(center)
 	var card := PanelContainer.new()
 	var sb := UI._box(UI.PARCHMENT, 18, Color("c99a2e"), 8, 30)
