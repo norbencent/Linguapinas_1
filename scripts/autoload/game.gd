@@ -74,23 +74,24 @@ func _ready() -> void:
 	_fit_window.call_deferred()
 
 
-## On a PC, shrinks the portrait window so it fits above the taskbar
-## (a 450x800 window does not fit a 1366x768 laptop screen).
+## On a PC, sizes the portrait window to the screen: as tall as fits above
+## the taskbar, up to 800 px. The project's default window (315x560) is kept
+## small so it also fits inside the editor's Game window on a 768 px laptop
+## screen, where the game cannot resize its own window.
+const MAX_WINDOW_HEIGHT := 800
+
+
 func _fit_window() -> void:
 	if OS.has_feature("mobile") or DisplayServer.get_name() == "headless":
 		return
 	if Engine.has_method("is_embedded_in_editor") and Engine.call("is_embedded_in_editor"):
-		return  # the editor's Game window sizes itself; resize or maximize it there
+		return  # the editor's Game window sizes itself
 	if DisplayServer.window_get_mode() != DisplayServer.WINDOW_MODE_WINDOWED:
 		return
 	var screen := DisplayServer.window_get_current_screen()
 	var usable := DisplayServer.screen_get_usable_rect(screen)
 	const TITLE_BAR := 40  # room for the window's title bar and border
-	var size := DisplayServer.window_get_size()
-	var max_h := usable.size.y - TITLE_BAR - 20
-	if size.y <= max_h:
-		return
-	var h := max_h
+	var h := mini(MAX_WINDOW_HEIGHT, usable.size.y - TITLE_BAR - 20)
 	var w := int(h * 9.0 / 16.0)
 	DisplayServer.window_set_size(Vector2i(w, h))
 	DisplayServer.window_set_position(usable.position + Vector2i((usable.size.x - w) / 2, TITLE_BAR))
