@@ -3,7 +3,7 @@ extends Control
 
 
 func _ready() -> void:
-	var content := UI.page(self, UI.t("stories"), "map")
+	var content := UI.page(self, UI.t("stories"), Game.BACK)
 	var restored := DB.get_restored_cores(Game.user_id())
 	var all_restored := restored.size() == DB.get_regions().size()
 	for story in DB.get_stories():

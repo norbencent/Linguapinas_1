@@ -34,13 +34,30 @@ var language_code := ""
 var difficulty := 1
 var category_code := ""          # "" means all categories
 var last_result: Dictionary = {}  # filled by the quiz for the results screen
-var return_to := ""              # where the Guiding Spirit's Back button goes
 var settings_return := "title"   # where Settings' Exit button goes
 
 ## Screens that can be opened without a player.
 const PUBLIC_SCREENS := ["title", "menu", "new_game", "continue", "settings"]
 const PLAYTIME_SAVE_EVERY := 30.0
 var _unsaved_playtime := 0.0
+
+# ---------------------------------------------------------------- back navigation
+#
+# Every back button, the nav bar's BACK, Esc and the Android back key go
+# through handle_back(). A screen's back target is registered by UI.top_bar()
+# (or set_back() for screens with their own button). The special target
+# BACK returns to the previous screen in the history, used by screens that
+# can be opened from many places (gallery, profile, leaderboard, ...).
+
+const BACK := "@back"
+## Screens never returned to through the history (a quiz restarts if reopened).
+const NO_RETURN := ["quiz", "settings"]
+const MAX_HISTORY := 30
+
+var current_screen := "title"
+var history: Array[String] = []
+var back_action: Variant = null          # String screen, BACK or Callable
+var overlays: Array[Node] = []           # pop-ups closed first by the back key
 
 
 func _process(delta: float) -> void:
@@ -51,9 +68,22 @@ func _process(delta: float) -> void:
 		save_playtime()
 
 
+func _ready() -> void:
+	# The Android back key goes back a screen instead of closing the app.
+	get_tree().quit_on_go_back = false
+
+
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_APPLICATION_PAUSED:
 		save_playtime()
+	elif what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		handle_back()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
+		handle_back()
 
 
 func save_playtime() -> void:
@@ -92,7 +122,8 @@ func login(u: Dictionary) -> void:
 	save_playtime()
 	user = u
 	_unsaved_playtime = 0.0
-	goto("map")
+	history.clear()
+	goto("map", false)
 
 
 func logout() -> void:
@@ -100,13 +131,71 @@ func logout() -> void:
 	user = {}
 	region_code = ""
 	language_code = ""
-	goto("title")
+	history.clear()
+	goto("title", false)
 
 
-func goto(screen: String) -> void:
+## Opens a screen. remember=false skips the history (used when going back).
+func goto(screen: String, remember := true) -> void:
 	if not screen in PUBLIC_SCREENS and not is_logged_in():
 		screen = "title"
+	if screen == "title":
+		history.clear()
+	elif remember and screen != current_screen:
+		history.append(current_screen)
+		if history.size() > MAX_HISTORY:
+			history.pop_front()
+	current_screen = screen
+	back_action = null
+	overlays.clear()
 	get_tree().change_scene_to_file(SCENES[screen])
+
+
+## Registers where the current screen's back button goes.
+func set_back(target: Variant) -> void:
+	back_action = target
+
+
+## Follows a back target: a screen name, BACK (history) or a Callable.
+func go(target: Variant, fallback := "map") -> void:
+	if target is Callable:
+		target.call()
+	elif target == BACK:
+		go_back(fallback)
+	elif target is String and target != "":
+		goto(target, false)
+	else:
+		goto(fallback, false)
+
+
+## Returns to the previous screen, skipping ones that can't be reopened.
+func go_back(fallback := "map") -> void:
+	while not history.is_empty():
+		var prev: String = history.pop_back()
+		if prev == current_screen or prev in NO_RETURN:
+			continue
+		if prev in PUBLIC_SCREENS or is_logged_in():
+			goto(prev, false)
+			return
+	goto(fallback if is_logged_in() or fallback in PUBLIC_SCREENS else "title", false)
+
+
+## Back key / Esc: close a pop-up, else press the screen's back button.
+func handle_back() -> void:
+	while not overlays.is_empty():
+		var o: Node = overlays.pop_back()
+		if is_instance_valid(o) and o.is_inside_tree():
+			Sound.click()
+			o.queue_free()
+			return
+	if back_action != null:
+		Sound.click()
+		go(back_action)
+	elif current_screen == "title":
+		get_tree().quit()
+	else:
+		Sound.click()
+		go_back("title")
 
 
 func refresh_user() -> void:

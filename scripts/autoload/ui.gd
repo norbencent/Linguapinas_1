@@ -232,6 +232,7 @@ func top_bar(back: Variant = "") -> HBoxContainer:
 	var bar := HBoxContainer.new()
 	bar.custom_minimum_size.y = 84
 	if back is Callable or (back is String and back != ""):
+		Game.set_back(back)
 		var b := TextureButton.new()
 		b.texture_normal = tex.back
 		b.ignore_texture_size = true
@@ -253,10 +254,7 @@ func top_bar(back: Variant = "") -> HBoxContainer:
 
 func _go_back(back: Variant) -> void:
 	Sound.click()
-	if back is Callable:
-		back.call()
-	else:
-		Game.goto(back)
+	Game.go(back)
 
 
 ## Ornate ribbon with a title written on it.
@@ -325,8 +323,11 @@ func nav_bar(back: Variant) -> Control:
 	row.set_anchors_preset(Control.PRESET_FULL_RECT)
 	row.add_theme_constant_override("separation", 0)
 	bar.add_child(row)
+	if back is String and back == "":
+		back = Game.BACK
 	var targets: Array = ["map", "gallery", back, "profile"]
-	for target in targets:
+	for i in targets.size():
+		var target: Variant = targets[i]
 		var b := Button.new()
 		b.flat = true
 		b.focus_mode = Control.FOCUS_NONE
@@ -337,8 +338,12 @@ func nav_bar(back: Variant) -> Control:
 			b.add_theme_stylebox_override(state, empty)
 		b.add_theme_stylebox_override("hover", _box(Color(1, 1, 1, 0.12), 12, Color.TRANSPARENT, 0, 0))
 		b.add_theme_stylebox_override("pressed", _box(Color(0, 0, 0, 0.2), 12, Color.TRANSPARENT, 0, 0))
-		var tgt: Variant = target
-		b.pressed.connect(func(): _go_back(tgt if not (tgt is String and tgt == "") else "map"))
+		if i == 2:
+			b.pressed.connect(func(): _go_back(target))
+		else:
+			b.pressed.connect(func():
+				Sound.click()
+				Game.goto(target))
 		row.add_child(b)
 	return bar
 

@@ -70,7 +70,8 @@ func _ready() -> void:
 	back.custom_minimum_size = Vector2(56, 56)
 	back.pressed.connect(func():
 		Sound.click()
-		Game.goto("difficulty"))
+		Game.go("difficulty"))
+	Game.set_back("difficulty")
 	hrow.add_child(back)
 	progress_bar = ProgressBar.new()
 	progress_bar.show_percentage = false

@@ -5,7 +5,7 @@ extends Control
 func _ready() -> void:
 	Game.refresh_user()
 	var uid := Game.user_id()
-	var content := UI.page(self, UI.t("profile"), "map")
+	var content := UI.page(self, UI.t("profile"), Game.BACK)
 	var last := DB.get_last_language(uid)
 	var region: String = last.get("region_code", Game.region_code if Game.region_code != "" else "luzon")
 

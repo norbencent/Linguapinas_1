@@ -11,7 +11,7 @@ var notify: CheckButton
 
 func _ready() -> void:
 	UI.background(self)
-	var top := UI.top_bar(func(): Game.goto(Game.settings_return))
+	var top := UI.top_bar(_exit)
 	top.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	top.offset_left = 20
 	top.offset_right = -20
@@ -109,10 +109,10 @@ func _slider_row(caption: String, value: int) -> Array:
 func _save() -> void:
 	Game.save_settings("fil" if lang_picker.selected == 0 else "en", int(music_slider.value),
 		int(sfx_slider.value), notify.button_pressed)
-	Game.goto(Game.settings_return)
+	Game.goto(Game.settings_return, false)
 
 
 func _exit() -> void:
 	# Discard changes.
 	Sound.apply(int(DB.get_setting("music_volume", "70")), int(DB.get_setting("sfx_volume", "80")))
-	Game.goto(Game.settings_return)
+	Game.goto(Game.settings_return, false)

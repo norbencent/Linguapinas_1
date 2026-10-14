@@ -1,5 +1,12 @@
 extends Control
 ## "Main island" map (hub). Tap Luzon, Visayas or Mindanao.
+## Hovering an island (or pressing on it) previews its language map.
+
+var _preview: PanelContainer
+var _preview_title: Label
+var _preview_map: TextureRect
+var _preview_tween: Tween
+var _hovered := ""
 
 
 func _ready() -> void:
@@ -42,13 +49,18 @@ func _ready() -> void:
 		b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		if region in restored:
 			b.modulate = Color(1.15, 1.15, 1.15)
-		b.mouse_entered.connect(func(): b.self_modulate = Color(1.2, 1.2, 1.2))
-		b.mouse_exited.connect(func(): b.self_modulate = Color.WHITE)
+		b.mouse_entered.connect(func():
+			b.self_modulate = Color(1.2, 1.2, 1.2)
+			_show_preview(region))
+		b.mouse_exited.connect(func():
+			b.self_modulate = Color.WHITE
+			_hide_preview(region))
 		b.pressed.connect(func():
 			Sound.click()
 			Game.region_code = region
 			Game.goto("island"))
 		holder.add_child(b)
+	_build_preview(holder)
 
 	var hint := UI.label(UI.t("tap_island"), 20, UI.INK_SOFT)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -59,9 +71,7 @@ func _ready() -> void:
 	var items := [
 		[UI.t("leaderboard"), UI.GOLD.darkened(0.15), func(): Game.goto("leaderboard")],
 		[UI.t("stories"), UI.BLUE, func(): Game.goto("stories")],
-		[UI.t("spirit"), Color("6b3fa0"), func():
-			Game.return_to = "map"
-			Game.goto("spirit")],
+		[UI.t("spirit"), Color("6b3fa0"), func(): Game.goto("spirit")],
 	]
 	for it in items:
 		var b := UI.pill_button(it[0], it[1], it[2], 56, 18)
@@ -70,3 +80,62 @@ func _ready() -> void:
 		row.add_child(b)
 	var settings := UI.pill_button(UI.t("setting"), UI.INK_SOFT, func(): Game.open_settings("map"), 50, 18)
 	content.add_child(settings)
+
+
+# ---------------------------------------------------------------- hover preview
+
+## A card over the map area showing the hovered island's language map. It
+## ignores the mouse, so the island underneath keeps its hover and its tap.
+func _build_preview(holder: Control) -> void:
+	_preview = PanelContainer.new()
+	_preview.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_preview.visible = false
+	holder.add_child(_preview)
+	var v := UI.vbox(6)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_preview.add_child(v)
+	_preview_title = UI.label("", 26, UI.WHITE, false, UI.font_body_black)
+	_preview_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_preview_title.add_theme_color_override("font_outline_color", Color("3b2208"))
+	_preview_title.add_theme_constant_override("outline_size", 8)
+	v.add_child(_preview_title)
+	_preview_map = UI.image(null, Vector2.ZERO)
+	_preview_map.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_preview_map.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.add_child(_preview_map)
+	var tip := UI.label("Pindutin para pumasok" if UI.lang == "fil" else "Tap to explore", 18, UI.WHITE)
+	tip.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	tip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.add_child(tip)
+
+
+func _show_preview(region: String) -> void:
+	_hovered = region
+	var color: Color = UI.REGION_COLORS[region]
+	var sb := UI._box(Color(0.08, 0.06, 0.04, 0.88), 18, color.lightened(0.2), 4, 10)
+	_preview.add_theme_stylebox_override("panel", sb)
+	var count := DB.get_languages(region).size()
+	_preview_title.text = "%s  ·  %d %s" % [region.to_upper(), count, "wika" if UI.lang == "fil" else "languages"]
+	_preview_map.texture = UI.tex["lang_map_" + region]
+	_preview.visible = true
+	_preview.pivot_offset = _preview.size / 2.0
+	if _preview_tween:
+		_preview_tween.kill()
+	_preview.modulate.a = 0.0
+	_preview.scale = Vector2(0.94, 0.94)
+	_preview_tween = create_tween().set_parallel()
+	_preview_tween.tween_property(_preview, "modulate:a", 1.0, 0.15)
+	_preview_tween.tween_property(_preview, "scale", Vector2.ONE, 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+func _hide_preview(region: String) -> void:
+	# Moving straight from one island to another fires the new enter first.
+	if _hovered != region:
+		return
+	_hovered = ""
+	if _preview_tween:
+		_preview_tween.kill()
+	_preview_tween = create_tween()
+	_preview_tween.tween_property(_preview, "modulate:a", 0.0, 0.12)
+	_preview_tween.tween_callback(func(): _preview.visible = _hovered != "")
