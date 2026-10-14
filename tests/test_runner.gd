@@ -40,6 +40,7 @@ func _run() -> void:
 	await _test_back_navigation()
 	await _test_back_button_clicks()
 	await _test_delete_player()
+	await _test_battle_stage()
 	await _test_play_quiz_through_ui()
 	DB.close()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_DB))
@@ -322,6 +323,37 @@ func _test_delete_player() -> void:
 	check(DB.get_user(locked).is_empty(), "player with a password deleted without it")
 	check(_row(locked) == null, "list refreshed")
 	check(not DB.delete_user(locked), "deleting a missing player fails cleanly")
+
+
+func _test_battle_stage() -> void:
+	# Every language (playable or not) gets an animated warrior at each level.
+	for region in DB.get_regions():
+		for lang in DB.get_languages(region.code):
+			for level in [1, 2, 3]:
+				var st := BattleStage.new()
+				add_child(st)
+				st.setup(lang.code, level, region.code, "girl")
+				var sf := st.enemy.sprite_frames
+				check(sf != null and sf.get_frame_count("idle") >= 3 and sf.get_frame_count("attack") >= 3,
+					"%s level %d has warrior animations" % [lang.code, level])
+				st.queue_free()
+	# The quiz shows the duel and reacts to answers.
+	Game.user = DB.login_user("juan", "secret1").user
+	Game.language_code = "ceb"
+	Game.difficulty = 2
+	Game.category_code = ""
+	Game.goto("quiz")
+	await _frames(3)
+	var quiz := get_tree().current_scene
+	check(quiz.stage != null and quiz.stage.enemy_code == "ceb", "quiz shows the Cebuano warrior")
+	quiz._answer(quiz.questions[0].answer)
+	await get_tree().create_timer(0.25).timeout
+	check(quiz.stage.enemy.animation == "hurt", "right answer hurts the warrior")
+	quiz._next()
+	await _frames(2)
+	quiz._answer("definitely wrong")
+	await _frames(2)
+	check(quiz.stage.enemy.animation == "attack", "wrong answer makes the warrior attack")
 
 
 func _test_play_quiz_through_ui() -> void:
