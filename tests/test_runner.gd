@@ -38,6 +38,8 @@ func _run() -> void:
 	await _test_spirit()
 	await _test_screens()
 	await _test_back_navigation()
+	await _test_back_button_clicks()
+	await _test_delete_player()
 	await _test_play_quiz_through_ui()
 	DB.close()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_DB))
@@ -242,6 +244,103 @@ func _test_back_navigation() -> void:
 	map.find_child("visayas", true, false).mouse_exited.emit()
 	await _frames(20)
 	check(not map._preview.visible, "preview hides after hover ends")
+
+
+## Clicks a control like a player would (mouse press + release at its centre).
+func _click(c: Control) -> void:
+	var pos := c.get_global_rect().get_center()
+	for pressed in [true, false]:
+		var e := InputEventMouseButton.new()
+		e.button_index = MOUSE_BUTTON_LEFT
+		e.pressed = pressed
+		e.position = pos
+		e.global_position = pos
+		get_viewport().push_input(e, true)
+		await _frames(1)
+
+
+func _back_button() -> TextureButton:
+	for n in get_tree().current_scene.find_children("*", "TextureButton", true, false):
+		if n.texture_normal == UI.tex.back:
+			return n
+	return null
+
+
+func _test_back_button_clicks() -> void:
+	# The on-screen back button must actually receive the click on every
+	# screen that has one (a full-screen container on top would block it).
+	var expected := {"menu": "title", "new_game": "menu", "continue": "menu", "settings": "map",
+		"map": "menu", "island": "map", "language": "island", "difficulty": "language",
+		"gallery": "map", "profile": "map", "leaderboard": "map", "stories": "map", "spirit": "map"}
+	Game.region_code = "luzon"
+	Game.language_code = "tl"
+	Game.difficulty = 1
+	for screen in expected:
+		Game.history.clear()
+		Game.goto("map")
+		await _frames()
+		if screen == "settings":
+			Game.open_settings("map")
+		else:
+			Game.goto(screen)
+		await _frames(4)
+		var b := _back_button()
+		check(b != null, "%s shows a back button" % screen)
+		if b == null:
+			continue
+		await _click(b)
+		await _frames(3)
+		check(_scene_is(expected[screen]), "clicking back on %s opens %s" % [screen, expected[screen]])
+
+
+func _row(uid: int) -> Node:
+	return get_tree().current_scene.find_child("player_%d" % uid, true, false)
+
+
+func _test_delete_player() -> void:
+	var sample := DB.register_user("Sample Player", "").user.id as int
+	var locked := DB.register_user("Locked Player", "pass1234").user.id as int
+	DB.add_reward(sample, "word_fragment", 5)
+	DB.record_quiz(sample, "tl", 1, "", 100, 10, 10, 5, true)
+	Game.user = {}
+	Game.goto("continue")
+	await _frames(4)
+	check(_row(sample) != null and _row(locked) != null, "continue lists the sample players")
+
+	# Delete, then cancel: nothing is removed.
+	await _click(_row(sample).find_child("delete", true, false))
+	await _frames(2)
+	var popup := get_tree().current_scene.find_child("DeletePopup", true, false)
+	check(popup != null, "delete asks for confirmation")
+	Game.handle_back()
+	await _frames(2)
+	check(not is_instance_valid(popup) and not DB.get_user(sample).is_empty(), "back key cancels the delete")
+
+	# Delete and confirm.
+	await _click(_row(sample).find_child("delete", true, false))
+	await _frames(2)
+	await _click(get_tree().current_scene.find_child("confirm_delete", true, false))
+	await _frames(3)
+	check(DB.get_user(sample).is_empty(), "sample player deleted")
+	for table in ["quiz_attempts", "progress", "rewards", "badges"]:
+		var left: int = DB._select("SELECT COUNT(*) AS n FROM %s WHERE user_id = ?;" % table, [sample])[0].n
+		check(left == 0, "deleted player's %s removed" % table)
+	check(_row(sample) == null, "deleted player leaves the list")
+
+	# A player with a password needs it to be deleted.
+	await _click(_row(locked).find_child("delete", true, false))
+	await _frames(2)
+	var scene := get_tree().current_scene
+	var pw: LineEdit = scene.find_child("DeletePopup", true, false).find_children("*", "LineEdit", true, false)[0]
+	pw.text = "nope"
+	await _click(scene.find_child("confirm_delete", true, false))
+	await _frames(2)
+	check(not DB.get_user(locked).is_empty(), "wrong password does not delete")
+	pw.text = "pass1234"
+	await _click(scene.find_child("confirm_delete", true, false))
+	await _frames(3)
+	check(DB.get_user(locked).is_empty(), "right password deletes")
+	check(not DB.delete_user(locked), "deleting a missing player fails cleanly")
 
 
 func _test_play_quiz_through_ui() -> void:

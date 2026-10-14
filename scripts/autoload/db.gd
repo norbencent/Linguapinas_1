@@ -226,6 +226,32 @@ func get_users() -> Array:
 		ORDER BY COALESCE(last_login, created_at) DESC;""")
 
 
+## Checks a player's password without logging them in. A player without a
+## password always passes.
+func check_password(user_id: int, password: String) -> bool:
+	var row := _select_one("SELECT password_hash, salt, has_password FROM users WHERE id = ?;", [user_id])
+	if row.is_empty():
+		return false
+	if int(row.has_password) == 0:
+		return true
+	return _hash_password(password, row.salt) == row.password_hash
+
+
+## Removes a player and everything saved for them (scores, progress,
+## rewards, badges). Returns true if the player existed and was deleted.
+func delete_user(user_id: int) -> bool:
+	if get_user(user_id).is_empty():
+		return false
+	if not _exec("BEGIN;"):
+		return false
+	var ok := true
+	for table in ["quiz_attempts", "progress", "rewards", "badges"]:
+		ok = ok and _exec("DELETE FROM %s WHERE user_id = ?;" % table, [user_id])
+	ok = ok and _exec("DELETE FROM users WHERE id = ?;", [user_id])
+	_exec("COMMIT;" if ok else "ROLLBACK;")
+	return ok
+
+
 func add_playtime(user_id: int, seconds: int) -> void:
 	if seconds > 0:
 		_exec("UPDATE users SET playtime = playtime + ? WHERE id = ?;", [seconds, user_id])
