@@ -72,13 +72,16 @@ CREATE TABLE IF NOT EXISTS tips (
     tip           TEXT NOT NULL
 );
 
--- Culture Showcase Gallery.
+-- Culture Showcase Gallery. language_code is '' for items shared by a region;
+-- image is the picture's name in assets/culture/ (without .png).
 CREATE TABLE IF NOT EXISTS culture_items (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    region_code TEXT NOT NULL REFERENCES regions(code),
-    kind        TEXT NOT NULL,
-    title       TEXT NOT NULL,
-    description TEXT NOT NULL
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    region_code   TEXT NOT NULL REFERENCES regions(code),
+    language_code TEXT NOT NULL DEFAULT '',
+    kind          TEXT NOT NULL,
+    title         TEXT NOT NULL,
+    description   TEXT NOT NULL,
+    image         TEXT NOT NULL DEFAULT ''
 );
 
 -- Regional stories unlocked by restoring a Language Core.
