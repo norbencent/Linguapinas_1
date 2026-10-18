@@ -58,3 +58,6 @@ func _ready() -> void:
 		Sound.click()
 		Game.goto("language"))
 	content.add_child(b)
+	Tutorial.show_steps(self, [{"id": "island_languages", "target": b, "wait": true,
+		"text": "I am %s, your Guiding Spirit. I will help you on this island. Tap the %s button to see its languages."
+			% [UI.GUIDES[code], region.name.to_upper()]}])

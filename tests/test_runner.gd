@@ -45,6 +45,7 @@ func _run() -> void:
 	await _test_reward_economy()
 	_test_pronunciation_and_grammar()
 	await _test_new_screens()
+	await _test_tutorial()
 	await _test_play_quiz_through_ui()
 	DB.close()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_DB))
@@ -528,6 +529,77 @@ func _test_new_screens() -> void:
 	await _click(buy)
 	await _frames(3)
 	check(DB.get_unlocked_culture(uid).size() == before + 1, "gallery unlock buys an item")
+
+
+func _tutorial_button(name: String) -> Control:
+	var layer := get_tree().current_scene.get_node_or_null("Tutorial")
+	return layer.find_child(name, true, false) if layer else null
+
+
+func _test_tutorial() -> void:
+	Game.user = {}
+	check(not Tutorial.is_active(), "guest tutorial only before anyone has played")
+	var uid := DB.register_user("rookie", "").user.id as int
+	Game.user = DB.get_user(uid)
+	check(not Tutorial.is_active(), "no tutorial until it is started")
+	Tutorial.start_for_player()
+	Game.history.clear()
+	Game.goto("map")
+	await _frames(4)
+	check(Tutorial.current_step() == "map_island", "map step shown")
+	var hand: Control = get_tree().current_scene.find_child("Hand", true, false)
+	var luzon: TextureButton = get_tree().current_scene.find_child("luzon", true, false)
+	var island: Rect2 = get_tree().current_scene.island_rect(luzon)
+	check(hand != null and hand.visible and island.grow(40).has_point(hand.position + hand.pivot_offset),
+		"the hand points at Luzon")
+	luzon.pressed.emit()
+	await _frames(4)
+	check(_scene_is("island") and Tutorial.current_step() == "island_languages", "island step")
+	for b in get_tree().current_scene.find_children("*", "TextureButton", true, false):
+		if b.texture_normal == UI.tex.btn_region_luzon:
+			b.pressed.emit()
+	await _frames(4)
+	check(_scene_is("language") and Tutorial.current_step() == "language_pick", "language step")
+	Tutorial._steps_screen.find_child("Tutorial", true, false)
+	var pick = Tutorial._target
+	pick.pressed.emit()
+	await _frames(4)
+	check(_scene_is("difficulty") and Tutorial.current_step() == "level_easy", "level step")
+	get_tree().current_scene.easy_start.pressed.emit()
+	await _frames(4)
+	check(_scene_is("lesson") and Tutorial.current_step() == "lesson_study", "lesson study step")
+	await _click(_tutorial_button("got_it"))
+	await _frames(3)
+	check(Tutorial.current_step() == "lesson_start", "then START QUIZ is pointed at")
+	(Tutorial._target as BaseButton).pressed.emit()
+	await _frames(4)
+	check(_scene_is("quiz") and Tutorial.current_step() == "quiz_answer", "quiz steps")
+	for step in ["quiz_spirit", "quiz_warrior", ""]:
+		await _click(_tutorial_button("got_it"))
+		await _frames(3)
+		check(Tutorial.current_step() == step, "quiz step %s" % step)
+	Game.last_result = {"passed": true, "score": 100, "correct": 10, "total": 10, "hearts": 5,
+		"summary": DB.record_quiz(uid, Game.language_code, 1, "", 100, 10, 10, 5, true)}
+	Game.goto("results")
+	await _frames(4)
+	check(Tutorial.current_step() == "results_rewards", "results step")
+	await _click(_tutorial_button("got_it"))
+	await _frames(3)
+	check(not Tutorial.is_active(), "tutorial finished")
+	Game.goto("map")
+	await _frames(4)
+	check(Tutorial.current_step() == "", "finished tutorial stays away")
+	# How to play guide, replay, skip.
+	await _click(get_tree().current_scene.find_child("how_to_play", true, false))
+	await _frames(3)
+	var guide := get_tree().current_scene.get_node_or_null("HowToPlay")
+	check(guide != null, "how to play guide opens")
+	await _click(guide.find_child("replay", true, false))
+	await _frames(5)
+	check(Tutorial.is_active() and Tutorial.current_step() == "map_island", "tutorial can be replayed")
+	await _click(_tutorial_button("skip"))
+	await _frames(3)
+	check(not Tutorial.is_active() and get_tree().current_scene.get_node_or_null("Tutorial") == null, "skip ends it")
 
 
 func _test_play_quiz_through_ui() -> void:

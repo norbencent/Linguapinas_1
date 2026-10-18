@@ -202,6 +202,13 @@ func _ready() -> void:
 		Game.goto("difficulty")
 		return
 	_show_question()
+	Tutorial.show_steps(self, [
+		{"id": "quiz_answer", "target": answer_area,
+			"text": "Pick an answer, then tap CHECK. You have five hearts: a wrong answer costs one heart."},
+		{"id": "quiz_spirit", "target": guide,
+			"text": "Stuck? Tap me for a hint. Tap BIGKAS under me to see and hear how the words are said."},
+		{"id": "quiz_warrior", "target": stage,
+			"text": "Every right answer is a strike against the warrior. Defeat them by finishing the quiz with hearts left!"}])
 
 
 func _draw_mark() -> void:

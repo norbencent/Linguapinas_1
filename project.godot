@@ -32,6 +32,7 @@ Game="*res://scripts/autoload/game.gd"
 Spirit="*res://scripts/autoload/spirit.gd"
 Sound="*res://scripts/autoload/sound.gd"
 UI="*res://scripts/autoload/ui.gd"
+Tutorial="*res://scripts/autoload/tutorial.gd"
 
 [display]
 

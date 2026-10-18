@@ -78,8 +78,29 @@ func _ready() -> void:
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		row.add_child(b)
+	var bottom := UI.hbox(8)
+	content.add_child(bottom)
 	var settings := UI.pill_button(UI.t("setting"), UI.INK_SOFT, func(): Game.open_settings("map"), 50, 18)
-	content.add_child(settings)
+	settings.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bottom.add_child(settings)
+	var guide := UI.pill_button("HOW TO PLAY", Color("6b3fa0"), func(): Tutorial.show_guide(self), 50, 18)
+	guide.name = "how_to_play"
+	guide.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bottom.add_child(guide)
+
+	var luzon: TextureButton = holder.get_node("luzon")
+	Tutorial.show_steps(self, [{"id": "map_island", "target": luzon, "rect": func(): return island_rect(luzon), "wait": true,
+		"text": "This is the Main Island, Guardian! Each island keeps a Language Core. Tap LUZON to start your journey."}])
+
+
+## Where the island is drawn inside its (full-size) button, in screen space.
+func island_rect(b: TextureButton) -> Rect2:
+	var tex := b.texture_normal
+	var used := tex.get_image().get_used_rect()
+	var r := b.get_global_rect()
+	var s := minf(r.size.x / tex.get_width(), r.size.y / tex.get_height())
+	var origin := r.position + (r.size - tex.get_size() * s) / 2
+	return Rect2(origin + Vector2(used.position) * s, Vector2(used.size) * s)
 
 
 # ---------------------------------------------------------------- hover preview

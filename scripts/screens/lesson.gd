@@ -57,7 +57,12 @@ func _ready() -> void:
 
 	_culture_corner(content, lang)
 
-	content.add_child(UI.gem_button(UI.t("start_quiz"), "green", _start_quiz, 90, 30))
+	var start := UI.gem_button(UI.t("start_quiz"), "green", _start_quiz, 90, 30)
+	content.add_child(start)
+	Tutorial.show_steps(self, [
+		{"id": "lesson_study", "text": "This is the lesson. Read each word and its meaning, and say it aloud. Scroll down to see them all."},
+		{"id": "lesson_start", "target": start, "wait": true,
+			"text": "Ready? Tap START QUIZ. The quiz asks about the words you just studied."}])
 
 
 ## The language's culture: unlocked items are shown in full, locked ones say

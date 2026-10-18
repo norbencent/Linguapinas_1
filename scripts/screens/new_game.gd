@@ -67,6 +67,8 @@ func _build_card(root: Control, title: String, intro: String) -> void:
 	v.add_child(UI.gem_button(UI.t("start_adventure"), "red", _submit, 84, 30))
 	name_edit.text_submitted.connect(func(_t): _submit())
 	password_edit.text_submitted.connect(func(_t): _submit())
+	Tutorial.show_steps(root, [{"id": "new_name", "target": name_edit,
+		"text": "Type your name here, choose your hero (boy or girl), then tap START ADVENTURE. The password is optional."}])
 
 
 func _pick_avatar(a: String) -> void:
@@ -78,6 +80,8 @@ func _pick_avatar(a: String) -> void:
 func _submit() -> void:
 	var result := DB.register_user(name_edit.text, password_edit.text, name_edit.text, avatar)
 	if result.ok:
+		Game.user = result.user
+		Tutorial.start_for_player()  # every new Guardian gets the guided tour
 		Game.login(result.user)
 	else:
 		status.text = result.error

@@ -72,6 +72,7 @@ music and sound effects in `assets/audio` were generated for this project.
 
 | Feature | Status |
 | --- | --- |
+| First-time tutorial: an animated hand points at what to tap next while the Guiding Spirit explains each step (title → new game → map → island → language → level → lesson → quiz → results); SKIP any time; HOW TO PLAY guide on the map with REPLAY TUTORIAL | Implemented (scripts/autoload/tutorial.gd) |
 | Portrait Android layout with the prototype art (title, menu, name entry, settings, map, island pages, profile, gallery, quiz) | Implemented |
 | New Game (name, optional password, choose a hero) / Continue (saved players) | Implemented (salted SHA-256 password hashes, stored locally) |
 | Settings: Filipino/English interface, music and SFX volume, notifications | Implemented |
