@@ -94,19 +94,23 @@ music and sound effects in `assets/audio` were generated for this project.
 | Five-heart system; review the lesson after losing all hearts | Implemented |
 | Rewards: Word Fragments (Easy), Phrase Crystals (Medium, Grammar), Cultural Relics (Hard) | Implemented: a first clear pays in full, replays and practice pay half |
 | Spending rewards | 20 Word Fragments unlock a language (the first language of each island is free); 5 Phrase Crystals unlock a culture item; 1 Cultural Relic buys an extra hint when free hints run out |
-| Badges and Language Core restoration, Pearl of the Orient | Implemented |
+| Island pearls (Luzon, Visayas, Mindanao Pearl) and the Pearl of the Orient, with a light-up animation (rays, rings of light, sparkles) when a pearl is lit; the map shows each island's progress (e.g. 2/4) | Implemented |
 | Culture Showcase Gallery (food, festivals, clothing, textiles, art, dances, music, crafts, heritage) | Implemented: 46 cultural elements, at least one for each of the 30 languages, each with a picture. Clearing a level for the first time reveals one (shown on the Results screen); the rest can be unlocked with Phrase Crystals. Lessons show the language's unlocked culture |
 | Culture questions in quizzes | Implemented: 1 per Easy quiz, 2 per Medium and Hard quiz, from the language's and region's culture items |
-| Stories unlocked by restoring cores | Implemented: one story per region plus the Pearl story |
+| Stories unlocked by lighting the island pearls | Implemented: one story per region plus the Pearl story |
 | Leaderboard (all players on the device, filter by region) | Implemented |
 | Guiding Spirit: offline dictionary, word-by-word gloss, grammar tips, quiz hints | Implemented |
 | Guiding Spirit: MarianNMT machine translation | Implemented as an optional local server (see below) |
 | Text-to-speech (Coqui TTS / Tacotron2), TensorFlow Lite / ONNX on device | Not implemented |
 
-A region's core is restored when the player passes Easy, Medium and Hard in at
-least one of its languages (`LANGUAGES_TO_RESTORE_CORE` in
-`scripts/autoload/db.gd`). Only "All categories" quizzes unlock levels and
-count on the leaderboard; category practice still earns rewards.
+An island's pearl lights up only when the player has mastered every playable
+language of that island (Easy, Medium and Hard passed in each):
+Tagalog, Ilocano, Kapampangan and Bikolano for Luzon; Cebuano, Hiligaynon and
+Waray-Waray for the Visayas; Bisaya, Tausug and Chavacano for Mindanao. When
+more languages get lessons, they are added to the requirement automatically
+(`is_core_restored` in `scripts/autoload/db.gd`). Lighting all three unlocks
+the Pearl of the Orient. Only "All categories" quizzes unlock levels and count
+on the leaderboard; category practice still earns rewards.
 
 ## MarianNMT (optional)
 

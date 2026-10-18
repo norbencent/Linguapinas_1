@@ -2,10 +2,10 @@ extends Control
 ## Evaluation, rewards and saved progress after a quiz.
 
 const BADGE_TEXT := {
-	"core_luzon": "The Luzon Core shines again!",
-	"core_visayas": "The Visayas Core shines again!",
-	"core_mindanao": "The Mindanao Core shines again!",
-	"pearl": "All three cores are restored. You unlocked the Pearl of the Orient!",
+	"core_luzon": "The Luzon Pearl shines again!",
+	"core_visayas": "The Visayas Pearl shines again!",
+	"core_mindanao": "The Mindanao Pearl shines again!",
+	"pearl": "All three island pearls are lit. You unlocked the Pearl of the Orient!",
 }
 
 
@@ -84,3 +84,13 @@ func _ready() -> void:
 		"text": ("Well done! " if r.passed else "Out of hearts? No problem: review the lesson and try again. ")
 			+ "Passing Easy quizzes earns Word Fragments: collect %s to unlock a new language. " % DB.cost_text(DB.LANGUAGE_COST)
 			+ "Your first clear of each level also reveals a cultural element for the Gallery. Tap GABAY on the map any time for the full guide."}])
+	_celebrate(summary.new_badges.duplicate())
+
+
+## Plays the pearl animation for each newly lit pearl, one after another.
+func _celebrate(badges: Array) -> void:
+	if badges.is_empty():
+		return
+	var c := PearlCelebration.play(self, badges.pop_front())
+	# Deferred: the finished animation is still being removed from the tree.
+	c.finished.connect(func(): _celebrate(badges), CONNECT_DEFERRED)

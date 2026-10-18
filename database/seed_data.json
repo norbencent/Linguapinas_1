@@ -1,10 +1,10 @@
 {
- "version": 3,
+ "version": 4,
  "regions": [
   {
    "code": "luzon",
    "name": "Luzon",
-   "core_name": "Luzon Core",
+   "core_name": "Luzon Pearl",
    "color": "#3a7bd5",
    "sort_order": 1,
    "description": "The Language Core of the North, guardian of the languages of Luzon."
@@ -12,7 +12,7 @@
   {
    "code": "visayas",
    "name": "Visayas",
-   "core_name": "Visayas Core",
+   "core_name": "Visayas Pearl",
    "color": "#f2c14e",
    "sort_order": 2,
    "description": "The Language Core of the islands at the heart of the archipelago."
@@ -20,7 +20,7 @@
   {
    "code": "mindanao",
    "name": "Mindanao",
-   "core_name": "Mindanao Core",
+   "core_name": "Mindanao Pearl",
    "color": "#e04f5f",
    "sort_order": 3,
    "description": "The Language Core of the South, keeper of Mindanao's many voices."

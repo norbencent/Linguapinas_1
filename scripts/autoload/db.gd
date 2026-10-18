@@ -10,9 +10,6 @@ const SCHEMA_PATH := "res://database/schema.sql"
 const SEED_PATH := "res://database/seed_data.json"
 const DEFAULT_DB_PATH := "user://linguapinas.db"
 const HASH_ROUNDS := 2000
-## How many languages of a region must be mastered (all three difficulties
-## passed) to restore that region's Language Core.
-const LANGUAGES_TO_RESTORE_CORE := 1
 
 const EASY := 1
 const MEDIUM := 2
@@ -573,10 +570,23 @@ func get_completed_level_count(user_id: int, region_code: String) -> int:
 	return int(row.get("n", 0))
 
 
-## A region's Language Core is restored once the player masters
-## LANGUAGES_TO_RESTORE_CORE of its languages (Easy, Medium and Hard).
+## Number of languages of the region that can be played (have lessons).
+func get_playable_count(region_code: String) -> int:
+	return int(_select_one("SELECT COUNT(*) AS n FROM languages WHERE region_code = ? AND playable = 1;",
+		[region_code]).get("n", 0))
+
+
+## {"mastered": n, "total": m}: how many of the island's playable languages
+## the player has mastered (Easy, Medium and Hard passed).
+func get_pearl_progress(user_id: int, region_code: String) -> Dictionary:
+	return {"mastered": get_mastered_language_count(user_id, region_code), "total": get_playable_count(region_code)}
+
+
+## An island's pearl (its Language Core) lights up only when the player has
+## mastered EVERY playable language of the island.
 func is_core_restored(user_id: int, region_code: String) -> bool:
-	return get_mastered_language_count(user_id, region_code) >= LANGUAGES_TO_RESTORE_CORE
+	var p := get_pearl_progress(user_id, region_code)
+	return p.total > 0 and p.mastered >= p.total
 
 
 func get_restored_cores(user_id: int) -> Array:

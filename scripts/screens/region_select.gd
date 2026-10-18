@@ -2,12 +2,12 @@ extends Control
 ## Island page: the region's guide, its two heroes and the region button.
 
 const GREETINGS := {
-	"luzon": ["Mabuhay, Tagapangalaga! Ako si Maelor. Matuto ng wika ng Luzon upang muling paliwanagin ang Luzon Core.",
-		"Welcome, Guardian! I am Maelor. Learn a language of Luzon to relight the Luzon Core."],
-	"visayas": ["Maayong adlaw! Ako si Marea. Ibalik natin ang liwanag ng Visayas Core.",
-		"Good day! I am Marea. Let us bring back the light of the Visayas Core."],
-	"mindanao": ["Assalamu alaikum! Ako si Lanora. Gisingin natin ang Mindanao Core.",
-		"Peace be with you! I am Lanora. Let us awaken the Mindanao Core."],
+	"luzon": ["Mabuhay, Tagapangalaga! Ako si Maelor. Matuto ng wika ng Luzon upang muling paliwanagin ang Luzon Pearl.",
+		"Welcome, Guardian! I am Maelor. Master the languages of Luzon to relight the Luzon Pearl."],
+	"visayas": ["Maayong adlaw! Ako si Marea. Ibalik natin ang liwanag ng Visayas Pearl.",
+		"Good day! I am Marea. Let us bring back the light of the Visayas Pearl."],
+	"mindanao": ["Assalamu alaikum! Ako si Lanora. Gisingin natin ang Mindanao Pearl.",
+		"Peace be with you! I am Lanora. Let us awaken the Mindanao Pearl."],
 }
 
 
@@ -40,10 +40,10 @@ func _ready() -> void:
 	content.add_child(heroes)
 
 	var langs := DB.get_languages(code)
-	var playable := langs.filter(func(l): return int(l.playable) == 1).size()
-	var levels := DB.get_completed_level_count(uid, code)
 	var restored := DB.is_core_restored(uid, code)
-	var status := "%s: %s   |   %d / %d" % [region.core_name, "RESTORED" if restored else "dormant", levels, playable * 3]
+	var pearl := DB.get_pearl_progress(uid, code)
+	var status := "%s: %s   |   %d / %d languages mastered" % [region.core_name, "LIT" if restored else "dormant",
+		pearl.mastered, pearl.total]
 	var sl := UI.label(status, 18, color.darkened(0.2) if restored else UI.INK_SOFT, true)
 	sl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	content.add_child(sl)

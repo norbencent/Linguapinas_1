@@ -16,18 +16,33 @@ func _ready() -> void:
 
 	var cores := UI.hbox(18)
 	cores.alignment = BoxContainer.ALIGNMENT_CENTER
+	# The island pearls light up when every language of the island is mastered.
 	for region in DB.get_regions():
 		var col := UI.vbox(2)
-		col.add_child(UI.orb(UI.REGION_COLORS[region.code], region.code in restored, 34))
+		var orb := PearlOrb.make(UI.REGION_COLORS[region.code], region.code in restored, 42)
+		orb.name = "pearl_" + region.code
+		col.add_child(orb)
 		var l := UI.label(region.name, 16, UI.INK)
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		col.add_child(l)
+		var p := DB.get_pearl_progress(uid, region.code)
+		var pl := UI.label("%d/%d" % [p.mastered, p.total], 14, UI.GREEN if region.code in restored else UI.INK_SOFT, false, UI.font_body_black)
+		pl.name = "progress_" + region.code
+		pl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		pl.tooltip_text = "Languages mastered (Easy, Medium and Hard)"
+		pl.mouse_filter = Control.MOUSE_FILTER_PASS
+		col.add_child(pl)
 		cores.add_child(col)
 	var pearl := UI.vbox(2)
-	pearl.add_child(UI.orb(Color("fdf8ec"), restored.size() == 3, 34))
-	var pl := UI.label("Pearl", 16, UI.INK)
+	var orient := PearlOrb.make(PearlCelebration.PEARL_OF_THE_ORIENT, restored.size() == 3, 42)
+	orient.name = "pearl_orient"
+	pearl.add_child(orient)
+	var pl := UI.label("Orient", 16, UI.INK)
 	pl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	pearl.add_child(pl)
+	var pl2 := UI.label("%d/3" % restored.size(), 14, UI.INK_SOFT, false, UI.font_body_black)
+	pl2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	pearl.add_child(pl2)
 	cores.add_child(pearl)
 	content.add_child(cores)
 
@@ -88,7 +103,7 @@ func _ready() -> void:
 	var luzon: TextureButton = holder.get_node("luzon")
 	var tour := func(): Tutorial.show_steps(self, [{"id": "map_island", "target": luzon,
 		"rect": func(): return island_rect(luzon), "wait": true,
-		"text": "This is the Main Island, Guardian! Each island keeps a Language Core. Tap LUZON to start your journey."}])
+		"text": "This is the Main Island, Guardian! Each island keeps a pearl that lights up when you master all of its languages. Tap LUZON to start your journey."}])
 	if GuidePages.maybe_show(self, "welcome", tour) == null:
 		tour.call()
 
