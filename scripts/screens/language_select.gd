@@ -84,7 +84,7 @@ func _ready() -> void:
 		else:
 			info.add_child(UI.label(UI.t("coming_soon"), 16, UI.INK_SOFT))
 		content.add_child(row)
-
+	Tutorial.maybe_show(self, "language")
 
 func _add_map(content: VBoxContainer, code: String) -> void:
 	var map := UI.image(UI.tex["lang_map_" + code], Vector2(0, 420))

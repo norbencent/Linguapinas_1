@@ -58,10 +58,12 @@ func _ready() -> void:
 	_culture_corner(content, lang)
 
 	content.add_child(UI.gem_button(UI.t("start_quiz"), "green", _start_quiz, 90, 30))
+	Tutorial.maybe_show(self, "lesson")
 
 
 ## The language's culture: unlocked items are shown in full, locked ones say
 ## how to reveal them.
+
 func _culture_corner(content: VBoxContainer, lang: Dictionary) -> void:
 	var items := DB.get_culture_items(lang.region_code).filter(func(c): return c.language_code == lang.code)
 	if items.is_empty():

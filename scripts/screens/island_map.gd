@@ -72,6 +72,7 @@ func _ready() -> void:
 		[UI.t("leaderboard"), UI.GOLD.darkened(0.15), func(): Game.goto("leaderboard")],
 		[UI.t("stories"), UI.BLUE, func(): Game.goto("stories")],
 		[UI.t("spirit"), Color("6b3fa0"), func(): Game.goto("spirit")],
+		["GABAY" if UI.lang == "fil" else "GUIDE", UI.GREEN, func(): Game.goto("guide")],
 	]
 	for it in items:
 		var b := UI.pill_button(it[0], it[1], it[2], 56, 18)
@@ -80,6 +81,9 @@ func _ready() -> void:
 		row.add_child(b)
 	var settings := UI.pill_button(UI.t("setting"), UI.INK_SOFT, func(): Game.open_settings("map"), 50, 18)
 	content.add_child(settings)
+	# First time here: the welcome walkthrough, then the map tip.
+	if Tutorial.maybe_show(self, "welcome", func(): Tutorial.maybe_show(self, "map")) == null:
+		Tutorial.maybe_show(self, "map")
 
 
 # ---------------------------------------------------------------- hover preview

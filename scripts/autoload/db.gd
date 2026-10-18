@@ -249,7 +249,7 @@ func delete_user(user_id: int) -> bool:
 	if not _exec("BEGIN;"):
 		return false
 	var ok := true
-	for table in ["quiz_attempts", "progress", "rewards", "badges", "unlocked_languages", "unlocked_culture"]:
+	for table in ["quiz_attempts", "progress", "rewards", "badges", "unlocked_languages", "unlocked_culture", "tutorial_seen"]:
 		ok = ok and _exec("DELETE FROM %s WHERE user_id = ?;" % table, [user_id])
 	ok = ok and _exec("DELETE FROM users WHERE id = ?;", [user_id])
 	_exec("COMMIT;" if ok else "ROLLBACK;")
@@ -527,6 +527,21 @@ func sync_culture(user_id: int) -> void:
 		for i in int(row.n) - have:
 			if reveal_culture(user_id, row.language_code).is_empty():
 				break
+
+
+# ---------------------------------------------------------------- tutorial
+
+func has_seen_tutorial(user_id: int, key: String) -> bool:
+	return not _select_one("SELECT 1 AS x FROM tutorial_seen WHERE user_id = ? AND key = ?;", [user_id, key]).is_empty()
+
+
+func mark_tutorial_seen(user_id: int, key: String) -> void:
+	_exec("INSERT OR IGNORE INTO tutorial_seen(user_id, key) VALUES(?, ?);", [user_id, key])
+
+
+## Shows every tip again (from the Guide screen).
+func reset_tutorials(user_id: int) -> void:
+	_exec("DELETE FROM tutorial_seen WHERE user_id = ?;", [user_id])
 
 
 func _award_badge(user_id: int, code: String) -> bool:

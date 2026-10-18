@@ -202,6 +202,7 @@ func _ready() -> void:
 		Game.goto("difficulty")
 		return
 	_show_question()
+	Tutorial.maybe_show(self, "quiz")
 
 
 func _draw_mark() -> void:

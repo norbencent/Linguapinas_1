@@ -77,9 +77,11 @@ func _ready() -> void:
 
 
 	_grammar_section(content, lang, progress)
+	Tutorial.maybe_show(self, "difficulty")
 
 
 ## Grammar quiz: opens after Easy, rewards Phrase Crystals.
+
 func _grammar_section(content: VBoxContainer, lang: Dictionary, progress: Dictionary) -> void:
 	var unlocked: bool = progress[DB.EASY].completed
 	var color := Color("6b3fa0") if unlocked else UI.LOCKED

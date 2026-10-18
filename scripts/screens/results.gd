@@ -79,3 +79,4 @@ func _ready() -> void:
 	if not summary.new_badges.is_empty():
 		content.add_child(UI.gem_button(UI.t("stories").to_upper(), "purple", func(): Game.goto("stories"), 88, 30))
 	content.add_child(UI.gem_button(UI.t("leaderboard").to_upper(), "red", func(): Game.goto("leaderboard"), 88, 30))
+	Tutorial.maybe_show(self, "results")

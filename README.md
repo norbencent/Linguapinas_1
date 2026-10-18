@@ -76,6 +76,8 @@ music and sound effects in `assets/audio` were generated for this project.
 | New Game (name, optional password, choose a hero) / Continue (saved players) | Implemented (salted SHA-256 password hashes, stored locally) |
 | Settings: Filipino/English interface, music and SFX volume, notifications | Implemented |
 | Profile with name, island, language, fragments, crystals, relics, badges, score, playtime | Implemented |
+| First-time tutorial: welcome walkthrough (8 pages) on the first visit to the map, then a short tip the first time each screen opens | Implemented, remembered per player in the database |
+| Guide (GABAY button on the map): every tutorial topic and the reward guide, with "show all tips again" | Implemented |
 | Region selection: Luzon, Visayas, Mindanao | Implemented |
 | 30 languages listed (10 per region) | Implemented |
 | Lessons and quizzes with content | Implemented for 10 languages: Tagalog, Ilocano, Kapampangan, Bikolano, Cebuano, Hiligaynon, Waray-Waray, Bisaya, Tausug, Chavacano. The other 20 show "Coming soon". |
