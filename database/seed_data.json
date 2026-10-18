@@ -1,5 +1,5 @@
 {
- "version": 2,
+ "version": 3,
  "regions": [
   {
    "code": "luzon",
@@ -1996,14 +1996,6 @@
   },
   {
    "region_code": "luzon",
-   "language_code": "pag",
-   "kind": "Landmark",
-   "title": "Hundred Islands",
-   "description": "A national park in Alaminos, Pangasinan with over a hundred small limestone islands in the Lingayen Gulf.",
-   "image": "hundred_islands"
-  },
-  {
-   "region_code": "luzon",
    "language_code": "pam",
    "kind": "Food",
    "title": "Sisig",
@@ -2021,14 +2013,6 @@
   {
    "region_code": "luzon",
    "language_code": "bcl",
-   "kind": "Landmark",
-   "title": "Mayon Volcano",
-   "description": "Albay's famous volcano, admired for its almost perfect cone shape.",
-   "image": "mayon_volcano"
-  },
-  {
-   "region_code": "luzon",
-   "language_code": "bcl",
    "kind": "Food",
    "title": "Bicol Express",
    "description": "A spicy Bicolano dish of pork cooked in coconut milk with plenty of chili.",
@@ -2041,14 +2025,6 @@
    "title": "Pancit Batil Patung",
    "description": "A noodle dish from Tuguegarao, Cagayan, topped with a poached egg, meat and vegetables and served with egg-drop soup.",
    "image": "pancit_batil_patung"
-  },
-  {
-   "region_code": "luzon",
-   "language_code": "ibg",
-   "kind": "Landmark",
-   "title": "Callao Cave",
-   "description": "A seven-chambered limestone cave in Peñablanca, Cagayan, with a small chapel built inside one of its chambers.",
-   "image": "callao_cave"
   },
   {
    "region_code": "luzon",
@@ -2077,14 +2053,6 @@
   {
    "region_code": "luzon",
    "language_code": "ifk",
-   "kind": "Landmark",
-   "title": "Banaue Rice Terraces",
-   "description": "Carved into the mountains of Ifugao by hand by the Ifugao people centuries ago. The Rice Terraces of the Philippine Cordilleras are a UNESCO World Heritage Site.",
-   "image": "banaue_rice_terraces"
-  },
-  {
-   "region_code": "luzon",
-   "language_code": "ifk",
    "kind": "Heritage",
    "title": "Hudhud Chants",
    "description": "Long narrative chants of the Ifugao, sung during rice harvesting, funerals and weddings. UNESCO lists them as Intangible Cultural Heritage.",
@@ -2109,14 +2077,6 @@
   {
    "region_code": "visayas",
    "language_code": "ceb",
-   "kind": "Landmark",
-   "title": "Chocolate Hills",
-   "description": "More than a thousand cone-shaped hills in Bohol that turn brown in the dry season.",
-   "image": "chocolate_hills"
-  },
-  {
-   "region_code": "visayas",
-   "language_code": "ceb",
    "kind": "Food",
    "title": "Lechon",
    "description": "Whole roasted pig. Cebu's version is famous for its crisp skin and herb-stuffed meat.",
@@ -2137,14 +2097,6 @@
    "title": "La Paz Batchoy",
    "description": "A rich noodle soup from Iloilo topped with pork, crushed chicharon and garlic.",
    "image": "la_paz_batchoy"
-  },
-  {
-   "region_code": "visayas",
-   "language_code": "war",
-   "kind": "Landmark",
-   "title": "San Juanico Bridge",
-   "description": "A bridge over the San Juanico Strait linking the islands of Samar and Leyte. It is the longest bridge over seawater in the Philippines.",
-   "image": "san_juanico_bridge"
   },
   {
    "region_code": "visayas",
@@ -2213,18 +2165,10 @@
   {
    "region_code": "visayas",
    "language_code": "prh",
-   "kind": "Landmark",
-   "title": "Lake Danao, Camotes",
-   "description": "A guitar-shaped freshwater lake in San Francisco on the Camotes Islands, where Porohanon is spoken.",
-   "image": "lake_danao_camotes"
-  },
-  {
-   "region_code": "mindanao",
-   "language_code": "bis",
-   "kind": "Landmark",
-   "title": "Mount Apo",
-   "description": "The highest mountain in the Philippines, rising between Davao and Cotabato.",
-   "image": "mount_apo"
+   "kind": "Food",
+   "title": "Kinilaw",
+   "description": "Fresh raw fish 'cooked' in vinegar or citrus with ginger, onion and chili, a favorite in coastal Visayan towns such as those of the Camotes Islands.",
+   "image": "kinilaw"
   },
   {
    "region_code": "mindanao",
@@ -2301,10 +2245,10 @@
   {
    "region_code": "mindanao",
    "language_code": "sgd",
-   "kind": "Landmark",
-   "title": "Siargao",
-   "description": "An island in Surigao del Norte known for its surfing. Its famous wave, Cloud 9, is in General Luna.",
-   "image": "siargao"
+   "kind": "Festival",
+   "title": "Bonok-Bonok Festival",
+   "description": "Surigao City's yearly festival in honor of its patron, San Nicolas de Tolentino, with street dancing inspired by the region's indigenous rituals.",
+   "image": "bonok_bonok_festival"
   },
   {
    "region_code": "mindanao",

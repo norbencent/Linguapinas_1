@@ -38,6 +38,12 @@ func _ready() -> void:
 		v.add_child(UI.label("%s: %s" % [l[0], l[1]], 24, Color("8b1a1a"), true, UI.font_body_black))
 	content.add_child(card)
 
+	content.add_child(UI.heading("Rewards", UI.RED, 24))
+	content.add_child(UI.wallet(uid))
+	content.add_child(UI.reward_guide())
+	var culture_count := DB.get_unlocked_culture(uid).size()
+	content.add_child(UI.label("Culture collected: %d / %d" % [culture_count, DB.get_culture_items().size()], 20, UI.INK, true, UI.font_body_black))
+
 	content.add_child(UI.heading("Progress", UI.RED, 24))
 	var any := false
 	for lang in DB.get_playable_languages():

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bo2n0tg6sixkh"
-path="res://.godot/imported/mount_apo.png-b7e46d6d41bbd8f3456ed7154555eb5d.ctex"
+uid="uid://c42jwthc7bt8l"
+path="res://.godot/imported/kinilaw.png-dbfc0d940969029d01ff22f8096da566.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/culture/mount_apo.png"
-dest_files=["res://.godot/imported/mount_apo.png-b7e46d6d41bbd8f3456ed7154555eb5d.ctex"]
+source_file="res://assets/culture/kinilaw.png"
+dest_files=["res://.godot/imported/kinilaw.png-dbfc0d940969029d01ff22f8096da566.ctex"]
 
 [params]
 

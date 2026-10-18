@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cb2rw7wj1npq8"
-path="res://.godot/imported/siargao.png-6ae1a640f96fb03beae72a9916429928.ctex"
+uid="uid://bibcyme3jh10x"
+path="res://.godot/imported/bonok_bonok_festival.png-1a370f97aaddf78e0c46a6f7ac8f3721.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/culture/siargao.png"
-dest_files=["res://.godot/imported/siargao.png-6ae1a640f96fb03beae72a9916429928.ctex"]
+source_file="res://assets/culture/bonok_bonok_festival.png"
+dest_files=["res://.godot/imported/bonok_bonok_festival.png-1a370f97aaddf78e0c46a6f7ac8f3721.ctex"]
 
 [params]
 

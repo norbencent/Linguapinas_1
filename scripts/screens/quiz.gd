@@ -28,6 +28,7 @@ var mark: Control
 var choice_grid: VBoxContainer
 var option_buttons: Array = []
 var stage: BattleStage
+var native_vocab := {}  # every word of the language's lessons, for the pronunciation helper
 
 ## Quiz backgrounds made for a language (others use the default scene).
 const SCENES := {
@@ -50,8 +51,7 @@ func _ready() -> void:
 	if lang.is_empty():
 		Game.goto("map")
 		return
-	questions = Game.build_quiz(Game.language_code, Game.difficulty,
-		Game.category_code if Game.difficulty == DB.EASY else "")
+	questions = Game.build_quiz(Game.language_code, Game.difficulty, _category())
 	UI.background(self)
 
 	var margin := MarginContainer.new()
@@ -151,6 +151,16 @@ func _ready() -> void:
 	hint_label = UI.label("", 15, Color("5a3591"), false, UI.font_body_black)
 	hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	guide_box.add_child(hint_label)
+	var say := UI.pill_button("BIGKAS" if UI.lang == "fil" else "SAY IT", Color("6b3fa0"), _open_pronunciation, 40, 15)
+	say.name = "pronounce"
+	say.tooltip_text = "%s shows how to pronounce the words" % UI.GUIDES[lang.region_code]
+	guide_box.add_child(say)
+	for w in DB.get_words(lang.code):
+		for t in Pronounce._words(str(w.native).to_lower()):
+			native_vocab[t] = true
+	for s in DB.get_sentences(lang.code):
+		for t in Pronounce._words(str(s.native).to_lower()):
+			native_vocab[t] = true
 	qrow.add_child(guide_box)
 
 	prompt_label = UI.label("", 26, UI.INK, true, UI.font_body_black)
@@ -217,7 +227,10 @@ func _refresh_bar() -> void:
 	progress_bar.value = index + (1 if answered else 0)
 	points_label.text = "%s: %d" % [UI.t("points"), points]
 	(counter_pill.get_child(0) as Label).text = "%s %d" % [UI.t("question"), mini(index + 1, questions.size())]
-	hint_label.text = "%s x%d" % [UI.t("hint"), hints_left]
+	if hints_left > 0:
+		hint_label.text = "%s x%d" % [UI.t("hint"), hints_left]
+	else:
+		hint_label.text = "Relic: +1 %s" % UI.t("hint")
 
 
 func _show_question() -> void:
@@ -279,8 +292,8 @@ func _show_question() -> void:
 			undo.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 			answer_area.add_child(undo)
 			_update_built()
-		"typed":
-			typed_edit = UI.line_edit(UI.t("type_answer"))
+		"typed", "grammar":
+			typed_edit = UI.line_edit(UI.t("type_answer") if q.type == "typed" else "Write the sentence...")
 			typed_edit.text_submitted.connect(func(t): _answer(t))
 			answer_area.add_child(typed_edit)
 			typed_edit.call_deferred("grab_focus")
@@ -322,7 +335,7 @@ func _on_action() -> void:
 			_answer(selected)
 		"build":
 			_answer(" ".join(built))
-		"typed":
+		"typed", "grammar":
 			_answer(typed_edit.text)
 
 
@@ -352,8 +365,16 @@ func _update_built() -> void:
 
 
 func _use_hint() -> void:
-	if hints_left <= 0 or answered:
+	if answered:
 		return
+	if hints_left <= 0:
+		# Out of free hints: a Cultural Relic buys one more.
+		if not DB.spend(Game.user_id(), DB.HINT_COST):
+			Sound.play("wrong")
+			UI.toast("No hints left. Earn %s on Hard to buy more." % DB.REWARD_NAMES.cultural_relic)
+			return
+		hints_left += 1
+		UI.toast("-%s: +1 hint" % DB.cost_text(DB.HINT_COST))
 	Sound.click()
 	var q: Dictionary = questions[index]
 	match q.type:
@@ -375,7 +396,7 @@ func _use_hint() -> void:
 					if not b.disabled and b.text == target[built.size()]:
 						_add_tile(b)
 						break
-		"typed":
+		"typed", "grammar":
 			var reveal := mini(q.answer.length(), maxi(2, q.answer.length() / 2))
 			typed_edit.placeholder_text = "%s..." % q.answer.substr(0, reveal)
 	hints_left -= 1
@@ -404,6 +425,17 @@ func _answer(given: String) -> void:
 		Sound.play("wrong")
 		stage.enemy_strikes()
 	explain_label.text = q.explain
+	if q.type == "grammar":
+		# The grammar checker says exactly what was wrong.
+		var check := GrammarChecker.check(given, q.answer, DB.get_tips(Game.language_code))
+		var lines: Array = []
+		for issue in check.issues + check.notes:
+			lines.append("• " + issue)
+		if ok:
+			feedback_label.text = UI.t("correct") + (" " + " ".join(check.notes) if not check.notes.is_empty() else "")
+		else:
+			feedback_label.text = "Grammar check:\n" + "\n".join(lines)
+		explain_label.text = "%s: %s\n%s" % ["Correct sentence", q.answer, q.explain]
 	for b in option_buttons:
 		b.disabled = true
 		b.modulate = Color.WHITE
@@ -435,7 +467,7 @@ func _next() -> void:
 func _finish() -> void:
 	var passed := hearts > 0
 	var score := Game.score_for(points, hearts, Game.difficulty) if passed else points
-	var category := Game.category_code if Game.difficulty == DB.EASY else ""
+	var category := _category()
 	var summary := DB.record_quiz(Game.user_id(), Game.language_code, Game.difficulty, category,
 		score, correct_count, questions.size(), maxi(hearts, 0), passed)
 	Game.last_result = {
@@ -443,3 +475,41 @@ func _finish() -> void:
 		"hearts": maxi(hearts, 0), "summary": summary,
 	}
 	Game.goto("results")
+
+
+# ---------------------------------------------------------------- pronunciation
+
+## Words of the current question that are in the language (never the hidden
+## answer before the player has answered).
+func pronunciation_texts() -> Array:
+	var q: Dictionary = questions[index]
+	var candidates: Array = []
+	var quoted := RegEx.create_from_string("\"([^\"]+)\"")
+	for m in quoted.search_all(str(q.prompt)):
+		candidates.append(m.get_string(1))
+	if str(q.detail) != "":
+		candidates.append(q.detail)
+	candidates.append_array(q.get("options", []))
+	candidates.append_array(q.get("tokens", []))
+	if answered:
+		candidates.push_front(q.answer)
+	var out: Array = []
+	for c in candidates:
+		var words: Array = Pronounce._words(str(c).to_lower())
+		if not words.is_empty() and words.all(func(w): return native_vocab.has(w)) and not c in out:
+			out.append(c)
+	return out
+
+
+func _open_pronunciation() -> void:
+	if get_node_or_null("PronouncePanel"):
+		return
+	var lang := DB.get_language(Game.language_code)
+	Pronounce.show_panel(self, pronunciation_texts(), lang.code, lang.region_code)
+
+
+## Word categories only apply to Easy; the grammar quiz is played at Medium.
+func _category() -> String:
+	if Game.category_code == Game.GRAMMAR or Game.difficulty == DB.EASY:
+		return Game.category_code
+	return ""

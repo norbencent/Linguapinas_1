@@ -21,6 +21,10 @@ run/main_scene="res://scenes/title.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.png"
 
+[audio]
+
+general/text_to_speech=true
+
 [autoload]
 
 DB="*res://scripts/autoload/db.gd"

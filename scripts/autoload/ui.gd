@@ -597,6 +597,99 @@ func stat_lines(user_id: int) -> VBoxContainer:
 	return v
 
 
+const REWARD_COLORS := {"word_fragment": Color("2f6fb5"), "phrase_crystal": Color("7d3fa8"),
+	"cultural_relic": Color("b5741a")}
+const REWARD_SHORT := {"word_fragment": "Fragments", "phrase_crystal": "Crystals", "cultural_relic": "Relics"}
+const REWARD_USE := {
+	"word_fragment": "Earned on Easy. Spend %d to unlock a new language.",
+	"phrase_crystal": "Earned on Medium and in Grammar quizzes. Spend %d to unlock a culture item in the Gallery.",
+	"cultural_relic": "Earned on Hard. Spend %d for an extra hint from your Guiding Spirit during a quiz.",
+}
+
+
+## The player's three reward balances as coloured pills.
+func wallet(user_id: int, size := 18) -> HFlowContainer:
+	var row := HFlowContainer.new()
+	row.add_theme_constant_override("h_separation", 8)
+	row.add_theme_constant_override("v_separation", 6)
+	var have := DB.get_rewards(user_id)
+	for kind in DB.REWARD_NAMES:
+		var p := pill("%s %d" % [REWARD_SHORT[kind], have[kind]], REWARD_COLORS[kind], size)
+		p.name = kind
+		row.add_child(p)
+	return row
+
+
+## One line per reward explaining what it buys.
+func reward_guide() -> VBoxContainer:
+	var v := vbox(4)
+	var costs := {"word_fragment": DB.LANGUAGE_COST.word_fragment, "phrase_crystal": DB.CULTURE_COST.phrase_crystal,
+		"cultural_relic": DB.HINT_COST.cultural_relic}
+	for kind in DB.REWARD_NAMES:
+		var h := hbox(8)
+		var p := pill(REWARD_SHORT[kind], REWARD_COLORS[kind], 15)
+		p.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		h.add_child(p)
+		var l := label(REWARD_USE[kind] % costs[kind], 16, INK, true)
+		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		h.add_child(l)
+		v.add_child(h)
+	return v
+
+
+## A culture item's picture from assets/culture/, or null if there is none.
+func culture_picture(item: Dictionary, height := 180) -> TextureRect:
+	var image := str(item.get("image", ""))
+	var path := "res://assets/culture/%s.png" % image
+	if image == "" or not ResourceLoader.exists(path):
+		return null
+	var r := TextureRect.new()
+	r.texture = load(path)
+	# Full width of the card, height following the picture's shape.
+	r.expand_mode = TextureRect.EXPAND_FIT_HEIGHT_PROPORTIONAL
+	r.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	r.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	r.custom_minimum_size = Vector2(0, height)
+	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return r
+
+
+## Card for a culture item. Locked items show how to unlock them; pass
+## [param on_buy] to add an unlock button.
+func culture_card(item: Dictionary, unlocked: bool, on_buy := Callable()) -> PanelContainer:
+	var region_color: Color = REGION_COLORS.get(item.region_code, RED)
+	var card := panel(CARD if unlocked else Color("d9d2c2"), Color("8a5a2b") if unlocked else Color("8d8170"))
+	card.name = "culture_" + str(item.get("image", ""))
+	var v := vbox(4)
+	card.add_child(v)
+	var pic := culture_picture(item)
+	if pic:
+		if not unlocked:
+			pic.modulate = Color(0.35, 0.33, 0.3)
+		v.add_child(pic)
+	var tags := hbox(6)
+	v.add_child(tags)
+	tags.add_child(pill(str(item.kind).to_upper(), region_color if unlocked else Color("8d8170"), 16))
+	var lang := DB.get_language(str(item.get("language_code", "")))
+	if not lang.is_empty():
+		tags.add_child(pill(lang.name, INK_SOFT if unlocked else Color("8d8170"), 16))
+	if unlocked:
+		v.add_child(label(item.title, 26, RED, true, font_body_black))
+		v.add_child(label(item.description, 18, INK, true))
+	else:
+		v.add_child(label("%s · %s" % [t("locked"), item.kind], 24, Color("5f5446"), true, font_body_black))
+		var how := "Clear a level in %s to reveal it" % lang.name if not lang.is_empty() \
+			else "Clear levels in %s to reveal it" % DB.get_region(item.region_code).get("name", "")
+		v.add_child(label("%s, or unlock it now for %s." % [how, DB.cost_text(DB.CULTURE_COST)], 17, Color("5f5446"), true))
+		if on_buy.is_valid():
+			var b := pill_button("UNLOCK · %d %s" % [DB.CULTURE_COST.phrase_crystal, REWARD_SHORT.phrase_crystal],
+				REWARD_COLORS.phrase_crystal, on_buy, 52, 18)
+			b.name = "unlock"
+			b.disabled = not DB.can_afford(Game.user_id(), DB.CULTURE_COST)
+			v.add_child(b)
+	return card
+
+
 ## Kept for compatibility with older screens.
 func rewards_bar(user_id: int) -> Control:
 	return stat_lines(user_id)

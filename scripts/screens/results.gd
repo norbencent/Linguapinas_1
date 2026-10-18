@@ -20,7 +20,8 @@ func _ready() -> void:
 	var summary: Dictionary = r.summary
 	Sound.play("win" if r.passed else "wrong")
 
-	content.add_child(UI.ribbon("%s · %s" % [lang.name, Game.difficulty_name()], UI.REGION_COLORS[region]))
+	var level_name := "Grammar" if Game.category_code == Game.GRAMMAR else Game.difficulty_name()
+	content.add_child(UI.ribbon("%s · %s" % [lang.name, level_name], UI.REGION_COLORS[region]))
 	content.add_child(UI.heading("Level complete!" if r.passed else "Out of hearts!", UI.GREEN if r.passed else UI.RED, 36))
 	var guide := UI.hbox(12)
 	guide.add_child(UI.image(UI.tex["guide_" + region], Vector2(90, 90)))
@@ -36,12 +37,30 @@ func _ready() -> void:
 	v.add_child(UI.label("Correct: %d / %d" % [r.correct, r.total], 22, UI.INK, true))
 	v.add_child(UI.hearts_row(r.hearts))
 	if summary.reward_amount > 0:
-		v.add_child(UI.label("+%d %s" % [summary.reward_amount, DB.REWARD_NAMES[summary.reward_kind]], 24, UI.GREEN, true, UI.font_body_black))
+		var kind: String = summary.reward_kind
+		var got := UI.pill("+%d %s" % [summary.reward_amount, DB.REWARD_NAMES[kind]], UI.REWARD_COLORS[kind], 22)
+		got.name = "reward"
+		v.add_child(got)
+		v.add_child(UI.label("First clear: full reward!" if summary.get("first_clear", false)
+			else "Replays and practice earn half rewards. Clear a new level for the full amount.", 16, UI.INK_SOFT, true))
+	v.add_child(UI.wallet(Game.user_id(), 16))
 	if not summary.counts:
 		v.add_child(UI.label("Category practice earns rewards, but only full quizzes unlock levels and count on the leaderboard.", 16, UI.INK_SOFT, true))
 	elif r.passed and Game.difficulty < DB.HARD:
 		v.add_child(UI.label("%s unlocked!" % Game.difficulty_name(Game.difficulty + 1), 22, UI.GREEN, true))
 	content.add_child(card)
+
+	var revealed: Dictionary = summary.get("revealed", {})
+	if not revealed.is_empty():
+		var reveal := UI.vbox(6)
+		reveal.name = "revealed"
+		var say2 := "%s: You uncovered a piece of %s culture!" % [UI.GUIDES[region], lang.name]
+		reveal.add_child(UI.label(say2, 20, Color("5a3591"), true, UI.font_body_black))
+		reveal.add_child(UI.culture_card(revealed, true))
+		content.add_child(reveal)
+		content.add_child(UI.gem_button(UI.t("gallery").to_upper(), "gold", func():
+			Game.region_code = region
+			Game.goto("gallery"), 84, 30))
 
 	for badge in summary.new_badges:
 		var bp := UI.panel(Color("fff2c2"), UI.GOLD)

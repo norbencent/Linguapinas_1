@@ -47,6 +47,13 @@ func _ready() -> void:
 	var uid := Game.user_id()
 	content.add_theme_constant_override("separation", 14)
 	_add_map(content, region.code)
+	var shop := UI.panel(Color("fff2c2"), UI.GOLD)
+	var sv := UI.vbox(6)
+	shop.add_child(sv)
+	sv.add_child(UI.label("The first language of each island is free. Unlock more with %s, earned on Easy quizzes."
+		% DB.cost_text(DB.LANGUAGE_COST), 17, UI.INK, true))
+	sv.add_child(UI.wallet(uid))
+	content.add_child(shop)
 	for lang in DB.get_languages(region.code):
 		var playable := int(lang.playable) == 1
 		var row := UI.row_panel(UI.ROW if playable else Color("e3d8bf"))
@@ -59,13 +66,21 @@ func _ready() -> void:
 		info.add_child(UI.label(lang.name, 26, UI.INK if playable else UI.INK_SOFT, true, UI.font_body_black))
 		if AREAS.has(lang.name):
 			info.add_child(UI.label(AREAS[lang.name], 15, UI.INK_SOFT, true))
-		if playable:
-			h.add_child(UI.level_gems(DB.get_progress(uid, lang.code)))
-			var code: String = lang.code
+		var code: String = lang.code
+		if playable and DB.is_language_unlocked(uid, code):
+			h.add_child(UI.level_gems(DB.get_progress(uid, code)))
 			UI.clickable(row, func():
 				Game.language_code = code
 				Game.category_code = ""
 				Game.goto("difficulty"))
+		elif playable:
+			row.name = "locked_" + code
+			info.add_child(UI.label("%s · %s" % [UI.t("locked"), DB.cost_text(DB.LANGUAGE_COST)], 16, UI.RED, true))
+			var buy := UI.pill_button("UNLOCK", UI.REWARD_COLORS.word_fragment, func(): _buy(code), 52, 18)
+			buy.name = "unlock"
+			buy.disabled = not DB.can_afford(uid, DB.LANGUAGE_COST)
+			buy.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			h.add_child(buy)
 		else:
 			info.add_child(UI.label(UI.t("coming_soon"), 16, UI.INK_SOFT))
 		content.add_child(row)
@@ -98,3 +113,16 @@ func _show_map(code: String) -> void:
 			overlay.queue_free())
 	add_child(overlay)
 	Game.overlays.append(overlay)
+
+
+func _buy(code: String) -> void:
+	var r := DB.unlock_language(Game.user_id(), code)
+	if r.ok:
+		Sound.play("win")
+		UI.toast("%s unlocked!" % DB.get_language(code).name)
+		Game.language_code = code
+		Game.category_code = ""
+		Game.goto("difficulty")
+	else:
+		Sound.play("wrong")
+		UI.toast(r.error)

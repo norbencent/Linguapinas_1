@@ -245,6 +245,8 @@ func difficulty_name(d: int = -1) -> String:
 #   explain:  shown after answering
 
 func build_quiz(lang_code: String, diff: int, category := "") -> Array:
+	if category == GRAMMAR:
+		return grammar_quiz(lang_code)
 	var words := DB.get_words(lang_code)
 	var sentences := DB.get_sentences(lang_code)
 	var lang_name: String = DB.get_language(lang_code).get("name", "")
@@ -296,6 +298,213 @@ func build_quiz(lang_code: String, diff: int, category := "") -> Array:
 	questions.append_array(culture)
 	questions.shuffle()
 	return questions
+
+
+# ---------------------------------------------------------------- grammar quiz
+
+## Game.category_code for the grammar quiz (played at Medium, rewards Phrase Crystals).
+const GRAMMAR := "grammar"
+## Case markers of each playable language. A marker from another language,
+## or a missing marker, is always wrong, which makes safe wrong options.
+const LANGUAGE_MARKERS := {
+	"tl": ["ang", "ng", "sa", "si", "ni", "kay", "mga"],
+	"ceb": ["ang", "sa", "og", "ug", "si", "ni", "kang", "mga"],
+	"bis": ["ang", "sa", "og", "ug", "si", "ni", "kang", "mga"],
+	"hil": ["ang", "sang", "sa", "si", "ni", "kay", "mga"],
+	"war": ["an", "han", "ha", "hin", "si", "ni", "mga"],
+	"ilo": ["ti", "iti", "dagiti", "ni", "ken"],
+	"bcl": ["an", "kan", "nin", "sa", "si", "ni", "ki", "mga"],
+	"pam": ["ing", "ning", "king", "ni", "kang"],
+	"tsg": ["in", "sin", "ha", "hi"],
+	"cbk": ["el", "maga", "con"],
+}
+## Object / possessive markers. Leaving one out breaks the sentence, while a
+## missing topic marker ("Ano pangalan mo?") is often fine in casual speech,
+## so only these are dropped to make wrong options.
+const DROPPABLE_MARKERS := ["ng", "og", "ug", "sang", "hin", "nin", "ning", "sin", "ti", "iti", "kan"]
+## Personal pronouns. Swapping one for another changes who is meant, so the
+## sentence no longer matches its English meaning.
+const PRONOUNS := ["ako", "ko", "ka", "mo", "ikaw", "kami", "imong", "akong", "nimo", "nako", "aku", "ku", "mu",
+	"kaw", "tu", "yo", "ta"]
+
+
+## Markers and pronouns that appear in the language's sentences.
+func grammar_words(lang_code: String) -> Array:
+	var markers: Array = LANGUAGE_MARKERS.get(lang_code, [])
+	var out: Array = []
+	for s in DB.get_sentences(lang_code):
+		for w in GrammarChecker.words(s.native):
+			if (w in markers or w in PRONOUNS) and not w in out:
+				out.append(w)
+	return out
+
+
+## Pronouns that are certainly not this language's: Spanish-based Chavacano
+## pronouns for the other languages, and Philippine-type pronouns for
+## Chavacano. (Similar Philippine languages share many pronouns, so those are
+## never used as wrong options for each other.)
+func foreign_pronouns(lang_code: String) -> Array:
+	var own := _lesson_words(lang_code)
+	var pool: Array = ["ko", "mo", "ka", "ako"] if lang_code == "cbk" else ["tu", "yo"]
+	return pool.filter(func(p): return not p in own)
+
+
+func _lesson_words(lang_code: String) -> Array:
+	var out: Array = []
+	for w in DB.get_words(lang_code):
+		out.append_array(GrammarChecker.words(w.native))
+	for s in DB.get_sentences(lang_code):
+		out.append_array(GrammarChecker.words(s.native))
+	return out
+
+
+## Markers of other languages that never appear in this language's lessons.
+func foreign_markers(lang_code: String) -> Array:
+	var own: Array = LANGUAGE_MARKERS.get(lang_code, []) + _lesson_words(lang_code)
+	var out: Array = []
+	for code in LANGUAGE_MARKERS:
+		for m in LANGUAGE_MARKERS[code]:
+			if not m in own and not m in out and not m in PRONOUNS:
+				out.append(m)
+	return out
+
+
+## Ten grammar questions: pick the correct sentence, fill in the missing
+## grammar word, and write a sentence that the grammar checker marks.
+func grammar_quiz(lang_code: String) -> Array:
+	var sentences := DB.get_sentences(lang_code)
+	var lang_name: String = DB.get_language(lang_code).get("name", "")
+	var gwords := grammar_words(lang_code)
+	var choose: Array = []
+	var fill: Array = []
+	var write: Array = []
+	for s in sentences:
+		var q := _grammar_choose(s, gwords)
+		if not q.is_empty():
+			choose.append(q)
+		q = _grammar_fill(s, gwords)
+		if not q.is_empty():
+			fill.append(q)
+		write.append(_grammar_write(s, lang_name))
+	for list in [choose, fill, write]:
+		list.shuffle()
+	# A mix: about four of each kind, at least two sentences to write.
+	var out: Array = []
+	var pools := [choose, fill, write]
+	var turn := 0
+	while out.size() < QUESTIONS_PER_QUIZ and pools.any(func(p): return not p.is_empty()):
+		var pool: Array = pools[turn % 3]
+		if not pool.is_empty():
+			out.append(pool.pop_back())
+		turn += 1
+	out.shuffle()
+	return out
+
+
+func _grammar_explain(s: Dictionary) -> String:
+	var text := "%s = %s" % [s.native, s.english]
+	var tip := GrammarChecker._tip_for_sentence(s.native, DB.get_tips(s.language_code))
+	return text + ("\nTip: " + tip if tip != "" else "")
+
+
+## "Which sentence is correct?" with versions that are certainly wrong:
+## the first two words swapped, a case marker left out or replaced by another
+## language's marker, or a pronoun swapped (which changes the meaning).
+func _grammar_choose(s: Dictionary, gwords: Array) -> Dictionary:
+	var w: Array = GrammarChecker.words(s.native)
+	if w.size() < 2:
+		return {}
+	var markers: Array = LANGUAGE_MARKERS.get(s.language_code, [])
+	var foreign := foreign_markers(s.language_code)
+	foreign.shuffle()
+	var pronouns := gwords.filter(func(x): return x in PRONOUNS)
+	var punct := "?" if s.native.strip_edges().ends_with("?") else "."
+	var wrong: Array = []
+	var add := func(arr: Array):
+		var t := _sentence_case(" ".join(arr)) + punct
+		if GrammarChecker.words(t) != w and not t in wrong:
+			wrong.append(t)
+	var swapped := w.duplicate()
+	swapped[0] = w[1]
+	swapped[1] = w[0]
+	add.call(swapped)
+	for i in w.size():
+		if w[i] in markers:
+			if w.size() >= 3 and w[i] in DROPPABLE_MARKERS:
+				var dropped := w.duplicate()
+				dropped.remove_at(i)
+				add.call(dropped)
+			if not foreign.is_empty():
+				var replaced := w.duplicate()
+				replaced[i] = foreign[0]
+				add.call(replaced)
+		elif w[i] in PRONOUNS:
+			for other in pronouns:
+				if other != w[i]:
+					var replaced := w.duplicate()
+					replaced[i] = other
+					add.call(replaced)
+					break
+	if wrong.size() < 2:
+		return {}
+	wrong.shuffle()
+	var correct := _sentence_case(" ".join(w)) + punct
+	var options: Array = [correct]
+	options.append_array(wrong.slice(0, 3))
+	options.shuffle()
+	return {
+		"type": "choice", "kind": "Grammar",
+		"prompt": "Which sentence is correct?", "detail": "Meaning: \"%s\"" % s.english,
+		"options": options, "answer": correct, "explain": _grammar_explain(s),
+	}
+
+
+## "Choose the missing word": a case marker (wrong options are other
+## languages' markers) or a pronoun (wrong options are other pronouns).
+func _grammar_fill(s: Dictionary, gwords: Array) -> Dictionary:
+	var w: Array = GrammarChecker.words(s.native)
+	var markers: Array = LANGUAGE_MARKERS.get(s.language_code, [])
+	var pronouns := gwords.filter(func(x): return x in PRONOUNS)
+	var slots: Array = []
+	for i in w.size():
+		if w[i] in markers or (w[i] in PRONOUNS and pronouns.size() >= 2):
+			slots.append(i)
+	if slots.is_empty() or w.size() < 2:
+		return {}
+	var i: int = slots.pick_random()
+	var options: Array
+	if w[i] in markers:
+		options = _pick_options(w[i], foreign_markers(s.language_code))
+	else:
+		# The language's other pronouns first, then pronouns it never uses.
+		var own := pronouns.filter(func(x): return x != w[i])
+		own.shuffle()
+		var foreign := foreign_pronouns(s.language_code)
+		foreign.shuffle()
+		options = [w[i]]
+		options.append_array((own + foreign).slice(0, 3))
+		options.shuffle()
+	var shown := w.duplicate()
+	shown[i] = "_____"
+	return {
+		"type": "choice", "kind": "Grammar",
+		"prompt": "Choose the missing word.",
+		"detail": "%s\n(\"%s\")" % [_sentence_case(" ".join(shown)), s.english],
+		"options": options, "answer": w[i], "explain": _grammar_explain(s),
+	}
+
+
+## "Write in Tagalog" checked by the grammar checker.
+func _grammar_write(s: Dictionary, lang_name: String) -> Dictionary:
+	return {
+		"type": "grammar", "kind": "Grammar check",
+		"prompt": "Write in %s: \"%s\"" % [lang_name, s.english], "detail": "",
+		"answer": s.native, "explain": _grammar_explain(s),
+	}
+
+
+static func _sentence_case(text: String) -> String:
+	return text.substr(0, 1).to_upper() + text.substr(1) if text != "" else text
 
 
 ## Culture questions per level (taken from the 10 questions of a quiz).
@@ -480,6 +689,8 @@ static func normalize_answer(text: String) -> String:
 func check_answer(question: Dictionary, given: String) -> bool:
 	if question.type == "choice":
 		return given == question.answer
+	if question.type == "grammar":
+		return GrammarChecker.check(given, question.answer).ok
 	return normalize_answer(given) == normalize_answer(question.answer)
 
 

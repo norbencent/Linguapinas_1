@@ -1,13 +1,29 @@
 extends Control
-## Culture Showcase Gallery. A region's items unlock once the player
-## completes any level in one of its languages.
+## Culture Showcase Gallery. Clearing a level for the first time reveals one
+## of that language's culture items; the rest can be unlocked with Phrase
+## Crystals.
 
 var list: VBoxContainer
+var wallet_holder: VBoxContainer
 var tabs: Dictionary = {}
+var current := "luzon"
 
 
 func _ready() -> void:
+	var uid := Game.user_id()
+	DB.sync_culture(uid)
 	var content := UI.page(self, UI.t("gallery"), Game.BACK)
+	var intro := UI.panel(Color("fff2c2"), UI.GOLD)
+	var iv := UI.vbox(6)
+	intro.add_child(iv)
+	iv.add_child(UI.label("How to collect culture", 22, UI.RED, true, UI.font_body_black))
+	iv.add_child(UI.label("Each time you clear a level for the first time, your Guiding Spirit reveals a cultural "
+		+ "element of that language: its food, festivals, clothing, textiles, art, dances and music. "
+		+ "You can also unlock any element now with %s." % DB.cost_text(DB.CULTURE_COST), 17, UI.INK, true))
+	wallet_holder = UI.vbox(0)
+	iv.add_child(wallet_holder)
+	content.add_child(intro)
+
 	var row := UI.hbox(8)
 	content.add_child(row)
 	for region in DB.get_regions():
@@ -17,53 +33,38 @@ func _ready() -> void:
 		tabs[region.code] = b
 	list = UI.vbox(12)
 	content.add_child(list)
-	var start: String = Game.region_code if Game.region_code != "" else "luzon"
-	_show(start)
+	_show(Game.region_code if Game.region_code in tabs else "luzon")
 
 
 func _show(region_code: String) -> void:
+	current = region_code
+	var uid := Game.user_id()
+	for c in wallet_holder.get_children():
+		wallet_holder.remove_child(c)
+		c.queue_free()
+	wallet_holder.add_child(UI.wallet(uid))
 	for code in tabs:
 		tabs[code].modulate = Color.WHITE if code == region_code else Color(1, 1, 1, 0.55)
 	for c in list.get_children():
 		list.remove_child(c)
 		c.queue_free()
-	var region := DB.get_region(region_code)
-	var unlocked := DB.get_completed_level_count(Game.user_id(), region_code) > 0
-	for item in DB.get_culture_items(region_code):
-		var card := UI.panel(UI.CARD if unlocked else Color("d9d2c2"), Color("8a5a2b") if unlocked else Color("8d8170"))
-		var v := UI.vbox(4)
-		card.add_child(v)
-		var pic := culture_picture(item, 200)
-		if pic:
-			if not unlocked:
-				pic.modulate = Color(0.35, 0.33, 0.3)
-			v.add_child(pic)
-		var tags := UI.hbox(6)
-		v.add_child(tags)
-		tags.add_child(UI.pill(item.kind.to_upper(), UI.REGION_COLORS[region_code] if unlocked else Color("8d8170"), 16))
-		var lang_name: String = DB.get_language(item.get("language_code", "")).get("name", "")
-		if lang_name != "":
-			tags.add_child(UI.pill(lang_name, UI.INK_SOFT if unlocked else Color("8d8170"), 16))
-		if unlocked:
-			v.add_child(UI.label(item.title, 26, UI.RED, true, UI.font_body_black))
-			v.add_child(UI.label(item.description, 18, UI.INK, true))
-		else:
-			v.add_child(UI.label("%s · %s" % [UI.t("locked"), item.kind], 24, Color("5f5446"), true, UI.font_body_black))
-			v.add_child(UI.label("Complete a level in %s to unlock." % region.name, 17, Color("5f5446"), true))
-		list.add_child(card)
+	var unlocked := DB.get_unlocked_culture(uid)
+	var items := DB.get_culture_items(region_code)
+	var count := items.filter(func(c): return c.title in unlocked).size()
+	var progress := UI.label("%d / %d collected" % [count, items.size()], 18, UI.INK_SOFT, true)
+	progress.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	list.add_child(progress)
+	for item in items:
+		var title: String = item.title
+		list.add_child(UI.culture_card(item, title in unlocked, func(): _buy(title)))
 
 
-## The item's picture from assets/culture/, or null if there is none.
-static func culture_picture(item: Dictionary, height: int) -> TextureRect:
-	var path := "res://assets/culture/%s.png" % str(item.get("image", ""))
-	if str(item.get("image", "")) == "" or not ResourceLoader.exists(path):
-		return null
-	var r := TextureRect.new()
-	r.texture = load(path)
-	# Full width of the card, height following the picture's shape.
-	r.expand_mode = TextureRect.EXPAND_FIT_HEIGHT_PROPORTIONAL
-	r.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	r.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	r.custom_minimum_size = Vector2(0, height)
-	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	return r
+func _buy(title: String) -> void:
+	var r := DB.unlock_culture(Game.user_id(), title)
+	if r.ok:
+		Sound.play("win")
+		UI.toast("Unlocked: %s" % title)
+	else:
+		Sound.play("wrong")
+		UI.toast(r.error)
+	_show(current)

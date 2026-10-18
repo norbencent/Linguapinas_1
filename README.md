@@ -83,14 +83,17 @@ music and sound effects in `assets/audio` were generated for this project.
 | Easy: vocabulary multiple choice (both directions) | Implemented |
 | Medium: sentence building, dialogue selection, comprehension | Implemented |
 | Hard: context-based "what would you say", sentence building with decoy words, typed recall | Implemented |
-| Hard: pronunciation (speech) exercises and audio | Not implemented (needs recorded audio and speech recognition) |
+| Pronunciation help from the Guiding Spirit (BIGKAS button in quizzes, PRONOUNCE in the Guiding Spirit screen): syllables, stressed syllable, sound tips, LISTEN with the device's text-to-speech voice | Implemented (no native recordings or speech recognition yet) |
+| Grammar quiz per language (pick the correct sentence, fill in the missing marker or pronoun, write sentences) | Implemented: opens after Easy, earns Phrase Crystals |
+| Grammar checker (spelling, missing / extra words, word order, with the matching grammar tip) | Implemented in the grammar quiz and in the Guiding Spirit screen; it compares with the game's sentence bank |
 | Easy: picture matching | Not implemented (needs image assets) |
 | Word categories (Greetings, Family, Food, Nature, Numbers, Expressions) | Implemented: category lessons and Easy practice quizzes |
 | Levels unlock in order (Easy → Medium → Hard) | Implemented |
 | Five-heart system; review the lesson after losing all hearts | Implemented |
-| Rewards: Word Fragments, Phrase Crystals, Cultural Relics | Implemented |
+| Rewards: Word Fragments (Easy), Phrase Crystals (Medium, Grammar), Cultural Relics (Hard) | Implemented: a first clear pays in full, replays and practice pay half |
+| Spending rewards | 20 Word Fragments unlock a language (the first language of each island is free); 5 Phrase Crystals unlock a culture item; 1 Cultural Relic buys an extra hint when free hints run out |
 | Badges and Language Core restoration, Pearl of the Orient | Implemented |
-| Culture Showcase Gallery (food, festivals, clothing, art, landmarks, dances, music, crafts) | Implemented: 53 items, at least one for each of the 30 languages, each with a picture; a region's items unlock after completing any level there |
+| Culture Showcase Gallery (food, festivals, clothing, textiles, art, dances, music, crafts, heritage) | Implemented: 46 cultural elements, at least one for each of the 30 languages, each with a picture. Clearing a level for the first time reveals one (shown on the Results screen); the rest can be unlocked with Phrase Crystals. Lessons show the language's unlocked culture |
 | Culture questions in quizzes | Implemented: 1 per Easy quiz, 2 per Medium and Hard quiz, from the language's and region's culture items |
 | Stories unlocked by restoring cores | Implemented: one story per region plus the Pearl story |
 | Leaderboard (all players on the device, filter by region) | Implemented |

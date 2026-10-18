@@ -128,6 +128,26 @@ CREATE TABLE IF NOT EXISTS rewards (
     PRIMARY KEY (user_id, kind)
 );
 
+-- Languages a player bought with Word Fragments (the first language of each
+-- region is free and not listed here).
+CREATE TABLE IF NOT EXISTS unlocked_languages (
+    user_id       INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    language_code TEXT NOT NULL,
+    unlocked_at   TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (user_id, language_code)
+);
+
+-- Culture items a player has unlocked, by title (culture_items is reloaded
+-- whenever the content changes). source is 'quiz:<language code>' for items
+-- revealed by passing a level, or 'bought' for items bought with crystals.
+CREATE TABLE IF NOT EXISTS unlocked_culture (
+    user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    title       TEXT NOT NULL,
+    source      TEXT NOT NULL DEFAULT '',
+    unlocked_at TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (user_id, title)
+);
+
 -- Badges such as core_luzon, core_visayas, core_mindanao, pearl.
 CREATE TABLE IF NOT EXISTS badges (
     user_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
