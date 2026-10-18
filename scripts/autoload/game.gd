@@ -19,6 +19,7 @@ const SCENES := {
 	"stories": "res://scenes/stories.tscn",
 	"spirit": "res://scenes/guiding_spirit.tscn",
 	"profile": "res://scenes/profile.tscn",
+	"guide": "res://scenes/guide.tscn",
 }
 
 const MAX_HEARTS := 5

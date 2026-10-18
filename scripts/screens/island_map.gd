@@ -72,25 +72,25 @@ func _ready() -> void:
 		[UI.t("leaderboard"), UI.GOLD.darkened(0.15), func(): Game.goto("leaderboard")],
 		[UI.t("stories"), UI.BLUE, func(): Game.goto("stories")],
 		[UI.t("spirit"), Color("6b3fa0"), func(): Game.goto("spirit")],
+		["GABAY" if UI.lang == "fil" else "GUIDE", UI.GREEN, func(): Game.goto("guide")],
 	]
 	for it in items:
 		var b := UI.pill_button(it[0], it[1], it[2], 56, 18)
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		if it[0] in ["GABAY", "GUIDE"]:
+			b.name = "guide_button"
 		row.add_child(b)
-	var bottom := UI.hbox(8)
-	content.add_child(bottom)
 	var settings := UI.pill_button(UI.t("setting"), UI.INK_SOFT, func(): Game.open_settings("map"), 50, 18)
-	settings.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	bottom.add_child(settings)
-	var guide := UI.pill_button("HOW TO PLAY", Color("6b3fa0"), func(): Tutorial.show_guide(self), 50, 18)
-	guide.name = "how_to_play"
-	guide.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	bottom.add_child(guide)
+	content.add_child(settings)
 
+	# First visit: the welcome story pages, then the hand tour starts at the map.
 	var luzon: TextureButton = holder.get_node("luzon")
-	Tutorial.show_steps(self, [{"id": "map_island", "target": luzon, "rect": func(): return island_rect(luzon), "wait": true,
+	var tour := func(): Tutorial.show_steps(self, [{"id": "map_island", "target": luzon,
+		"rect": func(): return island_rect(luzon), "wait": true,
 		"text": "This is the Main Island, Guardian! Each island keeps a Language Core. Tap LUZON to start your journey."}])
+	if GuidePages.maybe_show(self, "welcome", tour) == null:
+		tour.call()
 
 
 ## Where the island is drawn inside its (full-size) button, in screen space.

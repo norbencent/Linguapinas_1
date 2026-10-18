@@ -87,6 +87,7 @@ func _ready() -> void:
 
 
 ## Grammar quiz: opens after Easy, rewards Phrase Crystals.
+
 func _grammar_section(content: VBoxContainer, lang: Dictionary, progress: Dictionary) -> void:
 	var unlocked: bool = progress[DB.EASY].completed
 	var color := Color("6b3fa0") if unlocked else UI.LOCKED

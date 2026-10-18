@@ -67,6 +67,7 @@ func _ready() -> void:
 
 ## The language's culture: unlocked items are shown in full, locked ones say
 ## how to reveal them.
+
 func _culture_corner(content: VBoxContainer, lang: Dictionary) -> void:
 	var items := DB.get_culture_items(lang.region_code).filter(func(c): return c.language_code == lang.code)
 	if items.is_empty():

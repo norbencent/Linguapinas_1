@@ -29,6 +29,7 @@ func check(condition: bool, what: String) -> void:
 
 
 func _run() -> void:
+	GuidePages.enabled = false  # pop-ups would cover the screens the tests click
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_DB))
 	check(DB.open(TEST_DB), "database opens")
 	_test_seed()
@@ -46,6 +47,7 @@ func _run() -> void:
 	_test_pronunciation_and_grammar()
 	await _test_new_screens()
 	await _test_tutorial()
+	await _test_guide_pages()
 	await _test_play_quiz_through_ui()
 	DB.close()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_DB))
@@ -589,17 +591,65 @@ func _test_tutorial() -> void:
 	Game.goto("map")
 	await _frames(4)
 	check(Tutorial.current_step() == "", "finished tutorial stays away")
-	# How to play guide, replay, skip.
-	await _click(get_tree().current_scene.find_child("how_to_play", true, false))
+	# The Guide (GABAY) can replay the tour; SKIP ends it.
+	await _click(get_tree().current_scene.find_child("guide_button", true, false))
 	await _frames(3)
-	var guide := get_tree().current_scene.get_node_or_null("HowToPlay")
-	check(guide != null, "how to play guide opens")
-	await _click(guide.find_child("replay", true, false))
+	check(_scene_is("guide"), "GABAY opens the guide")
+	await _click(get_tree().current_scene.find_child("replay_tour", true, false))
 	await _frames(5)
 	check(Tutorial.is_active() and Tutorial.current_step() == "map_island", "tutorial can be replayed")
 	await _click(_tutorial_button("skip"))
 	await _frames(3)
 	check(not Tutorial.is_active() and get_tree().current_scene.get_node_or_null("Tutorial") == null, "skip ends it")
+
+
+func _test_guide_pages() -> void:
+	GuidePages.enabled = true
+	var uid := DB.register_user("firsttimer", "").user.id as int
+	Game.user = DB.get_user(uid)
+	Game.history.clear()
+	Game.goto("map")
+	await _frames(3)
+	var popup := get_tree().current_scene.find_child("TutorialPopup", true, false)
+	check(popup != null, "first visit to the map shows the welcome walkthrough")
+	var next: Button = popup.find_child("next", true, false)
+	for i in GuidePages.WELCOME.size():
+		await _click(next)
+		await _frames(1)
+	await _frames(2)
+	check(not is_instance_valid(popup), "the walkthrough closes after the last page")
+	Game.goto("map")
+	await _frames(3)
+	check(get_tree().current_scene.find_child("TutorialPopup", true, false) == null, "tips show only once")
+	# Screens covered by the hand tour have no separate tip; these two do.
+	for key in ["gallery", "spirit"]:
+		Game.region_code = "luzon"
+		Game.language_code = "tl"
+		Game.goto({"language": "language", "difficulty": "difficulty", "gallery": "gallery", "spirit": "spirit"}[key])
+		await _frames(3)
+		check(get_tree().current_scene.find_child("TutorialPopup", true, false) != null, "%s tip on first visit" % key)
+		check(DB.has_seen_tutorial(uid, key), "%s tip remembered" % key)
+	# The Guide lists every topic and can show the tips again.
+	Game.goto("guide")
+	await _frames(3)
+	for topic in GuidePages.GUIDE_TOPICS:
+		check(get_tree().current_scene.find_child("topic_" + topic[1], true, false) != null, "guide topic %s" % topic[1])
+	await _click(get_tree().current_scene.find_child("topic_quiz", true, false))
+	await _frames(2)
+	check(get_tree().current_scene.find_child("TutorialPopup", true, false) != null, "guide topic opens its pages")
+	Game.handle_back()
+	await _frames(2)
+	check(get_tree().current_scene.find_child("TutorialPopup", true, false) == null, "the back key closes the pages")
+	await _click(get_tree().current_scene.find_child("reset_tips", true, false))
+	check(not DB.has_seen_tutorial(uid, "quiz") and DB.has_seen_tutorial(uid, "welcome"), "tips reset (welcome kept)")
+	# A brand-new player's screen tips wait for the welcome walkthrough.
+	var other := DB.register_user("newcomer", "").user.id as int
+	Game.user = DB.get_user(other)
+	Game.goto("gallery")
+	await _frames(3)
+	check(get_tree().current_scene.find_child("TutorialPopup", true, false) == null, "screen tips wait for the welcome")
+	check(DB.delete_user(other) and not DB.has_seen_tutorial(other, "welcome"), "deleting a player clears tutorial state")
+	GuidePages.enabled = false
 
 
 func _test_play_quiz_through_ui() -> void:

@@ -7,10 +7,13 @@ extends Node
 ## step has not been done yet. The overlay never blocks the screen: the
 ## player taps the real button under the hand.
 ##
+## The welcome story pages and the Guide screen (GABAY) are in
+## scripts/ui/guide_pages.gd; the hand tour starts after the welcome pages.
+##
 ## Before anyone has played, the guest steps (title, menu, name) run once.
 ## A new player then gets the player steps (map -> island -> language ->
 ## level -> lesson -> quiz -> results). Progress is saved in the settings
-## table, so it survives restarts. SKIP stops it; the How to Play guide can
+## table, so it survives restarts. SKIP stops it; the Guide (GABAY) can
 ## replay it.
 
 const HAND_TIP := Vector2(60, 4)   # fingertip position in tutorial_hand.png (128x128)
@@ -266,61 +269,3 @@ func _draw_ring() -> void:
 	var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 180.0)
 	var grow := 6.0 + 6.0 * pulse
 	_ring.draw_rect(r.grow(grow), Color(1, 0.85, 0.2, 0.55 + 0.4 * pulse), false, 5.0)
-
-
-# ---------------------------------------------------------------- how to play
-
-## The How to Play guide, with a button to replay the tutorial.
-func show_guide(parent: Control) -> Control:
-	var overlay := ColorRect.new()
-	overlay.name = "HowToPlay"
-	overlay.color = Color(0, 0, 0, 0.6)
-	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
-	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
-	parent.add_child(overlay)
-	Game.overlays.append(overlay)
-	var margin := MarginContainer.new()
-	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
-	for side in ["left", "right"]:
-		margin.add_theme_constant_override("margin_" + side, 30)
-	for side in ["top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 90)
-	overlay.add_child(margin)
-	var card := PanelContainer.new()
-	card.add_theme_stylebox_override("panel", UI._box(UI.PARCHMENT, 18, Color("c99a2e"), 6, 22))
-	margin.add_child(card)
-	var scroll := ScrollContainer.new()
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	card.add_child(scroll)
-	var v := UI.vbox(10)
-	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.add_child(v)
-	v.add_child(UI.heading("How to play", UI.RED, 32))
-	var steps := [
-		["1. Pick an island", "On the Main Island map, tap Luzon, Visayas or Mindanao."],
-		["2. Choose a language", "The first language of each island is free. Unlock more with Word Fragments."],
-		["3. Study the lesson", "Each level starts with a lesson. Read the words and say them aloud."],
-		["4. Take the quiz", "Pick an answer and tap CHECK. Five hearts: a wrong answer costs one. Tap your Guiding Spirit for a hint, or BIGKAS to learn how words are said."],
-		["5. Level up", "Pass Easy to open Medium, then Hard, and the Grammar quiz with its grammar checker."],
-		["6. Collect culture", "Clearing a level for the first time reveals a cultural element. See them all in the Gallery."],
-		["7. Restore the cores", "Master a language on every level to restore its island's Language Core. Restore all three to unlock the Pearl of the Orient."],
-	]
-	for s in steps:
-		v.add_child(UI.label(s[0], 21, UI.RED, true, UI.font_body_black))
-		v.add_child(UI.label(s[1], 17, UI.INK, true))
-	v.add_child(UI.heading("Rewards", UI.RED, 24))
-	v.add_child(UI.reward_guide())
-	var close := func():
-		Game.overlays.erase(overlay)
-		overlay.queue_free()
-	if Game.is_logged_in():
-		var replay := UI.pill_button("REPLAY TUTORIAL", Color("6b3fa0"), func():
-			close.call()
-			start_for_player()
-			Game.goto("map"), 54, 20)
-		replay.name = "replay"
-		v.add_child(replay)
-	var close_b := UI.pill_button("CLOSE", UI.INK_SOFT, close, 54, 20)
-	close_b.name = "close"
-	v.add_child(close_b)
-	return overlay
