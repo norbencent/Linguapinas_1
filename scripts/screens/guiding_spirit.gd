@@ -10,6 +10,8 @@ var matches_box: VBoxContainer
 var tips_box: VBoxContainer
 var server_label: Label
 var lang_codes: Array = []
+var grammar_input: LineEdit
+var grammar_box: VBoxContainer
 
 
 func _ready() -> void:
@@ -47,6 +49,20 @@ func _ready() -> void:
 	matches_box = UI.vbox(4)
 	rv.add_child(matches_box)
 	content.add_child(result_panel)
+
+	var say := UI.pill_button("PRONOUNCE", Color("6b3fa0"), _pronounce, 52, 18)
+	say.name = "pronounce"
+	content.add_child(say)
+
+	content.add_child(UI.heading("Grammar checker", UI.RED, 24))
+	content.add_child(UI.label("Write a sentence in the language above. I compare it with the sentences I know and tell you what to fix.", 16, UI.INK_SOFT, true))
+	grammar_input = UI.line_edit("e.g. Gusto ko ng tubig")
+	grammar_input.text_submitted.connect(func(_t): _check_grammar())
+	content.add_child(grammar_input)
+	content.add_child(UI.gem_button("CHECK GRAMMAR", "green", _check_grammar, 80, 28))
+	grammar_box = UI.vbox(4)
+	grammar_box.name = "grammar_result"
+	content.add_child(grammar_box)
 
 	server_label = UI.label("Checking for the MarianNMT translator...", 15, UI.INK_SOFT, true)
 	content.add_child(server_label)
@@ -94,3 +110,25 @@ func _translate() -> void:
 		if str(m.get("note", "")) != "":
 			line += "  (%s)" % m.note
 		matches_box.add_child(UI.label(line, 17, UI.INK, true))
+
+
+## Pronunciation of the translation (or of what was typed, when it is in the language).
+func _pronounce() -> void:
+	var text := result_label.text if direction_picker.selected == 1 else input.text
+	if text.strip_edges() == "" or text.begins_with("(") or text == "...":
+		text = input.text
+	var region: String = DB.get_language(_current_lang()).get("region_code", "luzon")
+	Pronounce.show_panel(self, [text] if text.strip_edges() != "" else [], _current_lang(), region)
+
+
+func _check_grammar() -> void:
+	for c in grammar_box.get_children():
+		grammar_box.remove_child(c)
+		c.queue_free()
+	var r := GrammarChecker.check_free(grammar_input.text, DB.get_sentences(_current_lang()), DB.get_tips(_current_lang()))
+	if r.ok:
+		grammar_box.add_child(UI.label("Correct! \"%s\" means \"%s\"." % [r.match.native, r.match.english], 20, UI.GREEN, true, UI.font_body_black))
+	elif r.get("known", false):
+		grammar_box.add_child(UI.label("Did you mean: %s (\"%s\")?" % [r.match.native, r.match.english], 19, UI.INK, true, UI.font_body_black))
+	for line in r.issues + r.notes:
+		grammar_box.add_child(UI.label("• " + line, 18, UI.RED if not r.ok else UI.INK_SOFT, true))

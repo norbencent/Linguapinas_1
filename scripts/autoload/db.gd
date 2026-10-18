@@ -24,6 +24,13 @@ const REWARD_NAMES := {
 	"phrase_crystal": "Phrase Crystals",
 	"cultural_relic": "Cultural Relics",
 }
+## What rewards buy. Word Fragments unlock languages, Phrase Crystals unlock
+## culture items in the Gallery, a Cultural Relic buys an extra quiz hint.
+const LANGUAGE_COST := {"word_fragment": 20}
+const CULTURE_COST := {"phrase_crystal": 5}
+const HINT_COST := {"cultural_relic": 1}
+## A level passed again (or category / grammar practice) pays half.
+const REPLAY_REWARD_SHARE := 0.5
 
 var db: SQLite
 var db_path := DEFAULT_DB_PATH
@@ -242,7 +249,7 @@ func delete_user(user_id: int) -> bool:
 	if not _exec("BEGIN;"):
 		return false
 	var ok := true
-	for table in ["quiz_attempts", "progress", "rewards", "badges"]:
+	for table in ["quiz_attempts", "progress", "rewards", "badges", "unlocked_languages", "unlocked_culture"]:
 		ok = ok and _exec("DELETE FROM %s WHERE user_id = ?;" % table, [user_id])
 	ok = ok and _exec("DELETE FROM users WHERE id = ?;", [user_id])
 	_exec("COMMIT;" if ok else "ROLLBACK;")
@@ -359,6 +366,7 @@ func mark_lesson_done(user_id: int, language_code: String, difficulty: int) -> v
 func record_quiz(user_id: int, language_code: String, difficulty: int, category_code: String,
 		score: int, correct: int, total: int, hearts_left: int, passed: bool) -> Dictionary:
 	var cores_before := get_restored_cores(user_id)
+	var first_clear: bool = category_code == "" and passed and not get_progress(user_id, language_code)[difficulty].completed
 	_exec("BEGIN TRANSACTION;")
 	_exec("""INSERT INTO quiz_attempts(user_id, language_code, difficulty, category_code, score, correct, total,
 		hearts_left, passed) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);""",
@@ -371,10 +379,14 @@ func record_quiz(user_id: int, language_code: String, difficulty: int, category_
 			best_score = max(best_score, excluded.best_score), completed = max(completed, excluded.completed);""",
 			[user_id, language_code, difficulty, score if passed else 0, 1 if passed else 0])
 	var reward_kind: String = REWARD_FOR_DIFFICULTY[difficulty]
-	var reward_amount := correct if passed else 0
+	var reward_amount := 0
+	if passed:
+		reward_amount = correct if first_clear else maxi(1, int(ceil(correct * REPLAY_REWARD_SHARE)))
 	if reward_amount > 0:
 		add_reward(user_id, reward_kind, reward_amount)
 	_exec("COMMIT;")
+	# Clearing a level for the first time reveals one of the language's culture items.
+	var revealed: Dictionary = reveal_culture(user_id, language_code) if first_clear else {}
 
 	var new_badges: Array = []
 	for region in get_restored_cores(user_id):
@@ -382,7 +394,8 @@ func record_quiz(user_id: int, language_code: String, difficulty: int, category_
 			new_badges.append("core_" + region)
 	if get_restored_cores(user_id).size() == get_regions().size() and _award_badge(user_id, "pearl"):
 		new_badges.append("pearl")
-	return {"new_badges": new_badges, "reward_kind": reward_kind, "reward_amount": reward_amount, "counts": counts}
+	return {"new_badges": new_badges, "reward_kind": reward_kind, "reward_amount": reward_amount, "counts": counts,
+		"first_clear": first_clear, "revealed": revealed}
 
 
 func add_reward(user_id: int, kind: String, amount: int) -> void:
@@ -397,6 +410,123 @@ func get_rewards(user_id: int) -> Dictionary:
 	for row in _select("SELECT kind, amount FROM rewards WHERE user_id = ?;", [user_id]):
 		result[row.kind] = int(row.amount)
 	return result
+
+
+## True if the player has at least [param cost] ({kind: amount}).
+func can_afford(user_id: int, cost: Dictionary) -> bool:
+	var have := get_rewards(user_id)
+	for kind in cost:
+		if int(have.get(kind, 0)) < int(cost[kind]):
+			return false
+	return true
+
+
+## Takes [param cost] from the player's rewards. False (and nothing spent) if
+## they cannot afford it.
+func spend(user_id: int, cost: Dictionary) -> bool:
+	if not can_afford(user_id, cost):
+		return false
+	for kind in cost:
+		_exec("UPDATE rewards SET amount = amount - ? WHERE user_id = ? AND kind = ?;", [int(cost[kind]), user_id, kind])
+	return true
+
+
+static func cost_text(cost: Dictionary) -> String:
+	var parts: Array = []
+	for kind in cost:
+		parts.append("%d %s" % [cost[kind], REWARD_NAMES[kind]])
+	return ", ".join(parts)
+
+
+# ---------------------------------------------------------------- language shop
+
+## The first playable language of each region is free.
+func is_language_free(code: String) -> bool:
+	var lang := get_language(code)
+	if lang.is_empty():
+		return false
+	var first := _select_one("""SELECT code FROM languages WHERE region_code = ? AND playable = 1
+		ORDER BY sort_order LIMIT 1;""", [lang.region_code])
+	return first.get("code", "") == code
+
+
+## Free, bought, or already played before the shop existed.
+func is_language_unlocked(user_id: int, code: String) -> bool:
+	if is_language_free(code):
+		return true
+	if not _select_one("SELECT 1 AS x FROM unlocked_languages WHERE user_id = ? AND language_code = ?;",
+			[user_id, code]).is_empty():
+		return true
+	return not _select_one("SELECT 1 AS x FROM progress WHERE user_id = ? AND language_code = ?;",
+		[user_id, code]).is_empty()
+
+
+## Buys a language with Word Fragments. Returns {"ok": bool, "error": String}.
+func unlock_language(user_id: int, code: String) -> Dictionary:
+	var lang := get_language(code)
+	if lang.is_empty() or int(lang.playable) != 1:
+		return {"ok": false, "error": "This language is not available yet."}
+	if is_language_unlocked(user_id, code):
+		return {"ok": true, "error": ""}
+	if not spend(user_id, LANGUAGE_COST):
+		return {"ok": false, "error": "You need %s. Play quizzes to collect more." % cost_text(LANGUAGE_COST)}
+	_exec("INSERT INTO unlocked_languages(user_id, language_code) VALUES(?, ?);", [user_id, code])
+	return {"ok": true, "error": ""}
+
+
+# ---------------------------------------------------------------- culture unlocks
+
+func is_culture_unlocked(user_id: int, title: String) -> bool:
+	return not _select_one("SELECT 1 AS x FROM unlocked_culture WHERE user_id = ? AND title = ?;",
+		[user_id, title]).is_empty()
+
+
+func get_unlocked_culture(user_id: int) -> Array:
+	var out: Array = []
+	for row in _select("SELECT title FROM unlocked_culture WHERE user_id = ?;", [user_id]):
+		out.append(row.title)
+	return out
+
+
+## Reveals the next locked culture item of the language (or, when they are
+## all unlocked, of its region). Returns the item, or {} if none is left.
+func reveal_culture(user_id: int, language_code: String) -> Dictionary:
+	var lang := get_language(language_code)
+	if lang.is_empty():
+		return {}
+	var have := get_unlocked_culture(user_id)
+	var items := get_culture_items(lang.region_code)
+	var own := items.filter(func(c): return c.language_code == language_code and not c.title in have)
+	var rest := items.filter(func(c): return c.language_code != language_code and not c.title in have)
+	var pick: Dictionary = own[0] if not own.is_empty() else (rest[0] if not rest.is_empty() else {})
+	if not pick.is_empty():
+		_exec("INSERT OR IGNORE INTO unlocked_culture(user_id, title, source) VALUES(?, ?, ?);",
+			[user_id, pick.title, "quiz:" + language_code])
+	return pick
+
+
+## Buys a culture item with Phrase Crystals. Returns {"ok": bool, "error": String}.
+func unlock_culture(user_id: int, title: String) -> Dictionary:
+	if is_culture_unlocked(user_id, title):
+		return {"ok": true, "error": ""}
+	if _select_one("SELECT 1 AS x FROM culture_items WHERE title = ?;", [title]).is_empty():
+		return {"ok": false, "error": "Unknown culture item."}
+	if not spend(user_id, CULTURE_COST):
+		return {"ok": false, "error": "You need %s. Clear Medium levels to collect more." % cost_text(CULTURE_COST)}
+	_exec("INSERT INTO unlocked_culture(user_id, title, source) VALUES(?, ?, 'bought');", [user_id, title])
+	return {"ok": true, "error": ""}
+
+
+## Players who cleared levels before culture was revealed by quizzes get one
+## item per cleared level, so nobody loses what they had earned.
+func sync_culture(user_id: int) -> void:
+	for row in _select("""SELECT language_code, COUNT(*) AS n FROM progress
+			WHERE user_id = ? AND completed = 1 GROUP BY language_code;""", [user_id]):
+		var have := int(_select_one("SELECT COUNT(*) AS n FROM unlocked_culture WHERE user_id = ? AND source = ?;",
+			[user_id, "quiz:" + row.language_code]).get("n", 0))
+		for i in int(row.n) - have:
+			if reveal_culture(user_id, row.language_code).is_empty():
+				break
 
 
 func _award_badge(user_id: int, code: String) -> bool:

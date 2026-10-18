@@ -55,7 +55,31 @@ func _ready() -> void:
 			tv.add_child(UI.label("• " + t.tip, 18, UI.INK, true))
 		content.add_child(tip_panel)
 
+	_culture_corner(content, lang)
+
 	content.add_child(UI.gem_button(UI.t("start_quiz"), "green", _start_quiz, 90, 30))
+
+
+## The language's culture: unlocked items are shown in full, locked ones say
+## how to reveal them.
+func _culture_corner(content: VBoxContainer, lang: Dictionary) -> void:
+	var items := DB.get_culture_items(lang.region_code).filter(func(c): return c.language_code == lang.code)
+	if items.is_empty():
+		return
+	var unlocked := DB.get_unlocked_culture(Game.user_id())
+	var box := UI.vbox(8)
+	box.name = "culture_corner"
+	box.add_child(UI.heading("Culture corner", UI.REGION_COLORS.get(lang.region_code, UI.RED).darkened(0.1), 24))
+	var shown := 0
+	for item in items:
+		if item.title in unlocked:
+			box.add_child(UI.culture_card(item, true))
+			shown += 1
+	var locked := items.size() - shown
+	if locked > 0:
+		box.add_child(UI.label("%d more %s culture item%s to discover: clear a level you haven't cleared yet, or unlock it in the Gallery."
+			% [locked, lang.name, "" if locked == 1 else "s"], 17, UI.INK_SOFT, true))
+	content.add_child(box)
 
 
 func _intro(text: String) -> Label:

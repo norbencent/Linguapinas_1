@@ -42,6 +42,9 @@ func _run() -> void:
 	await _test_delete_player()
 	await _test_battle_stage()
 	await _test_culture()
+	await _test_reward_economy()
+	_test_pronunciation_and_grammar()
+	await _test_new_screens()
 	await _test_play_quiz_through_ui()
 	DB.close()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_DB))
@@ -131,7 +134,8 @@ func _test_progression() -> void:
 	check("core_mindanao" in s.new_badges and "pearl" in s.new_badges, "pearl unlocked")
 	check(DB.get_badges(uid).size() == 4, "4 badges")
 	var rewards := DB.get_rewards(uid)
-	check(rewards.word_fragment == 3 + 9 + 8 + 9 + 9, "word fragments counted (%d)" % rewards.word_fragment)
+	# First clears pay in full; category practice (3 -> 2) and replays (8 -> 4) pay half.
+	check(rewards.word_fragment == 2 + 9 + 4 + 9 + 9, "word fragments counted (%d)" % rewards.word_fragment)
 	var maria: int = DB.login_user("maria", "secret2").user.id
 	DB.record_quiz(maria, "hil", 1, "", 150, 10, 10, 5, true)
 	var board := DB.get_leaderboard()
@@ -250,6 +254,13 @@ func _test_back_navigation() -> void:
 
 ## Clicks a control like a player would (mouse press + release at its centre).
 func _click(c: Control) -> void:
+	# Scroll the control into view first, like a player would.
+	var p := c.get_parent()
+	while p != null and not p is ScrollContainer:
+		p = p.get_parent()
+	if p is ScrollContainer:
+		p.ensure_control_visible(c)
+		await _frames(2)
 	var pos := c.get_global_rect().get_center()
 	for pressed in [true, false]:
 		var e := InputEventMouseButton.new()
@@ -359,7 +370,7 @@ func _test_battle_stage() -> void:
 
 func _test_culture() -> void:
 	var items := DB.get_culture_items()
-	check(items.size() >= 50, "culture items seeded (%d)" % items.size())
+	check(items.size() >= 40 and items.all(func(c): return c.kind != "Landmark"), "culture items seeded without landmarks (%d)" % items.size())
 	for region in DB.get_regions():
 		for lang in DB.get_languages(region.code):
 			check(items.any(func(c): return c.language_code == lang.code), "%s has a culture item" % lang.code)
@@ -384,6 +395,139 @@ func _test_culture() -> void:
 	var pics := get_tree().current_scene.find_children("*", "TextureRect", true, false).filter(
 		func(t): return t.texture != null and t.texture.resource_path.begins_with("res://assets/culture/"))
 	check(pics.size() == DB.get_culture_items("visayas").size(), "gallery shows a picture for every Visayas item")
+
+
+func _test_reward_economy() -> void:
+	var uid := DB.register_user("shopper", "").user.id as int
+	check(DB.is_language_unlocked(uid, "tl") and DB.is_language_unlocked(uid, "ceb") and DB.is_language_unlocked(uid, "bis"),
+		"first language of each island is free")
+	check(not DB.is_language_unlocked(uid, "ilo"), "other languages start locked")
+	check(not DB.unlock_language(uid, "ilo").ok, "cannot unlock without fragments")
+	# A first clear pays in full and reveals a culture item; a replay pays half and reveals nothing.
+	var s := DB.record_quiz(uid, "tl", 1, "", 100, 10, 10, 5, true)
+	check(s.first_clear and s.reward_amount == 10, "first clear pays 10 fragments")
+	check(not s.revealed.is_empty() and s.revealed.language_code == "tl" and DB.is_culture_unlocked(uid, s.revealed.title),
+		"first clear reveals a Tagalog culture item")
+	s = DB.record_quiz(uid, "tl", 1, "", 100, 10, 10, 5, true)
+	check(not s.first_clear and s.reward_amount == 5 and s.revealed.is_empty(), "replay pays half, no reveal")
+	s = DB.record_quiz(uid, "tl", 1, "", 100, 10, 10, 5, true)
+	check(DB.get_rewards(uid).word_fragment == 20, "20 fragments collected")
+	check(DB.unlock_language(uid, "ilo").ok and DB.is_language_unlocked(uid, "ilo"), "Ilocano bought")
+	check(DB.get_rewards(uid).word_fragment == 0, "fragments spent")
+	check(not DB.unlock_language(uid, "pag").ok, "coming-soon languages can't be bought")
+	# Culture with crystals, hints with relics.
+	var locked := DB.get_culture_items().filter(func(c): return not DB.is_culture_unlocked(uid, c.title))
+	check(not DB.unlock_culture(uid, locked[0].title).ok, "culture needs crystals")
+	DB.add_reward(uid, "phrase_crystal", 5)
+	check(DB.unlock_culture(uid, locked[0].title).ok and DB.get_rewards(uid).phrase_crystal == 0, "culture bought with 5 crystals")
+	check(not DB.spend(uid, DB.HINT_COST), "no relic, no extra hint")
+	DB.add_reward(uid, "cultural_relic", 1)
+	check(DB.spend(uid, DB.HINT_COST) and DB.get_rewards(uid).cultural_relic == 0, "relic spent on a hint")
+	# Players from before the shop keep what they earned.
+	var old := DB.register_user("veteran", "").user.id as int
+	DB._exec("INSERT INTO progress(user_id, language_code, difficulty, completed) VALUES(?, 'war', 1, 1);", [old])
+	check(DB.is_language_unlocked(old, "war"), "languages already played stay unlocked")
+	DB.sync_culture(old)
+	check(DB.get_unlocked_culture(old).size() == 1, "cleared levels give their culture items")
+	check(DB.delete_user(uid) and DB.get_unlocked_culture(uid).is_empty(), "deleting a player removes unlocks")
+
+
+func _test_pronunciation_and_grammar() -> void:
+	check(Pronounce.guide("salamat") == "sa·LA·mat", "salamat syllables (%s)" % Pronounce.guide("salamat"))
+	check(Pronounce.syllables("pangalan") == ["pa", "nga", "lan"], "ng is one consonant")
+	check(Pronounce.syllables("nag-aaral") == ["nag", "a", "a", "ral"], "hyphen and double vowel split")
+	check(Pronounce.tips("Gusto ko ng tubig", "tl").any(func(t): return "nang" in t), "ng marker tip")
+	var tips := DB.get_tips("tl")
+	var r := GrammarChecker.check("Gusto ko ng tubig", "Gusto ko ng tubig.")
+	check(r.ok, "correct sentence passes")
+	r = GrammarChecker.check("gusto ko tubig", "Gusto ko ng tubig.", tips)
+	check(not r.ok and r.issues[0].begins_with("Missing word: \"ng\"") and "Tip:" in r.issues[0], "missing marker found with its tip")
+	r = GrammarChecker.check("Gusto ko ng tubg", "Gusto ko ng tubig.")
+	check(not r.ok and "Spelling" in r.issues[0], "spelling mistake found")
+	r = GrammarChecker.check("Ko gusto ng tubig", "Gusto ko ng tubig.")
+	check(not r.ok and "Word order" in r.issues[0], "word order found")
+	r = GrammarChecker.check("Gusto ko ang ng tubig", "Gusto ko ng tubig.")
+	check(not r.ok and "Extra word" in r.issues[0], "extra word found")
+	check(not GrammarChecker.check_free("The cat sleeps", DB.get_sentences("tl")).known, "unknown sentence is not judged")
+	for lang in DB.get_playable_languages():
+		var qs := Game.grammar_quiz(lang.code)
+		check(qs.size() >= 6 and qs.size() <= Game.QUESTIONS_PER_QUIZ, "%s grammar quiz has 6-10 questions (%d)" % [lang.code, qs.size()])
+		check(qs.any(func(q): return q.type == "grammar"), "%s grammar quiz has a sentence to write" % lang.code)
+		for q in qs:
+			if q.type == "choice":
+				check(q.answer in q.options and q.options.size() >= 3, "%s grammar options" % lang.code)
+			else:
+				check(Game.check_answer(q, q.answer), "%s written answer passes the checker" % lang.code)
+
+
+func _test_new_screens() -> void:
+	var uid := DB.register_user("newbie", "").user.id as int
+	Game.user = DB.get_user(uid)
+	# Language shop: Ilocano is locked; with 20 fragments the UNLOCK button buys it.
+	Game.region_code = "luzon"
+	Game.goto("language")
+	await _frames(3)
+	var row := get_tree().current_scene.find_child("locked_ilo", true, false)
+	check(row != null and row.find_child("unlock", true, false).disabled, "Ilocano locked, button off without fragments")
+	Game.language_code = "ilo"
+	Game.goto("difficulty")
+	await _frames(3)
+	check(_scene_is("language"), "a locked language can't be opened")
+	DB.add_reward(uid, "word_fragment", 20)
+	Game.goto("language")
+	await _frames(3)
+	await _click(get_tree().current_scene.find_child("locked_ilo", true, false).find_child("unlock", true, false))
+	await _frames(3)
+	check(_scene_is("difficulty") and DB.is_language_unlocked(uid, "ilo"), "UNLOCK buys the language and opens it")
+	check(get_tree().current_scene.find_child("start_grammar", true, false).disabled, "grammar quiz opens after Easy")
+	# Results show the revealed culture item.
+	DB.record_quiz(uid, "ilo", 1, "", 100, 10, 10, 5, true)
+	Game.difficulty = 1
+	Game.category_code = ""
+	Game.last_result = {"passed": true, "score": 100, "correct": 10, "total": 10, "hearts": 5,
+		"summary": DB.record_quiz(uid, "ilo", 2, "", 100, 10, 10, 5, true)}
+	Game.goto("results")
+	await _frames(3)
+	check(get_tree().current_scene.find_child("revealed", true, false) != null, "results show the revealed culture item")
+	Game.goto("difficulty")
+	await _frames(3)
+	check(not get_tree().current_scene.find_child("start_grammar", true, false).disabled, "grammar quiz open after Easy")
+	# Grammar quiz through the real quiz screen, with the pronunciation helper.
+	Game.category_code = Game.GRAMMAR
+	Game.difficulty = DB.MEDIUM
+	Game.goto("quiz")
+	await _frames(3)
+	var quiz := get_tree().current_scene
+	check(quiz.questions.all(func(q): return q.kind.begins_with("Grammar")), "grammar quiz screen")
+	for i in quiz.questions.size():
+		var q: Dictionary = quiz.questions[quiz.index]
+		if q.type == "grammar":
+			check(not q.answer in quiz.pronunciation_texts(), "pronunciation never shows the answer early")
+		quiz._answer(q.answer if i != 0 else "zzz")
+		if i == 0 and q.type == "grammar":
+			check("Grammar check" in quiz.feedback_label.text, "checker feedback shown")
+		if i == 0:
+			await _click(quiz.find_child("pronounce", true, false))
+			await _frames(2)
+			check(quiz.get_node_or_null("PronouncePanel") != null, "Guiding Spirit pronunciation panel opens")
+			Game.handle_back()
+			await _frames(2)
+			check(quiz.get_node_or_null("PronouncePanel") == null, "back key closes the panel")
+		quiz._next()
+		await _frames(1)
+	await _frames(3)
+	check(_scene_is("results") and Game.last_result.summary.reward_kind == "phrase_crystal", "grammar quiz pays crystals")
+	# Gallery: buy a locked item with crystals.
+	DB.add_reward(uid, "phrase_crystal", 5)
+	Game.region_code = "visayas"
+	Game.goto("gallery")
+	await _frames(3)
+	var buy := get_tree().current_scene.find_child("unlock", true, false)
+	check(buy != null and not buy.disabled, "gallery unlock button on")
+	var before := DB.get_unlocked_culture(uid).size()
+	await _click(buy)
+	await _frames(3)
+	check(DB.get_unlocked_culture(uid).size() == before + 1, "gallery unlock buys an item")
 
 
 func _test_play_quiz_through_ui() -> void:

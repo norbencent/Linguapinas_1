@@ -21,6 +21,10 @@ func _ready() -> void:
 	if lang.is_empty():
 		Game.goto("map")
 		return
+	if not DB.is_language_unlocked(Game.user_id(), lang.code):
+		Game.region_code = lang.region_code
+		Game.goto("language")
+		return
 	var content := UI.page(self, lang.name, "language")
 	var uid := Game.user_id()
 
@@ -72,6 +76,35 @@ func _ready() -> void:
 		content.add_child(line)
 
 
+	_grammar_section(content, lang, progress)
+
+
+## Grammar quiz: opens after Easy, rewards Phrase Crystals.
+func _grammar_section(content: VBoxContainer, lang: Dictionary, progress: Dictionary) -> void:
+	var unlocked: bool = progress[DB.EASY].completed
+	var color := Color("6b3fa0") if unlocked else UI.LOCKED
+	var box := UI.vbox(6)
+	box.name = "grammar"
+	box.add_child(UI.pill("GRAMMAR", color, 24))
+	box.add_child(UI.label("Grammar quiz with a grammar checker", 22, color.darkened(0.15), true, UI.font_body_black))
+	box.add_child(UI.label("Pick the correct sentence, fill in the missing word, and write sentences that the "
+		+ "grammar checker marks: it tells you about spelling, missing or extra words and word order. Earns %s."
+		% DB.REWARD_NAMES.phrase_crystal, 17, UI.INK_SOFT, true))
+	var tips := DB.get_tips(lang.code)
+	for t in tips:
+		box.add_child(UI.label("• " + t.tip, 16, UI.INK, true))
+	var start := UI.pill_button(UI.t("start") if unlocked else "%s · clear Easy first" % UI.t("locked"), color, func():
+		Game.category_code = Game.GRAMMAR
+		Game.difficulty = DB.MEDIUM
+		Game.goto("quiz"), 60, 24)
+	start.name = "start_grammar"
+	start.disabled = not unlocked
+	box.add_child(start)
+	content.add_child(box)
+
+
 func _open(d: int, screen: String) -> void:
 	Game.difficulty = d
+	if Game.category_code == Game.GRAMMAR:
+		Game.category_code = ""
 	Game.goto(screen)
