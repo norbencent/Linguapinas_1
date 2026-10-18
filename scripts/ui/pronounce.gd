@@ -193,7 +193,7 @@ static func show_panel(parent: Control, texts: Array, language_code: String, reg
 	var head := UI.hbox(10)
 	head.add_child(UI.image(UI.tex["guide_" + (region if region in UI.GUIDES else "luzon")], Vector2(72, 72)))
 	var name: String = UI.GUIDES.get(region, "Spirit")
-	var hl := UI.label("%s: Let me help you say it." % name, 21, Color("5a3591"), true, UI.font_body_black)
+	var hl := UI.label("%s: %s" % [name, Spirit.line(region, "pronounce")], 21, Color("5a3591"), true, UI.font_body_black)
 	hl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(hl)
 	v.add_child(head)
@@ -209,9 +209,13 @@ static func show_panel(parent: Control, texts: Array, language_code: String, reg
 		var word := UI.label(str(text), 24, UI.RED, true, UI.font_body_black)
 		word.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(word)
-		var listen := UI.pill_button("LISTEN", Color("6b3fa0"), func(): speak(str(text)), 46, 16)
+		# The island's spirit says it in its own recorded voice; the device
+		# voice is the fallback for words without a recording.
+		var listen := UI.pill_button("LISTEN", Color("6b3fa0"), func():
+			if not Spirit.say(region, str(text), language_code, true):
+				speak(str(text)), 46, 16)
 		listen.name = "listen"
-		listen.disabled = not voice_ok
+		listen.disabled = not (voice_ok or Spirit.clip_path(region, language_code, str(text)) != "")
 		row.add_child(listen)
 		ev.add_child(row)
 		ev.add_child(UI.label(phrase_guide(str(text)), 22, Color("5a3591"), true, UI.font_body_black))
@@ -219,8 +223,8 @@ static func show_panel(parent: Control, texts: Array, language_code: String, reg
 	var all_text := " ".join(texts.map(func(x): return str(x)))
 	for tip in tips(all_text, language_code):
 		v.add_child(UI.label("• " + tip, 16, UI.INK, true))
-	if not voice_ok:
-		v.add_child(UI.label("This device has no text-to-speech voice, so LISTEN is off.", 15, UI.INK_SOFT, true))
+	if texts.size() > 0:
+		Spirit.say(region, Spirit.line(region, "pronounce"), "fil" if UI.lang == "fil" else "en", true)
 	var close := UI.pill_button("CLOSE", UI.INK_SOFT, func():
 		Game.overlays.erase(overlay)
 		overlay.queue_free(), 52, 20)

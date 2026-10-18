@@ -1,15 +1,6 @@
 extends Control
 ## Island page: the region's guide, its two heroes and the region button.
 
-const GREETINGS := {
-	"luzon": ["Mabuhay, Tagapangalaga! Ako si Maelor. Matuto ng wika ng Luzon upang muling paliwanagin ang Luzon Pearl.",
-		"Welcome, Guardian! I am Maelor. Master the languages of Luzon to relight the Luzon Pearl."],
-	"visayas": ["Maayong adlaw! Ako si Marea. Ibalik natin ang liwanag ng Visayas Pearl.",
-		"Good day! I am Marea. Let us bring back the light of the Visayas Pearl."],
-	"mindanao": ["Assalamu alaikum! Ako si Lanora. Gisingin natin ang Mindanao Pearl.",
-		"Peace be with you! I am Lanora. Let us awaken the Mindanao Pearl."],
-}
-
 
 func _ready() -> void:
 	var region := DB.get_region(Game.region_code)
@@ -25,7 +16,11 @@ func _ready() -> void:
 	content.add_child(UI.ribbon(UI.t("language"), color))
 	content.add_child(UI.center(UI.image(UI.tex["guide_" + code], Vector2(120, 120))))
 	content.add_child(UI.heading(UI.GUIDES[code].to_upper(), color, 26))
-	var greet := UI.label(GREETINGS[code][0 if UI.lang == "fil" else 1], 20, UI.INK, true)
+	var greet := UI.label(Spirit.speak_line(code, "greet"), 20, UI.INK, true)
+	greet.name = "greeting"
+	var title := UI.label(Spirit.persona(code).get("title", ""), 16, UI.INK_SOFT, true)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	content.add_child(title)
 	greet.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	content.add_child(greet)
 

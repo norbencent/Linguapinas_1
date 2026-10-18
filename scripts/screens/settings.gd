@@ -7,6 +7,7 @@ var sfx_slider: HSlider
 var music_value: Label
 var sfx_value: Label
 var notify: CheckButton
+var spirit_voice: CheckButton
 
 
 func _ready() -> void:
@@ -77,6 +78,17 @@ func _ready() -> void:
 	nrow.add_child(notify)
 	v.add_child(nrow)
 
+	var vrow := UI.hbox(10)
+	var vl := _caption("BOSES NG ESPIRITU" if UI.lang == "fil" else "SPIRIT VOICE")
+	vl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vrow.add_child(vl)
+	spirit_voice = CheckButton.new()
+	spirit_voice.name = "spirit_voice"
+	spirit_voice.button_pressed = Spirit.voice_on()
+	spirit_voice.focus_mode = Control.FOCUS_NONE
+	vrow.add_child(spirit_voice)
+	v.add_child(vrow)
+
 	v.add_child(UI.gem_button(UI.t("save"), "green", _save, 84, 34))
 	v.add_child(UI.gem_button(UI.t("exit"), "red", _exit, 84, 34))
 	if Game.is_logged_in():
@@ -110,6 +122,7 @@ func _slider_row(caption: String, value: int) -> Array:
 func _save() -> void:
 	Game.save_settings("fil" if lang_picker.selected == 0 else "en", int(music_slider.value),
 		int(sfx_slider.value), notify.button_pressed)
+	DB.set_setting("spirit_voice", "1" if spirit_voice.button_pressed else "0")
 	Game.goto(Game.settings_return, false)
 
 

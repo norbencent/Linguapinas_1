@@ -48,6 +48,7 @@ func _run() -> void:
 	await _test_new_screens()
 	await _test_tutorial()
 	await _test_pearls()
+	await _test_spirits()
 	await _test_guide_pages()
 	await _test_play_quiz_through_ui()
 	DB.close()
@@ -699,6 +700,77 @@ func _test_pearls() -> void:
 	await _frames(3)
 	check(get_tree().current_scene.find_child("PearlCelebration", true, false) == null and _scene_is("results"),
 		"the back key closes the animation, staying on results")
+
+
+func _test_spirits() -> void:
+	# Three personalities, each with every kind of line, recorded in its own voice.
+	var names := {"luzon": "Maelor", "visayas": "Marea", "mindanao": "Lanora"}
+	for region in names:
+		check(Spirit.spirit_name(region) == names[region], "%s spirit is %s" % [region, names[region]])
+		for kind in ["greet", "correct", "wrong", "hint", "pass", "fail", "pronounce", "unknown", "about"]:
+			for lang in ["fil", "en"]:
+				UI.lang = lang
+				var text := Spirit.line(region, kind)
+				check(text != "" and Spirit.clip_path(region, lang, text) != "", "%s %s line recorded (%s)" % [region, kind, lang])
+	UI.lang = "fil"
+	check(Spirit.persona("luzon").voice.pitch != Spirit.persona("visayas").voice.pitch, "each spirit has its own voice")
+	# Every lesson word and sentence is recorded in its island spirit's voice.
+	var missing := 0
+	for lang in DB.get_playable_languages():
+		for w in DB.get_words(lang.code) + DB.get_sentences(lang.code):
+			if Spirit.clip_path(lang.region_code, lang.code, w.native) == "":
+				missing += 1
+	check(missing == 0, "every lesson word and sentence has a voice clip (%d missing)" % missing)
+	Spirit.last_said.clear()
+	check(Spirit.say_word("ceb", "Salamat"), "Marea says a Cebuano word")
+	check(Spirit.last_said.back() == ["visayas", "ceb", "Salamat"], "said by the Visayas spirit")
+	DB.set_setting("spirit_voice", "0")
+	check(not Spirit.say_word("tl", "Salamat"), "the voice can be switched off")
+	DB.set_setting("spirit_voice", "1")
+	Spirit.stop()
+	# The brain answers real questions.
+	UI.lang = "en"
+	var a: Dictionary = await SpiritBrain.ask("How do I say thank you?", "tl")
+	check(a.intent == "translate" and "Salamat" in a.text and a.say[0] == ["tl", "Salamat"], "how do I say thank you")
+	a = await SpiritBrain.ask("how do you say water in Cebuano", "tl")
+	check("Tubig" in a.text and a.say[0][0] == "ceb", "a language named in the question")
+	a = await SpiritBrain.ask("What does kumusta mean?", "ceb")
+	check(a.intent == "translate" and "How are you" in a.text, "what does kumusta mean")
+	a = await SpiritBrain.ask("ano ang ibig sabihin ng tubig", "tl")
+	check("Water" in a.text, "asked in Filipino")
+	a = await SpiritBrain.ask("Pronounce salamat", "tl")
+	check(a.intent == "pronounce" and "sa·LA·mat" in a.text, "pronounce")
+	a = await SpiritBrain.ask("Is this correct: gusto ko tubig", "tl")
+	check(a.intent == "check" and "Missing word" in a.text, "grammar check through the spirit")
+	a = await SpiritBrain.ask("Tell me about Sinulog", "ceb")
+	check(a.intent == "culture" and "Santo Ni" in a.text, "culture question")
+	a = await SpiritBrain.ask("What should I do next?", "tl")
+	check(a.intent == "advice", "advice")
+	a = await SpiritBrain.ask("Who are you?", "mdh")
+	check("Lanora" in a.text, "each spirit introduces itself")
+	a = await SpiritBrain.ask("the cat sleeps on the moon", "tl")
+	check(a.intent == "unknown", "unknown questions get a friendly answer")
+	UI.lang = "fil"
+	# The chat screen.
+	Game.user = DB.login_user("juan", "secret1").user
+	Game.language_code = "hil"
+	Game.goto("spirit")
+	await _frames(3)
+	var screen := get_tree().current_scene
+	check(screen.find_child("chat_log", true, false).get_child_count() == 1, "the spirit greets you")
+	var reply: Dictionary = await screen.ask("salamat")
+	await _frames(2)
+	check(reply.intent == "translate" and screen.find_child("chat_log", true, false).get_child_count() == 3, "chat shows question and answer")
+	# The spirit reacts during the quiz.
+	Game.language_code = "tl"
+	Game.difficulty = 1
+	Game.category_code = ""
+	Game.goto("quiz")
+	await _frames(3)
+	var quiz := get_tree().current_scene
+	quiz._answer(quiz.questions[0].answer)
+	check("Maelor:" in quiz.feedback_label.text and quiz.spirit_said != "", "Maelor reacts to a right answer")
+	Spirit.stop()
 
 
 func _test_play_quiz_through_ui() -> void:

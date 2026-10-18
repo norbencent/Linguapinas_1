@@ -1,0 +1,71 @@
+{
+ "about": "The three Guiding Spirits: personality, voice and what they say. Lines are [Filipino, English]. Edit freely, then run tools/voice/make_spirit_voices.py to record the voices again.",
+ "spirits": {
+  "luzon": {
+   "name": "Maelor",
+   "title": "Spirit of the Northern Mountains",
+   "personality": "Wise and warm, like a grandfather. Speaks slowly and kindly, calls you 'apo' (child), and loves old Filipino proverbs.",
+   "voice": {"espeak_variant": "m3", "pitch": 28, "speed": 128, "device_pitch": 0.7, "device_rate": 0.85},
+   "about": ["Ako si Maelor, ang espiritu ng mga bundok ng Luzon. Isang libong taon ko nang binabantayan ang mga hagdan-hagdang palayan. Tutulungan kitang matuto ng Tagalog, Ilocano, Kapampangan, Bikolano at iba pang wika ng Luzon.",
+             "I am Maelor, spirit of the northern mountains of Luzon. I have watched over the rice terraces for a thousand years. I will help you learn Tagalog, Ilocano, Kapampangan, Bikolano and the other languages of Luzon."],
+   "lines": {
+    "greet": [["Mabuhay, apo. Halika, mag-aral tayo nang dahan-dahan.", "Welcome, child. Come, let us learn step by step, like climbing the rice terraces."]],
+    "correct": [["Magaling! Ganyan nga.", "Well done! That is the way."],
+                ["Tama! Ipinagmamalaki kita.", "Correct! I am proud of you."],
+                ["Mahusay, apo.", "Excellent, child."]],
+    "wrong": [["Hindi bale. Sa bawat pagkakamali, may natututunan tayo.", "Never mind. With every mistake, we learn something."],
+              ["Dahan-dahan lang. Subukan natin ulit.", "Slowly now. Let us try again."]],
+    "hint": [["Pakinggan mo ako, apo.", "Listen closely, child."]],
+    "pass": [["Kapag may tiyaga, may nilaga. Nagbunga ang iyong sipag!", "As the old saying goes, patience brings its reward. Your hard work has paid off!"]],
+    "fail": [["Huwag kang mawalan ng pag-asa. Balikan natin ang aralin.", "Do not lose hope. Let us go back to the lesson together."]],
+    "pronounce": [["Pakinggan mo kung paano ito sabihin.", "Listen to how it is said."]],
+    "unknown": [["Hindi ko pa alam iyan, apo. Itanong mo sa akin kung paano sabihin ang isang salita.", "I do not know that yet, child. Ask me how to say a word, or what a word means."]],
+    "thinking": [["Hmm, sandali lang...", "Hmm, let me think..."]]
+   }
+  },
+  "visayas": {
+   "name": "Marea",
+   "title": "Spirit of the Visayan Seas",
+   "personality": "Cheerful and playful, full of energy. Talks about waves, fish and the sea, and cheers loudly when you get it right.",
+   "voice": {"espeak_variant": "f4", "pitch": 72, "speed": 172, "device_pitch": 1.35, "device_rate": 1.1},
+   "about": ["Ako si Marea, ang espiritu ng mga dagat ng Visayas! Lumalangoy ako sa paligid ng Cebu, Iloilo, Samar at bawat isla sa pagitan nila.",
+             "I'm Marea, spirit of the Visayan seas! I splash around Cebu, Iloilo, Samar and every island in between. Let's learn Cebuano, Hiligaynon, Waray-Waray and more!"],
+   "lines": {
+    "greet": [["Maayong adlaw! Tara, sumisid tayo sa mga wika ng Visayas!", "Maayong adlaw! Come on, let's dive into the languages of the Visayas!"]],
+    "correct": [["Ayos! Tuloy-tuloy ka parang alon!", "Woohoo! You're riding the waves!"],
+                ["Tama! Ang galing mo!", "Right! You're amazing!"],
+                ["Sakto!", "Spot on, like a perfect catch!"]],
+    "wrong": [["Ay, sablay! Okay lang, kahit ang magaling lumangoy ay nababasa.", "Oops, a big wave! It's okay, even the best swimmers get splashed."],
+              ["Hala! Subukan ulit!", "Oh no! Let's try again!"]],
+    "hint": [["Psst! May sikreto ako mula sa dagat.", "Psst! Here's a secret from the sea."]],
+    "pass": [["Yehey! Kumikislap ka na parang perlas!", "Yay! You're shining like a pearl!"]],
+    "fail": [["Hindi bale, laging bumabalik ang alon. Ulitin natin ang aralin!", "No worries, the tide always comes back. Let's review the lesson!"]],
+    "pronounce": [["Makinig ka, ganito ang bigkas!", "Listen up, this is how you say it!"]],
+    "unknown": [["Hala, hindi ko pa alam iyan! Itanong mo kung paano sabihin ang isang salita.", "Oh, I don't know that one yet! Ask me how to say a word, or what a word means."]],
+    "thinking": [["Teka, teka...", "Wait, wait, let me see..."]]
+   }
+  },
+  "mindanao": {
+   "name": "Lanora",
+   "title": "Spirit of the Southern Lakes",
+   "personality": "Calm, gentle and patient, a weaver of stories. Speaks softly and talks about weaving, music and the lakes of Mindanao.",
+   "voice": {"espeak_variant": "f2", "pitch": 52, "speed": 142, "device_pitch": 1.05, "device_rate": 0.9},
+   "about": ["Ako si Lanora, ang espiritu ng Mindanao. Iniingatan ko ang mga kuwento ng Lawa ng Lanao, ang mga awit ng kulintang at ang mga disenyo ng mga manghahabi.",
+             "I am Lanora, spirit of Mindanao. I keep the stories of Lake Lanao, the songs of the kulintang and the patterns of the weavers. Let us learn Bisaya, Tausug, Chavacano and more."],
+   "lines": {
+    "greet": [["Assalamu alaikum. Halika, habiin natin ang mga salita.", "Peace be with you. Come, let us weave words together."]],
+    "correct": [["Napakaganda. Isa pang sinulid ang nahabi.", "Beautiful. Another thread is woven."],
+                ["Tama ka.", "You are right."],
+                ["Mahusay. Para kang tumutugtog ng kulintang.", "Lovely. You play with words like a kulintang player."]],
+    "wrong": [["Huminga ka nang malalim. Subukan nating muli.", "Take a deep breath. Let us try once more."],
+              ["Kahit ang pinakamahusay na manghahabi ay nagkakamali.", "Even the finest weaver drops a thread."]],
+    "hint": [["Makinig ka, may sasabihin ako.", "Listen, I have something to tell you."]],
+    "pass": [["Natapos mo ang isang magandang habi. Ipinagmamalaki kita.", "You have finished a beautiful weave. I am proud of you."]],
+    "fail": [["Walang nagmamadali sa paghahabi. Balikan natin ang aralin.", "No one hurries a weave. Let us return to the lesson."]],
+    "pronounce": [["Pakinggan mo nang mabuti.", "Listen carefully."]],
+    "unknown": [["Hindi ko pa alam iyan. Itanong mo kung paano sabihin ang isang salita.", "I do not know that yet. Ask me how to say a word, or what a word means."]],
+    "thinking": [["Sandali...", "One moment..."]]
+   }
+  }
+ }
+}

@@ -25,8 +25,7 @@ func _ready() -> void:
 	content.add_child(UI.heading("Level complete!" if r.passed else "Out of hearts!", UI.GREEN if r.passed else UI.RED, 36))
 	var guide := UI.hbox(12)
 	guide.add_child(UI.image(UI.tex["guide_" + region], Vector2(90, 90)))
-	var say := "%s: %s" % [UI.GUIDES[region], "Magaling, Tagapangalaga!" if r.passed
-		else "Balikan natin ang aralin, then try again. Kaya mo 'yan!"]
+	var say := "%s: %s" % [Spirit.spirit_name(region), Spirit.speak_line(region, "pass" if r.passed else "fail")]
 	guide.add_child(UI.label(say, 20, UI.INK, true))
 	content.add_child(guide)
 
