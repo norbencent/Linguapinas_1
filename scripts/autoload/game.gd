@@ -290,7 +290,80 @@ func build_quiz(lang_code: String, diff: int, category := "") -> Array:
 					break
 				questions.append(_typed_word(w, lang_name))
 	questions.shuffle()
-	return questions.slice(0, QUESTIONS_PER_QUIZ)
+	# Full quizzes also ask about the language's and region's culture.
+	var culture: Array = [] if category != "" else _culture_questions(lang_code, CULTURE_QUESTIONS.get(diff, 1))
+	questions = questions.slice(0, QUESTIONS_PER_QUIZ - culture.size())
+	questions.append_array(culture)
+	questions.shuffle()
+	return questions
+
+
+## Culture questions per level (taken from the 10 questions of a quiz).
+const CULTURE_QUESTIONS := {1: 1, 2: 2, 3: 2}  # Easy, Medium, Hard
+
+
+## Questions about culture items: the language's own items first, then the
+## rest of its region's.
+func _culture_questions(lang_code: String, count: int) -> Array:
+	var region: String = DB.get_language(lang_code).get("region_code", "")
+	var all := DB.get_culture_items()
+	if all.size() < 4 or region == "":
+		return []
+	var own := all.filter(func(c): return c.get("language_code", "") == lang_code)
+	var regional := all.filter(func(c): return c.region_code == region and c.get("language_code", "") != lang_code)
+	own.shuffle()
+	regional.shuffle()
+	var picks := (own + regional).slice(0, count)
+	var out: Array = []
+	for i in picks.size():
+		out.append(_culture_describe(picks[i], all) if i % 2 == 0 else _culture_region(picks[i], all))
+	return out
+
+
+## "Which festival is this?" with the item's description, its name hidden.
+func _culture_describe(item: Dictionary, all: Array) -> Dictionary:
+	var same_kind := all.filter(func(c): return c.kind == item.kind)
+	var candidates := _column(same_kind, "title")
+	if candidates.size() < 4:
+		candidates.append_array(_column(all, "title"))
+	return {
+		"type": "choice", "kind": "Culture",
+		"prompt": "Which %s is this?" % str(item.kind).to_lower(),
+		"detail": hide_name(item.description, item.title),
+		"options": _pick_options(item.title, candidates),
+		"answer": item.title, "explain": "%s: %s" % [item.title, item.description],
+	}
+
+
+## "Which of these is found in Visayas?" with three items from other regions.
+func _culture_region(item: Dictionary, all: Array) -> Dictionary:
+	var region_name: String = DB.get_region(item.region_code).get("name", "")
+	var others := all.filter(func(c): return c.region_code != item.region_code)
+	return {
+		"type": "choice", "kind": "Culture",
+		"prompt": "Which of these is found in %s?" % region_name, "detail": "",
+		"options": _pick_options(item.title, _column(others, "title")),
+		"answer": item.title, "explain": "%s (%s): %s" % [item.title, region_name, item.description],
+	}
+
+
+## Replaces the words of [param name] in [param text] with blanks.
+static func hide_name(text: String, name: String) -> String:
+	var words: Array = [name]
+	for w in name.replace("'", "").split(" ", false):
+		if w.length() >= 4:
+			words.append(w)
+	for w in words:
+		var re := RegEx.create_from_string("(?i)\\b%s\\b" % _regex_escape(w))
+		text = re.sub(text, "_____", true)
+	return text
+
+
+static func _regex_escape(s: String) -> String:
+	var out := ""
+	for ch in s:
+		out += ("\\" + ch) if ch in ".^$*+?()[]{}|\\-" else ch
+	return out
 
 
 func _pick_options(correct: String, candidates: Array, count := 4) -> Array:

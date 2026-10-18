@@ -41,6 +41,7 @@ func _run() -> void:
 	await _test_back_button_clicks()
 	await _test_delete_player()
 	await _test_battle_stage()
+	await _test_culture()
 	await _test_play_quiz_through_ui()
 	DB.close()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_DB))
@@ -354,6 +355,35 @@ func _test_battle_stage() -> void:
 	quiz._answer("definitely wrong")
 	await _frames(2)
 	check(quiz.stage.enemy.animation == "attack", "wrong answer makes the warrior attack")
+
+
+func _test_culture() -> void:
+	var items := DB.get_culture_items()
+	check(items.size() >= 50, "culture items seeded (%d)" % items.size())
+	for region in DB.get_regions():
+		for lang in DB.get_languages(region.code):
+			check(items.any(func(c): return c.language_code == lang.code), "%s has a culture item" % lang.code)
+	for c in items:
+		check(ResourceLoader.exists("res://assets/culture/%s.png" % c.image), "%s has a picture" % c.title)
+	check(Game.hide_name("Sisig comes from Pampanga.", "Sisig") == "_____ comes from Pampanga.", "culture name hidden")
+	# Full quizzes include culture questions; category practice does not.
+	for d in [1, 2, 3]:
+		var qs := Game.build_quiz("war", d)
+		var culture := qs.filter(func(q): return q.kind == "Culture")
+		check(culture.size() == Game.CULTURE_QUESTIONS[d], "level %d has %d culture questions" % [d, Game.CULTURE_QUESTIONS[d]])
+		check(qs.size() <= Game.QUESTIONS_PER_QUIZ, "level %d quiz size" % d)
+		for q in culture:
+			check(q.answer in q.options and q.options.size() == 4, "culture question has 4 options with the answer")
+			check(not q.answer.to_lower() in q.detail.to_lower(), "culture description hides the answer")
+	check(Game.build_quiz("tl", 1, "food").all(func(q): return q.kind != "Culture"), "category practice has no culture questions")
+	# The gallery shows pictures once a region is unlocked.
+	Game.user = DB.login_user("juan", "secret1").user
+	Game.region_code = "visayas"
+	Game.goto("gallery")
+	await _frames(3)
+	var pics := get_tree().current_scene.find_children("*", "TextureRect", true, false).filter(
+		func(t): return t.texture != null and t.texture.resource_path.begins_with("res://assets/culture/"))
+	check(pics.size() == DB.get_culture_items("visayas").size(), "gallery shows a picture for every Visayas item")
 
 
 func _test_play_quiz_through_ui() -> void:

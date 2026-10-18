@@ -111,6 +111,13 @@ func _migrate() -> void:
 		_exec("ALTER TABLE users ADD COLUMN playtime INTEGER NOT NULL DEFAULT 0;")
 	if not "has_password" in cols:
 		_exec("ALTER TABLE users ADD COLUMN has_password INTEGER NOT NULL DEFAULT 1;")
+	var culture_cols: Array = []
+	for row in _select("PRAGMA table_info(culture_items);"):
+		culture_cols.append(row.name)
+	if not "language_code" in culture_cols:
+		_exec("ALTER TABLE culture_items ADD COLUMN language_code TEXT NOT NULL DEFAULT '';")
+	if not "image" in culture_cols:
+		_exec("ALTER TABLE culture_items ADD COLUMN image TEXT NOT NULL DEFAULT '';")
 
 
 func get_setting(key: String, default_value := "") -> String:
@@ -160,8 +167,9 @@ func _seed_content() -> void:
 	for t in data.tips:
 		_exec("INSERT INTO tips(language_code, tip) VALUES(?, ?);", [t.language_code, t.tip])
 	for c in data.culture_items:
-		_exec("INSERT INTO culture_items(region_code, kind, title, description) VALUES(?, ?, ?, ?);",
-			[c.region_code, c.kind, c.title, c.description])
+		_exec("""INSERT INTO culture_items(region_code, language_code, kind, title, description, image)
+			VALUES(?, ?, ?, ?, ?, ?);""",
+			[c.region_code, c.get("language_code", ""), c.kind, c.title, c.description, c.get("image", "")])
 	for s in data.stories:
 		_exec("INSERT INTO stories(region_code, title, body) VALUES(?, ?, ?);", [s.region_code, s.title, s.body])
 	set_setting("content_version", str(version))

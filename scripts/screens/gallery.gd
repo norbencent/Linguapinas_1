@@ -25,6 +25,7 @@ func _show(region_code: String) -> void:
 	for code in tabs:
 		tabs[code].modulate = Color.WHITE if code == region_code else Color(1, 1, 1, 0.55)
 	for c in list.get_children():
+		list.remove_child(c)
 		c.queue_free()
 	var region := DB.get_region(region_code)
 	var unlocked := DB.get_completed_level_count(Game.user_id(), region_code) > 0
@@ -32,7 +33,17 @@ func _show(region_code: String) -> void:
 		var card := UI.panel(UI.CARD if unlocked else Color("d9d2c2"), Color("8a5a2b") if unlocked else Color("8d8170"))
 		var v := UI.vbox(4)
 		card.add_child(v)
-		v.add_child(UI.pill(item.kind.to_upper(), UI.REGION_COLORS[region_code] if unlocked else Color("8d8170"), 16))
+		var pic := culture_picture(item, 200)
+		if pic:
+			if not unlocked:
+				pic.modulate = Color(0.35, 0.33, 0.3)
+			v.add_child(pic)
+		var tags := UI.hbox(6)
+		v.add_child(tags)
+		tags.add_child(UI.pill(item.kind.to_upper(), UI.REGION_COLORS[region_code] if unlocked else Color("8d8170"), 16))
+		var lang_name: String = DB.get_language(item.get("language_code", "")).get("name", "")
+		if lang_name != "":
+			tags.add_child(UI.pill(lang_name, UI.INK_SOFT if unlocked else Color("8d8170"), 16))
 		if unlocked:
 			v.add_child(UI.label(item.title, 26, UI.RED, true, UI.font_body_black))
 			v.add_child(UI.label(item.description, 18, UI.INK, true))
@@ -40,3 +51,19 @@ func _show(region_code: String) -> void:
 			v.add_child(UI.label("%s · %s" % [UI.t("locked"), item.kind], 24, Color("5f5446"), true, UI.font_body_black))
 			v.add_child(UI.label("Complete a level in %s to unlock." % region.name, 17, Color("5f5446"), true))
 		list.add_child(card)
+
+
+## The item's picture from assets/culture/, or null if there is none.
+static func culture_picture(item: Dictionary, height: int) -> TextureRect:
+	var path := "res://assets/culture/%s.png" % str(item.get("image", ""))
+	if str(item.get("image", "")) == "" or not ResourceLoader.exists(path):
+		return null
+	var r := TextureRect.new()
+	r.texture = load(path)
+	# Full width of the card, height following the picture's shape.
+	r.expand_mode = TextureRect.EXPAND_FIT_HEIGHT_PROPORTIONAL
+	r.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	r.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	r.custom_minimum_size = Vector2(0, height)
+	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return r

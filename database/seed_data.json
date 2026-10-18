@@ -1,5 +1,5 @@
 {
- "version": 1,
+ "version": 2,
  "regions": [
   {
    "code": "luzon",
@@ -1940,117 +1940,427 @@
  "culture_items": [
   {
    "region_code": "luzon",
-   "kind": "Landmark",
-   "title": "Banaue Rice Terraces",
-   "description": "Carved into the mountains of Ifugao by hand around 2,000 years ago. The Rice Terraces of the Philippine Cordilleras are a UNESCO World Heritage Site."
-  },
-  {
-   "region_code": "luzon",
-   "kind": "Landmark",
-   "title": "Mayon Volcano",
-   "description": "Albay's famous volcano, admired for its almost perfect cone shape."
-  },
-  {
-   "region_code": "luzon",
-   "kind": "Heritage",
-   "title": "Vigan",
-   "description": "A Spanish colonial town in Ilocos Sur with cobblestone streets and ancestral houses, listed as a UNESCO World Heritage Site."
-  },
-  {
-   "region_code": "luzon",
+   "language_code": "tl",
    "kind": "Festival",
    "title": "Pahiyas Festival",
-   "description": "Held every May in Lucban, Quezon, to thank San Isidro Labrador for a good harvest. Houses are decorated with colorful kiping (rice wafers)."
+   "description": "Held every May in Lucban, Quezon, to thank San Isidro Labrador for a good harvest. Houses are decorated with colorful kiping (rice wafers).",
+   "image": "pahiyas_festival"
   },
   {
    "region_code": "luzon",
-   "kind": "Food",
-   "title": "Pinakbet",
-   "description": "An Ilocano vegetable dish of squash, eggplant, ampalaya and okra, flavored with bagoong."
-  },
-  {
-   "region_code": "luzon",
-   "kind": "Food",
-   "title": "Bicol Express",
-   "description": "A spicy Bicolano dish of pork cooked in coconut milk with plenty of chili."
-  },
-  {
-   "region_code": "luzon",
+   "language_code": "tl",
    "kind": "Clothing",
    "title": "Barong Tagalog",
-   "description": "The embroidered formal shirt of Filipino men, often woven from piña (pineapple) fiber."
+   "description": "The embroidered formal shirt of Filipino men, often woven from piña (pineapple) fiber.",
+   "image": "barong_tagalog"
+  },
+  {
+   "region_code": "luzon",
+   "language_code": "tl",
+   "kind": "Heritage",
+   "title": "Intramuros",
+   "description": "The old walled city of Manila, built during Spanish rule. Its stone walls, gates and Fort Santiago still stand along the Pasig River.",
+   "image": "intramuros"
+  },
+  {
+   "region_code": "luzon",
+   "language_code": "ilo",
+   "kind": "Heritage",
+   "title": "Vigan",
+   "description": "A Spanish colonial town in Ilocos Sur with cobblestone streets and ancestral houses, listed as a UNESCO World Heritage Site.",
+   "image": "vigan"
+  },
+  {
+   "region_code": "luzon",
+   "language_code": "ilo",
+   "kind": "Food",
+   "title": "Pinakbet",
+   "description": "An Ilocano vegetable dish of squash, eggplant, ampalaya and okra, flavored with bagoong.",
+   "image": "pinakbet"
+  },
+  {
+   "region_code": "luzon",
+   "language_code": "ilo",
+   "kind": "Food",
+   "title": "Vigan Empanada",
+   "description": "A crispy orange rice-flour pastry from Ilocos Sur, filled with egg, green papaya and Vigan longganisa.",
+   "image": "vigan_empanada"
+  },
+  {
+   "region_code": "luzon",
+   "language_code": "pag",
+   "kind": "Food",
+   "title": "Dagupan Bangus",
+   "description": "Dagupan City in Pangasinan is famous for its bangus (milkfish) and holds a yearly Bangus Festival.",
+   "image": "dagupan_bangus"
+  },
+  {
+   "region_code": "luzon",
+   "language_code": "pag",
+   "kind": "Landmark",
+   "title": "Hundred Islands",
+   "description": "A national park in Alaminos, Pangasinan with over a hundred small limestone islands in the Lingayen Gulf.",
+   "image": "hundred_islands"
+  },
+  {
+   "region_code": "luzon",
+   "language_code": "pam",
+   "kind": "Food",
+   "title": "Sisig",
+   "description": "A sizzling dish of chopped pork seasoned with calamansi and chili. It comes from Pampanga, the culinary capital of the Philippines.",
+   "image": "sisig"
+  },
+  {
+   "region_code": "luzon",
+   "language_code": "pam",
+   "kind": "Festival",
+   "title": "Giant Lantern Festival",
+   "description": "Held in San Fernando, Pampanga every December. Huge parol (star lanterns) with thousands of lights flash in time with music.",
+   "image": "giant_lantern_festival"
+  },
+  {
+   "region_code": "luzon",
+   "language_code": "bcl",
+   "kind": "Landmark",
+   "title": "Mayon Volcano",
+   "description": "Albay's famous volcano, admired for its almost perfect cone shape.",
+   "image": "mayon_volcano"
+  },
+  {
+   "region_code": "luzon",
+   "language_code": "bcl",
+   "kind": "Food",
+   "title": "Bicol Express",
+   "description": "A spicy Bicolano dish of pork cooked in coconut milk with plenty of chili.",
+   "image": "bicol_express"
+  },
+  {
+   "region_code": "luzon",
+   "language_code": "ibg",
+   "kind": "Food",
+   "title": "Pancit Batil Patung",
+   "description": "A noodle dish from Tuguegarao, Cagayan, topped with a poached egg, meat and vegetables and served with egg-drop soup.",
+   "image": "pancit_batil_patung"
+  },
+  {
+   "region_code": "luzon",
+   "language_code": "ibg",
+   "kind": "Landmark",
+   "title": "Callao Cave",
+   "description": "A seven-chambered limestone cave in Peñablanca, Cagayan, with a small chapel built inside one of its chambers.",
+   "image": "callao_cave"
+  },
+  {
+   "region_code": "luzon",
+   "language_code": "kne",
+   "kind": "Heritage",
+   "title": "Sagada Hanging Coffins",
+   "description": "In Sagada, Mountain Province, the Kankanaey (Applai) people traditionally placed the coffins of their dead on cliff sides.",
+   "image": "sagada_hanging_coffins"
+  },
+  {
+   "region_code": "luzon",
+   "language_code": "ivv",
+   "kind": "Heritage",
+   "title": "Ivatan Stone Houses",
+   "description": "Thick-walled houses of limestone and coral with cogon roofs, built in Batanes to withstand strong typhoons.",
+   "image": "ivatan_stone_houses"
+  },
+  {
+   "region_code": "luzon",
+   "language_code": "ivv",
+   "kind": "Clothing",
+   "title": "Vakul",
+   "description": "A headgear made from vuyavuy palm fiber, worn by Ivatan women in Batanes to protect them from the sun and rain.",
+   "image": "vakul"
+  },
+  {
+   "region_code": "luzon",
+   "language_code": "ifk",
+   "kind": "Landmark",
+   "title": "Banaue Rice Terraces",
+   "description": "Carved into the mountains of Ifugao by hand by the Ifugao people centuries ago. The Rice Terraces of the Philippine Cordilleras are a UNESCO World Heritage Site.",
+   "image": "banaue_rice_terraces"
+  },
+  {
+   "region_code": "luzon",
+   "language_code": "ifk",
+   "kind": "Heritage",
+   "title": "Hudhud Chants",
+   "description": "Long narrative chants of the Ifugao, sung during rice harvesting, funerals and weddings. UNESCO lists them as Intangible Cultural Heritage.",
+   "image": "hudhud_chants"
+  },
+  {
+   "region_code": "luzon",
+   "language_code": "kal",
+   "kind": "Art",
+   "title": "Batok",
+   "description": "Traditional hand-tapped tattooing of the Kalinga, made with a thorn and soot. Apo Whang-Od of Buscalan is its best-known mambabatok.",
+   "image": "batok"
   },
   {
    "region_code": "visayas",
+   "language_code": "ceb",
    "kind": "Festival",
    "title": "Sinulog",
-   "description": "Cebu's grand January festival honoring the Santo Niño, with dancers moving to the rhythm of drums."
+   "description": "Cebu's grand January festival honoring the Santo Niño, with dancers moving to the rhythm of drums.",
+   "image": "sinulog"
   },
   {
    "region_code": "visayas",
-   "kind": "Festival",
-   "title": "Ati-Atihan",
-   "description": "A festival in Kalibo, Aklan, where participants paint their faces and dance in the streets."
-  },
-  {
-   "region_code": "visayas",
-   "kind": "Festival",
-   "title": "Dinagyang",
-   "description": "Iloilo City's festival featuring energetic warrior-dance performances."
-  },
-  {
-   "region_code": "visayas",
+   "language_code": "ceb",
    "kind": "Landmark",
    "title": "Chocolate Hills",
-   "description": "More than a thousand cone-shaped hills in Bohol that turn brown in the dry season."
+   "description": "More than a thousand cone-shaped hills in Bohol that turn brown in the dry season.",
+   "image": "chocolate_hills"
   },
   {
    "region_code": "visayas",
-   "kind": "Food",
-   "title": "La Paz Batchoy",
-   "description": "A rich noodle soup from Iloilo topped with pork, crushed chicharon and garlic."
-  },
-  {
-   "region_code": "visayas",
+   "language_code": "ceb",
    "kind": "Food",
    "title": "Lechon",
-   "description": "Whole roasted pig. Cebu's version is famous for its crisp skin and herb-stuffed meat."
+   "description": "Whole roasted pig. Cebu's version is famous for its crisp skin and herb-stuffed meat.",
+   "image": "lechon"
+  },
+  {
+   "region_code": "visayas",
+   "language_code": "hil",
+   "kind": "Festival",
+   "title": "Dinagyang",
+   "description": "Iloilo City's festival featuring energetic warrior-dance performances.",
+   "image": "dinagyang"
+  },
+  {
+   "region_code": "visayas",
+   "language_code": "hil",
+   "kind": "Food",
+   "title": "La Paz Batchoy",
+   "description": "A rich noodle soup from Iloilo topped with pork, crushed chicharon and garlic.",
+   "image": "la_paz_batchoy"
+  },
+  {
+   "region_code": "visayas",
+   "language_code": "war",
+   "kind": "Landmark",
+   "title": "San Juanico Bridge",
+   "description": "A bridge over the San Juanico Strait linking the islands of Samar and Leyte. It is the longest bridge over seawater in the Philippines.",
+   "image": "san_juanico_bridge"
+  },
+  {
+   "region_code": "visayas",
+   "language_code": "war",
+   "kind": "Festival",
+   "title": "Pintados Festival",
+   "description": "Held in Tacloban, Leyte. Dancers are painted to look like the tattooed warriors the Spanish called 'pintados'.",
+   "image": "pintados_festival"
+  },
+  {
+   "region_code": "visayas",
+   "language_code": "akl",
+   "kind": "Festival",
+   "title": "Ati-Atihan",
+   "description": "A festival in Kalibo, Aklan, where participants paint their faces and dance in the streets.",
+   "image": "ati_atihan"
+  },
+  {
+   "region_code": "visayas",
+   "language_code": "akl",
+   "kind": "Textile",
+   "title": "Piña Cloth",
+   "description": "A fine, sheer fabric woven in Aklan from pineapple-leaf fibers, often used for the barong Tagalog.",
+   "image": "pi_a_cloth"
+  },
+  {
+   "region_code": "visayas",
+   "language_code": "krj",
+   "kind": "Festival",
+   "title": "Binirayan Festival",
+   "description": "A festival in San Jose de Buenavista, Antique, recalling the legendary arrival of ten Bornean datus on Panay.",
+   "image": "binirayan_festival"
+  },
+  {
+   "region_code": "visayas",
+   "language_code": "cps",
+   "kind": "Craft",
+   "title": "Capiz Shell Windows",
+   "description": "Window panes and lamps made from thin, translucent capiz (windowpane oyster) shells, a craft linked to Capiz province.",
+   "image": "capiz_shell_windows"
+  },
+  {
+   "region_code": "visayas",
+   "language_code": "msb",
+   "kind": "Festival",
+   "title": "Rodeo Masbateño",
+   "description": "A rodeo festival in Masbate, a province of cattle ranches, with lassoing and bull-riding contests.",
+   "image": "rodeo_masbate_o"
+  },
+  {
+   "region_code": "visayas",
+   "language_code": "rol",
+   "kind": "Craft",
+   "title": "Romblon Marble",
+   "description": "Romblon is known for its high-quality marble, carved by local artisans into sculptures, tiles and furniture.",
+   "image": "romblon_marble"
+  },
+  {
+   "region_code": "visayas",
+   "language_code": "cyo",
+   "kind": "Heritage",
+   "title": "Cuyo Fort",
+   "description": "A Spanish-era stone fortress around a church in Cuyo, Palawan, built to protect the town from raids.",
+   "image": "cuyo_fort"
+  },
+  {
+   "region_code": "visayas",
+   "language_code": "prh",
+   "kind": "Landmark",
+   "title": "Lake Danao, Camotes",
+   "description": "A guitar-shaped freshwater lake in San Francisco on the Camotes Islands, where Porohanon is spoken.",
+   "image": "lake_danao_camotes"
   },
   {
    "region_code": "mindanao",
+   "language_code": "bis",
    "kind": "Landmark",
    "title": "Mount Apo",
-   "description": "The highest mountain in the Philippines, rising between Davao and Cotabato."
+   "description": "The highest mountain in the Philippines, rising between Davao and Cotabato.",
+   "image": "mount_apo"
   },
   {
    "region_code": "mindanao",
+   "language_code": "bis",
    "kind": "Festival",
    "title": "Kadayawan",
-   "description": "Davao City's thanksgiving festival celebrating the harvest and its indigenous cultures."
+   "description": "Davao City's thanksgiving festival celebrating the harvest and its indigenous cultures.",
+   "image": "kadayawan"
   },
   {
    "region_code": "mindanao",
-   "kind": "Art",
-   "title": "Okir",
-   "description": "Flowing, curving designs carved in wood and brass by the Maranao and other Mindanao peoples."
+   "language_code": "bis",
+   "kind": "Food",
+   "title": "Durian",
+   "description": "Davao is famous for durian, a spiky fruit with a strong smell and a sweet, creamy taste.",
+   "image": "durian"
   },
   {
    "region_code": "mindanao",
-   "kind": "Textile",
-   "title": "T'nalak",
-   "description": "A sacred abaca cloth woven by T'boli women, whose patterns are said to come to them in dreams."
+   "language_code": "tsg",
+   "kind": "Dance",
+   "title": "Pangalay",
+   "description": "A graceful Tausug dance from Sulu, often performed with long metal fingernail extensions called janggay.",
+   "image": "pangalay"
   },
   {
    "region_code": "mindanao",
-   "kind": "Clothing",
-   "title": "Malong",
-   "description": "A tube-shaped woven cloth worn as a skirt, blanket, or hammock across Mindanao."
-  },
-  {
-   "region_code": "mindanao",
+   "language_code": "mdh",
    "kind": "Food",
    "title": "Pastil",
-   "description": "Steamed rice topped with shredded chicken or beef, wrapped in banana leaf. A Maguindanaon favorite."
+   "description": "Steamed rice topped with shredded chicken or beef, wrapped in banana leaf. A Maguindanaon favorite.",
+   "image": "pastil"
+  },
+  {
+   "region_code": "mindanao",
+   "language_code": "mdh",
+   "kind": "Music",
+   "title": "Kulintang",
+   "description": "A row of small bronze gongs played with drums and larger gongs. The Maguindanaon are known for their kulintang music.",
+   "image": "kulintang"
+  },
+  {
+   "region_code": "mindanao",
+   "language_code": "mrw",
+   "kind": "Art",
+   "title": "Okir",
+   "description": "Flowing, curving designs carved in wood and brass by the Maranao and other Mindanao peoples.",
+   "image": "okir"
+  },
+  {
+   "region_code": "mindanao",
+   "language_code": "mrw",
+   "kind": "Heritage",
+   "title": "Torogan",
+   "description": "The large ancestral house of a Maranao sultan or datu, decorated with carved okir panels and a flared panolong.",
+   "image": "torogan"
+  },
+  {
+   "region_code": "mindanao",
+   "language_code": "mrw",
+   "kind": "Dance",
+   "title": "Singkil",
+   "description": "A Maranao dance in which a dancer steps gracefully between clapping bamboo poles, often while waving fans.",
+   "image": "singkil"
+  },
+  {
+   "region_code": "mindanao",
+   "language_code": "mba",
+   "kind": "Festival",
+   "title": "Kaamulan Festival",
+   "description": "Held in Malaybalay, Bukidnon, it celebrates the cultures of Bukidnon's indigenous groups, including the Higaonon.",
+   "image": "kaamulan_festival"
+  },
+  {
+   "region_code": "mindanao",
+   "language_code": "sgd",
+   "kind": "Landmark",
+   "title": "Siargao",
+   "description": "An island in Surigao del Norte known for its surfing. Its famous wave, Cloud 9, is in General Luna.",
+   "image": "siargao"
+  },
+  {
+   "region_code": "mindanao",
+   "language_code": "sub",
+   "kind": "Heritage",
+   "title": "Buklog",
+   "description": "A Subanen thanksgiving ritual held on a tall bamboo platform. UNESCO lists it as heritage in need of urgent safeguarding.",
+   "image": "buklog"
+  },
+  {
+   "region_code": "mindanao",
+   "language_code": "bla",
+   "kind": "Textile",
+   "title": "Mabal Tabih",
+   "description": "The Blaan art of ikat weaving abaca cloth. Weaver Yabing Masalon Dulo received the National Living Treasures award for it.",
+   "image": "mabal_tabih"
+  },
+  {
+   "region_code": "mindanao",
+   "language_code": "cbk",
+   "kind": "Heritage",
+   "title": "Fort Pilar",
+   "description": "A Spanish-era fort in Zamboanga City, now a shrine and a branch of the National Museum.",
+   "image": "fort_pilar"
+  },
+  {
+   "region_code": "mindanao",
+   "language_code": "cbk",
+   "kind": "Food",
+   "title": "Curacha",
+   "description": "A deep-sea spanner crab that is a specialty of Zamboanga City, often cooked in a rich coconut sauce.",
+   "image": "curacha"
+  },
+  {
+   "region_code": "mindanao",
+   "language_code": "yka",
+   "kind": "Textile",
+   "title": "Yakan Weaving",
+   "description": "The Yakan of Basilan weave brightly colored cloth with bold geometric patterns on backstrap looms.",
+   "image": "yakan_weaving"
+  },
+  {
+   "region_code": "mindanao",
+   "language_code": "",
+   "kind": "Textile",
+   "title": "T'nalak",
+   "description": "A sacred abaca cloth woven by T'boli women, whose patterns are said to come to them in dreams.",
+   "image": "tnalak"
+  },
+  {
+   "region_code": "mindanao",
+   "language_code": "",
+   "kind": "Clothing",
+   "title": "Malong",
+   "description": "A tube-shaped woven cloth worn as a skirt, blanket, or hammock across Mindanao.",
+   "image": "malong"
   }
  ],
  "stories": [

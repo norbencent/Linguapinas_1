@@ -90,7 +90,8 @@ music and sound effects in `assets/audio` were generated for this project.
 | Five-heart system; review the lesson after losing all hearts | Implemented |
 | Rewards: Word Fragments, Phrase Crystals, Cultural Relics | Implemented |
 | Badges and Language Core restoration, Pearl of the Orient | Implemented |
-| Culture Showcase Gallery (food, festivals, clothing, art, landmarks) | Implemented (text; a region's items unlock after completing any level there) |
+| Culture Showcase Gallery (food, festivals, clothing, art, landmarks, dances, music, crafts) | Implemented: 53 items, at least one for each of the 30 languages, each with a picture; a region's items unlock after completing any level there |
+| Culture questions in quizzes | Implemented: 1 per Easy quiz, 2 per Medium and Hard quiz, from the language's and region's culture items |
 | Stories unlocked by restoring cores | Implemented: one story per region plus the Pearl story |
 | Leaderboard (all players on the device, filter by region) | Implemented |
 | Guiding Spirit: offline dictionary, word-by-word gloss, grammar tips, quiz hints | Implemented |
@@ -132,6 +133,15 @@ scripts/screens/*.gd       One script per screen (scenes/*.tscn)
 tests/test_runner.tscn     Automated test
 tools/marian_server/       Optional MarianNMT translation server (Python)
 ```
+
+## Culture pictures
+
+The Gallery pictures in `assets/culture/` are illustrated placeholder cards
+drawn by `tools/art/make_culture_cards.py`. To use a real photo or drawing,
+save it over the card with the same file name (for example
+`assets/culture/sinulog.png`); any size works. Running the script again
+only draws cards that are missing, so your pictures are kept (use `--all`
+to redraw every card).
 
 ## Adding or fixing content
 
