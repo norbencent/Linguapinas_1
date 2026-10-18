@@ -54,6 +54,8 @@ func _ready() -> void:
 		% DB.cost_text(DB.LANGUAGE_COST), 17, UI.INK, true))
 	sv.add_child(UI.wallet(uid))
 	content.add_child(shop)
+	var first_open: Control = null
+	var first_name := ""
 	for lang in DB.get_languages(region.code):
 		var playable := int(lang.playable) == 1
 		var row := UI.row_panel(UI.ROW if playable else Color("e3d8bf"))
@@ -69,10 +71,13 @@ func _ready() -> void:
 		var code: String = lang.code
 		if playable and DB.is_language_unlocked(uid, code):
 			h.add_child(UI.level_gems(DB.get_progress(uid, code)))
-			UI.clickable(row, func():
+			var open := UI.clickable(row, func():
 				Game.language_code = code
 				Game.category_code = ""
 				Game.goto("difficulty"))
+			if first_open == null:
+				first_open = open
+				first_name = lang.name
 		elif playable:
 			row.name = "locked_" + code
 			info.add_child(UI.label("%s · %s" % [UI.t("locked"), DB.cost_text(DB.LANGUAGE_COST)], 16, UI.RED, true))
@@ -85,6 +90,10 @@ func _ready() -> void:
 			info.add_child(UI.label(UI.t("coming_soon"), 16, UI.INK_SOFT))
 		content.add_child(row)
 
+	if first_open:
+		Tutorial.show_steps(self, [{"id": "language_pick", "target": first_open, "wait": true,
+			"text": "%s is free to play! Other languages cost %s, which you earn in Easy quizzes. Tap %s."
+				% [first_name, DB.cost_text(DB.LANGUAGE_COST), first_name.to_upper()]}])
 
 func _add_map(content: VBoxContainer, code: String) -> void:
 	var map := UI.image(UI.tex["lang_map_" + code], Vector2(0, 420))

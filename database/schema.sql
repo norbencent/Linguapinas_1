@@ -148,6 +148,13 @@ CREATE TABLE IF NOT EXISTS unlocked_culture (
     PRIMARY KEY (user_id, title)
 );
 
+-- Tutorial pages a player has already seen ("welcome", "map", "quiz", ...).
+CREATE TABLE IF NOT EXISTS tutorial_seen (
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    key     TEXT NOT NULL,
+    PRIMARY KEY (user_id, key)
+);
+
 -- Badges such as core_luzon, core_visayas, core_mindanao, pearl.
 CREATE TABLE IF NOT EXISTS badges (
     user_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

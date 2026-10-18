@@ -71,7 +71,7 @@ func _ready() -> void:
 	content.add_child(tips_box)
 	_show_tips()
 	_check_server()
-
+	GuidePages.maybe_show(self, "spirit")
 
 func _current_lang() -> String:
 	return lang_codes[lang_picker.selected] if not lang_codes.is_empty() else ""

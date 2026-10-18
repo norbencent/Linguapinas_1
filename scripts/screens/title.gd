@@ -39,7 +39,8 @@ func _ready() -> void:
 	gap.custom_minimum_size = Vector2(0, 90)
 	column.add_child(gap)
 
-	column.add_child(_centered(UI.gem_button(UI.t("start"), "green", _on_start, 130, 50)))
+	var start_button := UI.gem_button(UI.t("start"), "green", _on_start, 130, 50)
+	column.add_child(_centered(start_button))
 	column.add_child(_centered(UI.gem_button(UI.t("setting"), "gold", _on_settings, 130, 50)))
 
 	var version := UI.label("v" + str(ProjectSettings.get_setting("application/config/version", "1.0")), 16, UI.WHITE)
@@ -52,6 +53,8 @@ func _ready() -> void:
 	add_child(version)
 
 	_intro(column)
+	Tutorial.show_steps(self, [{"id": "title_start", "target": start_button, "wait": true,
+		"text": "Mabuhay! Welcome to LinguaPinas. Tap START to begin your adventure."}])
 
 
 func _tagline() -> String:

@@ -16,6 +16,9 @@ var COLORS := {1: UI.GREEN, 2: UI.BLUE, 3: UI.RED}
 var category_codes: Array = [""]
 
 
+var easy_start: Button
+
+
 func _ready() -> void:
 	var lang := DB.get_language(Game.language_code)
 	if lang.is_empty():
@@ -67,6 +70,8 @@ func _ready() -> void:
 			func(): _open(d, "quiz" if p.lesson_done else "lesson"), 60, 26)
 		start.disabled = not unlocked
 		start.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		if d == DB.EASY:
+			easy_start = start
 		buttons.add_child(start)
 		box.add_child(buttons)
 		content.add_child(box)
@@ -77,9 +82,12 @@ func _ready() -> void:
 
 
 	_grammar_section(content, lang, progress)
+	Tutorial.show_steps(self, [{"id": "level_easy", "target": easy_start, "wait": true,
+		"text": "Every language has three levels: EASY, MEDIUM and HARD. Begin with EASY: tap START to open its lesson."}])
 
 
 ## Grammar quiz: opens after Easy, rewards Phrase Crystals.
+
 func _grammar_section(content: VBoxContainer, lang: Dictionary, progress: Dictionary) -> void:
 	var unlocked: bool = progress[DB.EASY].completed
 	var color := Color("6b3fa0") if unlocked else UI.LOCKED

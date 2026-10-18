@@ -76,6 +76,8 @@ music and sound effects in `assets/audio` were generated for this project.
 | New Game (name, optional password, choose a hero) / Continue (saved players) | Implemented (salted SHA-256 password hashes, stored locally) |
 | Settings: Filipino/English interface, music and SFX volume, notifications | Implemented |
 | Profile with name, island, language, fragments, crystals, relics, badges, score, playtime | Implemented |
+| First-time tutorial: the first launch points at START, NEW GAME and the name card; each new player then sees an 8-page welcome story on the map, followed by a guided tour where an animated hand points at what to tap next while the Guiding Spirit explains it (map → island → language → level → lesson → quiz → results). SKIP TUTORIAL any time | Implemented (scripts/autoload/tutorial.gd, scripts/ui/guide_pages.gd), remembered per player in the database |
+| Guide (GABAY button on the map): every topic and the reward guide, with REPLAY TUTORIAL and "show all tips again"; the Gallery and Guiding Spirit show a short tip on the first visit | Implemented |
 | Region selection: Luzon, Visayas, Mindanao | Implemented |
 | 30 languages listed (10 per region) | Implemented |
 | Lessons and quizzes with content | Implemented for 10 languages: Tagalog, Ilocano, Kapampangan, Bikolano, Cebuano, Hiligaynon, Waray-Waray, Bisaya, Tausug, Chavacano. The other 20 show "Coming soon". |
