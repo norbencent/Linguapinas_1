@@ -47,6 +47,7 @@ func _run() -> void:
 	_test_pronunciation_and_grammar()
 	await _test_new_screens()
 	await _test_tutorial()
+	await _test_pearls()
 	await _test_guide_pages()
 	await _test_play_quiz_through_ui()
 	DB.close()
@@ -126,19 +127,19 @@ func _test_progression() -> void:
 	check(DB.get_progress(uid, "tl")[1].best_score == 120, "best score kept")
 	DB.record_quiz(uid, "tl", 2, "", 200, 9, 10, 4, true)
 	var s := DB.record_quiz(uid, "tl", 3, "", 300, 9, 10, 4, true)
-	check("core_luzon" in s.new_badges, "luzon core restored")
-	check(DB.get_restored_cores(uid) == ["luzon"], "only luzon restored")
+	check(s.new_badges.is_empty() and DB.get_restored_cores(uid).is_empty(), "one language does not light the Luzon Pearl")
+	check(DB.get_pearl_progress(uid, "luzon") == {"mastered": 1, "total": 4}, "Luzon pearl progress 1/4")
 	DB.record_quiz(uid, "ceb", 1, "", 100, 9, 10, 4, true)
 	DB.record_quiz(uid, "ceb", 2, "", 100, 9, 10, 4, true)
 	DB.record_quiz(uid, "ceb", 3, "", 100, 9, 10, 4, true)
 	DB.record_quiz(uid, "cbk", 1, "", 100, 9, 10, 4, true)
 	DB.record_quiz(uid, "cbk", 2, "", 100, 9, 10, 4, true)
 	s = DB.record_quiz(uid, "cbk", 3, "", 100, 9, 10, 4, true)
-	check("core_mindanao" in s.new_badges and "pearl" in s.new_badges, "pearl unlocked")
-	check(DB.get_badges(uid).size() == 4, "4 badges")
+	check(s.new_badges.is_empty(), "no pearl lit yet")
 	var rewards := DB.get_rewards(uid)
 	# First clears pay in full; category practice (3 -> 2) and replays (8 -> 4) pay half.
 	check(rewards.word_fragment == 2 + 9 + 4 + 9 + 9, "word fragments counted (%d)" % rewards.word_fragment)
+	check(DB.get_badges(uid).is_empty(), "no badges yet")
 	var maria: int = DB.login_user("maria", "secret2").user.id
 	DB.record_quiz(maria, "hil", 1, "", 150, 10, 10, 5, true)
 	var board := DB.get_leaderboard()
@@ -188,6 +189,7 @@ func _scene_is(screen: String) -> bool:
 
 
 func _test_back_navigation() -> void:
+	Game.last_result.summary.new_badges = []  # no pearl animation in the way
 	# Every screen except the title has a back target, and pressing it
 	# (back button, Esc or Android back all call handle_back) opens a screen.
 	for screen in Game.SCENES:
@@ -652,6 +654,53 @@ func _test_guide_pages() -> void:
 	GuidePages.enabled = false
 
 
+func _test_pearls() -> void:
+	var uid := DB.register_user("pearlhunter", "").user.id as int
+	Game.user = DB.get_user(uid)
+	# Every playable language of an island lights its pearl; all three light the Pearl of the Orient.
+	var lit: Array = []
+	var s := {}
+	for code in ["tl", "ilo", "pam", "bcl", "ceb", "hil", "war", "bis", "tsg", "cbk"]:
+		for d in [1, 2, 3]:
+			s = DB.record_quiz(uid, code, d, "", 100, 9, 10, 4, true)
+			lit.append_array(s.new_badges)
+		if code == "pam":
+			check(lit.is_empty() and DB.get_pearl_progress(uid, "luzon") == {"mastered": 3, "total": 4},
+				"three of four Luzon languages: still dark (3/4)")
+		if code == "bcl":
+			check(lit == ["core_luzon"] and DB.get_restored_cores(uid) == ["luzon"], "all four Luzon languages light the Luzon Pearl")
+		if code == "war":
+			check(lit == ["core_luzon", "core_visayas"], "all three Visayas languages light the Visayas Pearl")
+	check(lit == ["core_luzon", "core_visayas", "core_mindanao", "pearl"], "Mindanao, then the Pearl of the Orient")
+	# The map shows the lit pearls and progress.
+	Game.goto("map")
+	await _frames(3)
+	var map := get_tree().current_scene
+	check(map.find_child("pearl_luzon", true, false).lit and map.find_child("pearl_orient", true, false).lit, "map pearls lit")
+	check(map.find_child("progress_luzon", true, false).text == "4/4", "map shows 4/4")
+	# Results play the animation for each new pearl, one after the other.
+	Game.language_code = "cbk"
+	Game.difficulty = 3
+	Game.category_code = ""
+	Game.last_result = {"passed": true, "score": 100, "correct": 9, "total": 10, "hearts": 4, "summary": s}
+	Game.goto("results")
+	await _frames(3)
+	var c: Control = get_tree().current_scene.find_child("PearlCelebration", true, false)
+	check(c != null and c.badge == "core_mindanao", "Mindanao Pearl animation plays")
+	await get_tree().create_timer(2.2).timeout
+	var pearl: PearlOrb = c.pearl
+	check(pearl.light == 1.0, "the pearl has lit up")
+	check(c.find_child("Sparkles", true, false) != null, "sparkles burst")
+	await _click(c.find_child("continue", true, false))
+	await _frames(3)
+	c = get_tree().current_scene.find_child("PearlCelebration", true, false)
+	check(c != null and c.badge == "pearl", "then the Pearl of the Orient animation")
+	Game.handle_back()
+	await _frames(3)
+	check(get_tree().current_scene.find_child("PearlCelebration", true, false) == null and _scene_is("results"),
+		"the back key closes the animation, staying on results")
+
+
 func _test_play_quiz_through_ui() -> void:
 	var uid := DB.register_user("tester", "secret3").user.id as int
 	Game.user = DB.get_user(uid)
@@ -678,7 +727,8 @@ func _test_play_quiz_through_ui() -> void:
 		check(Game.last_result.passed and Game.last_result.hearts == 4, "difficulty %d passed with 4 hearts" % d)
 		check(Game.last_result.correct == total - 1, "difficulty %d correct count" % d)
 	check(DB.get_mastered_language_count(uid, "visayas") == 1, "waray mastered through the UI")
-	check("core_visayas" in DB.get_badges(uid), "visayas core badge from UI play")
+	check(not "core_visayas" in DB.get_badges(uid) and DB.get_pearl_progress(uid, "visayas").mastered == 1,
+		"one Visayas language is 1/3 of the Visayas Pearl")
 	# Losing all hearts fails the quiz.
 	Game.difficulty = 1
 	Game.goto("quiz")

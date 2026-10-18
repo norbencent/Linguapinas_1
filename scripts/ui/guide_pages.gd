@@ -12,7 +12,7 @@ static var enabled := true
 
 const WELCOME := [
 	{"title": "Mabuhay, Guardian!", "image": "guide_luzon",
-		"text": "I am Maelor, a Guiding Spirit. The three Language Cores of the Philippines (Luzon, Visayas and Mindanao) have gone dark. Learn their languages to make them shine again!"},
+		"text": "I am Maelor, a Guiding Spirit. The three island pearls of the Philippines (the Luzon, Visayas and Mindanao Pearls) have gone dark. Learn their languages to make them shine again!"},
 	{"title": "Three islands, three guides", "image": "guide_visayas",
 		"text": "Tap an island on the Main Island map. Maelor guides you in Luzon, Marea in the Visayas and Lanora in Mindanao. Hover over (or press) an island to preview its language map."},
 	{"title": "Choose a language", "image": "guide_mindanao",
@@ -26,13 +26,13 @@ const WELCOME := [
 	{"title": "Culture and grammar", "image": "guide_luzon",
 		"text": "Clearing a level for the first time reveals a cultural element of that language: its food, festivals, clothing, art, dances and music. After Easy, try the Grammar quiz: the grammar checker shows exactly what to fix."},
 	{"title": "Your goal", "image": "guide_visayas",
-		"text": "Pass Easy, Medium and Hard in one language of an island to restore its Core. Restore all three to unlock the Pearl of the Orient! You can read this guide again any time: tap GABAY on the map."},
+		"text": "Master EVERY language of an island (pass Easy, Medium and Hard in each) to light up its pearl: the Luzon, Visayas and Mindanao Pearls. Light all three to unlock the Pearl of the Orient! You can read this guide again any time: tap GABAY on the map."},
 ]
 
 ## Tips shown the first time a screen opens.
 const SCREEN_TIPS := {
 	"map": [{"title": "The Main Island", "image": "guide_luzon",
-		"text": "The four orbs at the top are the Language Cores and the Pearl; they light up as you restore them. Tap an island to begin. LEADERBOARD, STORIES, GUIDING SPIRIT and GABAY (this guide) are below the map."}],
+		"text": "The four orbs at the top are the island pearls and the Pearl of the Orient. Each island pearl lights up when you master all of its languages; the numbers show your progress. Tap an island to begin. LEADERBOARD, STORIES, GUIDING SPIRIT and GABAY (this guide) are below the map."}],
 	"language": [{"title": "Languages of this island", "image": "guide_visayas",
 		"text": "Tap the map to see where each language is spoken. Tap a language to study it. Locked ones show an UNLOCK button: it turns on when you have 20 Word Fragments."}],
 	"difficulty": [{"title": "Levels", "image": "guide_mindanao",

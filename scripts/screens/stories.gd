@@ -1,5 +1,5 @@
 extends Control
-## Regional stories, unlocked by restoring each Language Core.
+## Regional stories, unlocked by lighting up each island pearl.
 
 
 func _ready() -> void:
@@ -23,7 +23,7 @@ func _ready() -> void:
 		if unlocked:
 			v.add_child(UI.label(story.body, 19, UI.INK, true))
 		elif story.region_code == "pearl":
-			v.add_child(UI.label("Restore all three Language Cores to unlock this story.", 18, Color("5f5446"), true))
+			v.add_child(UI.label("Light all three island pearls to unlock this story.", 18, Color("5f5446"), true))
 		else:
 			v.add_child(UI.label("Restore the %s to unlock this story." % region.core_name, 18, Color("5f5446"), true))
 		content.add_child(card)
