@@ -99,6 +99,8 @@ music and sound effects in `assets/audio` were generated for this project.
 | Culture questions in quizzes | Implemented: 1 per Easy quiz, 2 per Medium and Hard quiz, from the language's and region's culture items |
 | Stories unlocked by lighting the island pearls | Implemented: one story per region plus the Pearl story |
 | Leaderboard (all players on the device, filter by region) | Implemented |
+| Guiding Spirits with their own personality and voice: Maelor (Luzon, a wise elder who loves proverbs), Marea (Visayas, a cheerful sea spirit) and Lanora (Mindanao, a calm weaver of stories). They greet you, react to every answer, give hints, celebrate and comfort you, and say every lesson word and sentence in their own recorded voice | Implemented (database/spirits.json, assets/voice/, SPIRIT VOICE switch in Settings) |
+| Talk to your Guiding Spirit (chat): "How do I say thank you?", "What does kumusta mean?", "Pronounce salamat", "Is this correct: gusto ko tubig", "Tell me about Sinulog", "What should I do next?", in English or Filipino. Answers offline from the dictionary, pronunciation helper, grammar checker, culture items and your progress | Implemented (scripts/spirit_brain.gd) |
 | Guiding Spirit: offline dictionary, word-by-word gloss, grammar tips, quiz hints | Implemented |
 | Guiding Spirit: MarianNMT machine translation | Implemented as an optional local server (see below) |
 | Text-to-speech (Coqui TTS / Tacotron2), TensorFlow Lite / ONNX on device | Not implemented |
@@ -111,6 +113,18 @@ more languages get lessons, they are added to the requirement automatically
 (`is_core_restored` in `scripts/autoload/db.gd`). Lighting all three unlocks
 the Pearl of the Orient. Only "All categories" quizzes unlock levels and count
 on the leaderboard; category practice still earns rewards.
+
+## Spirit voices
+
+The spirits' voices are recorded with eSpeak NG by
+`tools/voice/make_spirit_voices.py` (Philippine languages are read with its
+Indonesian voice, which follows the same spelling rules; Chavacano with its
+Spanish voice). Each spirit has its own pitch, speed and voice in
+`database/spirits.json`. After changing lessons or lines, run the script
+again. To use native speakers' recordings instead, save an `.ogg` over the
+clip listed for that text in `assets/voice/manifest.json`. Text without a
+clip (free answers in the chat) is read by the device's own voice, tuned to
+the spirit, when the device has one.
 
 ## MarianNMT (optional)
 

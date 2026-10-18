@@ -28,6 +28,7 @@ var mark: Control
 var choice_grid: VBoxContainer
 var option_buttons: Array = []
 var stage: BattleStage
+var spirit_said := ""  # the spirit's last reaction (shown under the feedback)
 var native_vocab := {}  # every word of the language's lessons, for the pronunciation helper
 
 ## Quiz backgrounds made for a language (others use the default scene).
@@ -407,6 +408,9 @@ func _use_hint() -> void:
 			var reveal := mini(q.answer.length(), maxi(2, q.answer.length() / 2))
 			typed_edit.placeholder_text = "%s..." % q.answer.substr(0, reveal)
 	hints_left -= 1
+	var hint_region := Spirit.region_of(Game.language_code)
+	feedback_label.text = "%s: %s" % [Spirit.spirit_name(hint_region), Spirit.speak_line(hint_region, "hint")]
+	feedback_label.add_theme_color_override("font_color", Color("5a3591"))
 	hint_used_on_question = true
 	_refresh_bar()
 
@@ -443,6 +447,10 @@ func _answer(given: String) -> void:
 		else:
 			feedback_label.text = "Grammar check:\n" + "\n".join(lines)
 		explain_label.text = "%s: %s\n%s" % ["Correct sentence", q.answer, q.explain]
+	# The island's Guiding Spirit reacts, in its own voice and personality.
+	var region := Spirit.region_of(Game.language_code)
+	spirit_said = Spirit.speak_line(region, "correct" if ok else "wrong")
+	feedback_label.text += "\n%s: %s" % [Spirit.spirit_name(region), spirit_said]
 	for b in option_buttons:
 		b.disabled = true
 		b.modulate = Color.WHITE
