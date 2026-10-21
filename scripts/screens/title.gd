@@ -11,6 +11,11 @@ var _logo: TextureRect
 func _ready() -> void:
 	UI.background(self)
 	_badge()
+	if DB.recovered:
+		# Reliability: say so when a damaged save was replaced by a backup.
+		DB.recovered = false
+		UI.message.call_deferred(self, "Progress restored",
+			"The saved game data was damaged, so LINGUAPINAS restored it from the newest backup.")
 
 	var column := VBoxContainer.new()
 	column.set_anchors_preset(Control.PRESET_FULL_RECT)

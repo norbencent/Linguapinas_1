@@ -59,7 +59,7 @@ const SCREEN_TIPS := {
 	"profile": [{"title": "Your profile", "image": "guide_visayas",
 		"text": "Your hero, play time, rewards, badges and the levels you have passed in each language. GALLERY and SETTINGS are here too, and LOGOUT lets another player use the game."}],
 	"settings": [{"title": "Settings", "image": "guide_mindanao",
-		"text": "Choose Filipino or English for the game, set the music and sound volume, turn notices and your Guiding Spirit's voice on or off, then tap SAVE. EXIT leaves without changing anything."}],
+		"text": "Choose Filipino or English for the game, set the music and sound volume, turn notices and your Guiding Spirit's voice on or off, then tap SAVE. EXIT leaves without changing anything. SYSTEM has text size, battery saver, break reminders, backups and information about the game."}],
 	"controls": [
 		{"title": "Moving around", "image": "guide_luzon",
 			"text": "The bar at the bottom of most screens has HOME (the Main Island map), GALLERY, BACK and PROFILE. The arrow at the top left also goes back."},
@@ -75,7 +75,9 @@ const SCREEN_TIPS := {
 	"pearls": [{"title": "Island pearls", "image": "guide_mindanao",
 		"text": "A pearl lights up only when EVERY language of its island is mastered (Easy, Medium and Hard passed). Watch it glow on the map! Light Luzon, Visayas and Mindanao to awaken the Pearl of the Orient."}],
 	"saving": [{"title": "Saving and players", "image": "guide_luzon",
-		"text": "The game saves by itself after every lesson and quiz, and works without the internet. Each Guardian has their own progress. Use CONTINUE on the menu to pick your Guardian; the delete button there removes a Guardian and all of their progress."}],
+		"text": "The game saves by itself after every lesson and quiz, and works without the internet. Each Guardian has their own progress. Use CONTINUE on the menu to pick your Guardian; the delete button there removes a Guardian and all of their progress."},
+		{"title": "Backups and the SYSTEM page", "image": "guide_visayas",
+			"text": "A backup is made every day and before a Guardian is deleted. Settings > SYSTEM can check the game data, make a backup, restore one, change the text size, save battery, and remind you to take a break."}],
 }
 
 ## Topics listed on the Guide screen.

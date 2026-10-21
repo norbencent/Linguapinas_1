@@ -51,6 +51,7 @@ func _run() -> void:
 	await _test_spirits()
 	await _test_guide_pages()
 	await _test_play_quiz_through_ui()
+	await _test_quality()
 	DB.close()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_DB))
 	print("%d checks, %d failures" % [checks, failures])
@@ -372,6 +373,7 @@ func _test_battle_stage() -> void:
 	quiz._answer("definitely wrong")
 	await _frames(2)
 	check(quiz.stage.enemy.animation == "attack", "wrong answer makes the warrior attack")
+	Game.leave_warning = Callable()  # the test leaves the quiz half-way
 
 
 func _test_culture() -> void:
@@ -808,6 +810,7 @@ func _test_spirits() -> void:
 	quiz._answer(quiz.questions[0].answer)
 	check("Maelor:" in quiz.feedback_label.text and quiz.spirit_said != "", "Maelor reacts to a right answer")
 	Spirit.stop()
+	Game.leave_warning = Callable()  # the test leaves the quiz half-way
 
 
 func _test_play_quiz_through_ui() -> void:
@@ -850,3 +853,146 @@ func _test_play_quiz_through_ui() -> void:
 	await _frames()
 	check(not Game.last_result.passed, "quiz failed after losing all hearts")
 
+
+## ISO/IEC 25010 qualities built into the game.
+func _test_quality() -> void:
+	var uid := DB.register_user("quality", "").user.id as int
+	Game.user = DB.get_user(uid)
+	# Performance efficiency: every screen opens quickly.
+	Game.region_code = "luzon"
+	Game.language_code = "tl"
+	Game.difficulty = 1
+	Game.category_code = ""
+	var slowest := 0
+	var slow_name := ""
+	for screen in ["map", "island", "language", "difficulty", "lesson", "gallery", "spirit", "profile", "leaderboard", "guide", "system"]:
+		var t0 := Time.get_ticks_msec()
+		Game.goto(screen)
+		await _frames(2)
+		var ms := Time.get_ticks_msec() - t0
+		if ms > slowest:
+			slowest = ms
+			slow_name = screen
+	check(slowest < 2000, "every screen opens in under 2 s (slowest: %s %d ms)" % [slow_name, slowest])
+
+	# Interaction capability and performance: text size and battery saver.
+	Game.goto("settings")
+	await _frames()
+	await _click(get_tree().current_scene.find_child("system", true, false))
+	await _frames(3)
+	check(_scene_is("system"), "Settings opens SYSTEM")
+	var sys := get_tree().current_scene
+	sys.size_picker.select(1)
+	sys.size_picker.item_selected.emit(1)
+	check(Game.text_size() == "large" and is_equal_approx(get_tree().root.content_scale_factor, 1.12), "large text scales the interface")
+	sys.saver.button_pressed = true
+	check(Game.battery_saver_on() and Engine.max_fps == 30, "battery saver caps the frame rate")
+	sys.size_picker.select(0)
+	sys.size_picker.item_selected.emit(0)
+	sys.saver.button_pressed = false
+	check(is_equal_approx(get_tree().root.content_scale_factor, 1.0) and Engine.max_fps == 0, "display back to normal")
+	check(sys.find_child("version", true, false).text.begins_with("Version"), "SYSTEM shows the version")
+
+	# Reliability: the data check passes, and a bad row is found.
+	var r: Dictionary = sys._check()
+	check(r.ok and r.checked.size() >= 7, "game data check passes (%s)" % str(r.problems))
+	DB._exec("UPDATE rewards SET amount = -5 WHERE user_id = ?;", [uid])
+	DB.add_reward(uid, "word_fragment", 1)
+	DB._exec("UPDATE rewards SET amount = -5 WHERE user_id = ?;", [uid])
+	check(not DB.verify_data().ok, "the data check finds a negative reward")
+	DB._exec("UPDATE rewards SET amount = 0 WHERE user_id = ?;", [uid])
+
+	# Safety: backups before deleting a player, and restoring them.
+	var before := DB.list_backups().size()
+	var gone := DB.register_user("oops", "").user.id as int
+	DB.add_reward(gone, "word_fragment", 7)
+	check(DB.delete_user(gone), "player deleted")
+	var backups := DB.list_backups()
+	check(backups.size() > 0 and "before-delete" in backups[0] and backups.size() <= DB.BACKUPS_KEPT, "a backup is made before deleting a player")
+	check("(before deleting a player)" in DB.backup_label(backups[0]), "backup label explains it")
+	Game.goto("system")
+	await _frames(3)
+	sys = get_tree().current_scene
+	check(sys.find_child("restore_0", true, false) != null, "SYSTEM lists the backups")
+	sys._confirm_restore(backups[0])
+	await _frames(1)
+	check(sys.find_child("RestoreConfirm", true, false) != null, "restoring asks first")
+	check(sys.restore(backups[0]), "backup restored")
+	await _frames(3)
+	var back: Dictionary = DB.login_user("oops", "")
+	check(back.ok and DB.get_rewards(back.user.id).word_fragment == 7, "the deleted player is back with their rewards")
+	check(_scene_is("title") and not Game.is_logged_in(), "after a restore the player chooses again")
+	check(DB.list_backups().any(func(b): return "before-restore" in b), "the restore itself can be undone")
+	DB.delete_user(back.user.id)
+	Game.user = DB.get_user(uid)
+
+	# Reliability: a damaged database is replaced by the newest backup.
+	var path := "user://quality_check.db"
+	DB.open(path)
+	DB.register_user("saved", "")
+	DB.backup_now()
+	DB.close()
+	var f := FileAccess.open(path, FileAccess.WRITE)
+	f.store_string("this is not a database".repeat(200))
+	f.close()
+	check(DB.open(path) and DB.recovered, "damaged save detected and restored from the backup")
+	check(DB.login_user("saved", "").ok, "the restored data has the player")
+	for b in DB.list_backups():
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(b))
+	DB.close()
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	DB.open(TEST_DB)
+	DB.recovered = false
+	Game.user = DB.get_user(uid)
+
+	# Safety: leaving a quiz half-way asks first; STAY keeps the quiz.
+	Game.goto("quiz")
+	await _frames(3)
+	var quiz := get_tree().current_scene
+	Game.goto("map")
+	await _frames(2)
+	check(_scene_is("map"), "nothing to lose before answering: the quiz is left freely")
+	Game.goto("quiz")
+	await _frames(3)
+	quiz = get_tree().current_scene
+	quiz._answer(quiz.questions[0].answer)
+	Game.handle_back()
+	await _frames(2)
+	var warn := quiz.find_child("LeaveWarning", true, false)
+	check(_scene_is("quiz") and warn != null, "leaving a quiz half-way asks first")
+	warn.canceled.emit()
+	await _frames(2)
+	check(_scene_is("quiz"), "STAY keeps the quiz")
+	Game.goto("map")
+	await _frames(2)
+	quiz.find_child("LeaveWarning", true, false).confirmed.emit()
+	await _frames(3)
+	check(_scene_is("map"), "LEAVE leaves the quiz")
+	check(not Game.leave_warning.is_valid(), "the warning is cleared after leaving")
+
+	# Safety: break reminder after 30 minutes of play.
+	Game._break_timer = Game.BREAK_EVERY - 0.01
+	await _frames(3)
+	check(get_tree().current_scene.find_children("*", "AcceptDialog", true, false).size() > 0, "break reminder shown")
+	DB.set_setting("break_reminder", "0")
+	Game.goto("map")
+	await _frames(2)
+	Game._break_timer = Game.BREAK_EVERY - 0.01
+	await _frames(3)
+	check(get_tree().current_scene.find_children("*", "AcceptDialog", true, false).is_empty(), "break reminder can be turned off")
+	DB.set_setting("break_reminder", "1")
+
+	# Compatibility: the game goes quiet in the background and comes back.
+	Sound.set_background(true)
+	check(Sound.in_background and not Spirit.voice.playing, "sound and voices pause in the background")
+	Sound.set_background(false)
+	check(not Sound.in_background, "sound resumes")
+
+	# Security: deleted data is overwritten, passwords are hashed.
+	check(str(DB._select("PRAGMA secure_delete;")[0].values()[0]) == "1", "secure delete is on")
+	var pw: Dictionary = DB.register_user("secretive", "hunter22").user
+	var row := DB._select_one("SELECT password_hash FROM users WHERE id = ?;", [pw.id])
+	check(not "hunter22" in str(row) and str(row.password_hash).length() == 64, "password stored only as a hash")
+	DB.delete_user(pw.id)
+	for b in DB.list_backups():
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(b))

@@ -20,6 +20,7 @@ const SCENES := {
 	"spirit": "res://scenes/guiding_spirit.tscn",
 	"profile": "res://scenes/profile.tscn",
 	"guide": "res://scenes/guide.tscn",
+	"system": "res://scenes/system.tscn",
 }
 
 const MAX_HEARTS := 5
@@ -38,7 +39,7 @@ var last_result: Dictionary = {}  # filled by the quiz for the results screen
 var settings_return := "title"   # where Settings' Exit button goes
 
 ## Screens that can be opened without a player.
-const PUBLIC_SCREENS := ["title", "menu", "new_game", "continue", "settings"]
+const PUBLIC_SCREENS := ["title", "menu", "new_game", "continue", "settings", "system"]
 const PLAYTIME_SAVE_EVERY := 30.0
 var _unsaved_playtime := 0.0
 
@@ -67,12 +68,54 @@ func _process(delta: float) -> void:
 	_unsaved_playtime += delta
 	if _unsaved_playtime >= PLAYTIME_SAVE_EVERY:
 		save_playtime()
+	_break_timer += delta
+	if _break_timer >= BREAK_EVERY:
+		_break_timer = 0.0
+		if break_reminder_on() and get_tree().current_scene:
+			UI.message(get_tree().current_scene, "Time for a short break",
+				"You have been playing for %d minutes. Rest your eyes, stretch, and drink some water. Your progress is saved." % int(BREAK_EVERY / 60))
 
 
 func _ready() -> void:
 	# The Android back key goes back a screen instead of closing the app.
 	get_tree().quit_on_go_back = false
+	apply_display()
 	_fit_window.call_deferred()
+
+
+# ---------------------------------------------------------------- comfort and display
+
+## Safety: a reminder to rest after this much continuous play.
+const BREAK_EVERY := 30.0 * 60.0
+var _break_timer := 0.0
+## Interaction capability: "Large" text scales the whole interface up.
+const TEXT_SCALE := {"normal": 1.0, "large": 1.12}
+
+
+func break_reminder_on() -> bool:
+	return DB.get_setting("break_reminder", "1") == "1"
+
+
+func text_size() -> String:
+	var s := DB.get_setting("text_size", "normal")
+	return s if TEXT_SCALE.has(s) else "normal"
+
+
+func battery_saver_on() -> bool:
+	return DB.get_setting("battery_saver", "0") == "1"
+
+
+## Performance efficiency: the battery saver caps the frame rate at 30.
+func apply_display() -> void:
+	get_tree().root.content_scale_factor = TEXT_SCALE[text_size()]
+	Engine.max_fps = 30 if battery_saver_on() else 0
+
+
+func save_display(size: String, saver: bool, reminder: bool) -> void:
+	DB.set_setting("text_size", size if TEXT_SCALE.has(size) else "normal")
+	DB.set_setting("battery_saver", "1" if saver else "0")
+	DB.set_setting("break_reminder", "1" if reminder else "0")
+	apply_display()
 
 
 ## On a PC, sizes the portrait window to the screen: as tall as fits above
@@ -101,6 +144,10 @@ func _fit_window() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_APPLICATION_PAUSED:
 		save_playtime()
+	if what == NOTIFICATION_APPLICATION_PAUSED:
+		Sound.set_background(true)  # compatibility: stay quiet behind other apps
+	elif what == NOTIFICATION_APPLICATION_RESUMED:
+		Sound.set_background(false)
 	elif what == NOTIFICATION_WM_GO_BACK_REQUEST:
 		handle_back()
 
@@ -160,8 +207,19 @@ func logout() -> void:
 	goto("title", false)
 
 
+## Safety: a screen that would lose the player's work if left (the quiz)
+## sets this to a Callable returning a warning ("" = safe to leave).
+var leave_warning: Callable = Callable()
+
+
 ## Opens a screen. remember=false skips the history (used when going back).
 func goto(screen: String, remember := true) -> void:
+	if leave_warning.is_valid() and screen != current_screen:
+		var warning: String = leave_warning.call()
+		if warning != "" and get_tree().current_scene:
+			_confirm_leave(warning, screen, remember)
+			return
+	leave_warning = Callable()
 	if not screen in PUBLIC_SCREENS and not is_logged_in():
 		screen = "title"
 	if screen == "title":
@@ -174,6 +232,28 @@ func goto(screen: String, remember := true) -> void:
 	back_action = null
 	overlays.clear()
 	get_tree().change_scene_to_file(SCENES[screen])
+
+
+func _confirm_leave(warning: String, screen: String, remember: bool) -> void:
+	var scene := get_tree().current_scene
+	var old := scene.get_node_or_null("LeaveWarning")
+	if old:
+		scene.remove_child(old)
+		old.queue_free()
+	var d := ConfirmationDialog.new()
+	d.name = "LeaveWarning"
+	d.title = "Are you sure?"
+	d.dialog_text = warning
+	d.dialog_autowrap = true
+	d.min_size = Vector2i(560, 0)
+	d.ok_button_text = "LEAVE"
+	d.cancel_button_text = "STAY"
+	scene.add_child(d)
+	d.confirmed.connect(func():
+		leave_warning = Callable()
+		goto(screen, remember))
+	d.canceled.connect(d.queue_free)
+	d.popup_centered()
 
 
 ## Registers where the current screen's back button goes.

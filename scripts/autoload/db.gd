@@ -31,6 +31,10 @@ const REPLAY_REWARD_SHARE := 0.5
 
 var db: SQLite
 var db_path := DEFAULT_DB_PATH
+## True when the database was damaged at startup and restored from a backup.
+var recovered := false
+## Automatic backups kept per database file.
+const BACKUPS_KEPT := 7
 var last_error := ""
 
 
@@ -46,17 +50,31 @@ func _exit_tree() -> void:
 func open(path: String) -> bool:
 	close()
 	db_path = path
+	recovered = false
+	# Reliability: a damaged database is replaced by the newest good backup.
+	if not _open_file() or not _structure_ok():
+		recovered = _recover_from_backup()
+		if db == null:
+			return false
+	# Security: deleted rows (e.g. a deleted player) are overwritten on disk.
+	_exec("PRAGMA secure_delete = ON;")
+	_create_schema()
+	_migrate()
+	_seed_content()
+	backup_if_due()
+	return true
+
+
+func _open_file() -> bool:
 	db = SQLite.new()
-	db.path = path
+	db.path = db_path
 	db.foreign_keys = true
 	db.verbosity_level = SQLite.QUIET
 	if not db.open_db():
 		last_error = "Could not open database: %s" % db.error_message
 		push_error(last_error)
+		db = null
 		return false
-	_create_schema()
-	_migrate()
-	_seed_content()
 	return true
 
 
@@ -244,6 +262,8 @@ func get_users() -> Array:
 func delete_user(user_id: int) -> bool:
 	if get_user(user_id).is_empty():
 		return false
+	# Safety: a deleted player can be brought back from Settings > SYSTEM.
+	backup_now("_before-delete")
 	if not _exec("BEGIN;"):
 		return false
 	var ok := true
@@ -649,3 +669,136 @@ func get_total_score(user_id: int) -> int:
 	var row := _select_one("SELECT COALESCE(SUM(best_score), 0) AS s FROM progress WHERE user_id = ? AND completed = 1;", [user_id])
 	return int(row.get("s", 0))
 
+
+# ---------------------------------------------------------------- data integrity
+#
+# - SQLite checks the file itself (PRAGMA quick_check) every time the game
+#   starts; a damaged file is replaced by the newest good backup.
+# - verify_data() also checks every link between tables (foreign keys) and
+#   the game's own rules (no negative rewards, levels 1-3, scores in range).
+# - Changes that touch several tables run in one transaction
+#   (record_quiz, delete_user).
+# - A backup is made once a day and before a player is deleted (VACUUM INTO
+#   makes a consistent copy); the newest BACKUPS_KEPT are kept.
+
+func _structure_ok() -> bool:
+	var rows := _select("PRAGMA quick_check;")
+	return not rows.is_empty() and str(rows[0].values()[0]) == "ok"
+
+
+## Full check. Returns {"ok": bool, "problems": Array, "checked": Array}.
+func verify_data() -> Dictionary:
+	var problems: Array = []
+	var checked: Array = ["Database file structure"]
+	var integrity := _select("PRAGMA integrity_check;")
+	if integrity.is_empty() or str(integrity[0].values()[0]) != "ok":
+		problems.append("The database file is damaged.")
+	checked.append("Links between tables")
+	var fk := _select("PRAGMA foreign_key_check;")
+	if not fk.is_empty():
+		problems.append("%d rows point to missing records." % fk.size())
+	var rules := [
+		["Rewards are never negative", "SELECT COUNT(*) AS n FROM rewards WHERE amount < 0;"],
+		["Levels are Easy, Medium or Hard", "SELECT COUNT(*) AS n FROM progress WHERE difficulty NOT IN (1, 2, 3);"],
+		["Quiz results are in range", "SELECT COUNT(*) AS n FROM quiz_attempts WHERE score < 0 OR correct < 0 OR correct > total OR hearts_left < 0 OR hearts_left > 5;"],
+		["Every saved record belongs to a player", """SELECT (SELECT COUNT(*) FROM progress WHERE user_id NOT IN (SELECT id FROM users))
+			+ (SELECT COUNT(*) FROM rewards WHERE user_id NOT IN (SELECT id FROM users))
+			+ (SELECT COUNT(*) FROM quiz_attempts WHERE user_id NOT IN (SELECT id FROM users)) AS n;"""],
+		["Passwords are stored only as salted hashes", "SELECT COUNT(*) AS n FROM users WHERE length(password_hash) != 64 OR salt = '';"],
+		["Lesson content is complete", "SELECT CASE WHEN (SELECT COUNT(*) FROM words) > 0 AND (SELECT COUNT(*) FROM sentences) > 0 THEN 0 ELSE 1 END AS n;"],
+	]
+	for r in rules:
+		checked.append(r[0])
+		var n := int(_select_one(r[1]).get("n", 0))
+		if n > 0:
+			problems.append("%s: %d problem%s." % [r[0], n, "" if n == 1 else "s"])
+	return {"ok": problems.is_empty(), "problems": problems, "checked": checked}
+
+
+func _backup_dir() -> String:
+	return db_path.get_base_dir().path_join("backups")
+
+
+func _backup_prefix() -> String:
+	return db_path.get_file().get_basename() + "_"
+
+
+## Backup files of this database, newest first.
+func list_backups() -> Array:
+	var dir := DirAccess.open(_backup_dir())
+	if dir == null:
+		return []
+	var out: Array = []
+	for f in dir.get_files():
+		if f.begins_with(_backup_prefix()) and f.ends_with(".db"):
+			out.append(_backup_dir().path_join(f))
+	out.sort()
+	out.reverse()
+	return out
+
+
+## "linguapinas_2026-10-21_08-30-00_before-delete.db" -> "2026-10-21 08:30 (before deleting a player)"
+func backup_label(path: String) -> String:
+	var name := path.get_file().get_basename().trim_prefix(_backup_prefix())
+	var parts := name.split("_")
+	var text := name
+	if parts.size() >= 2:
+		text = "%s %s" % [parts[0], parts[1].substr(0, 5).replace("-", ":")]
+	if "before-delete" in name:
+		text += " (before deleting a player)"
+	elif "before-restore" in name:
+		text += " (before a restore)"
+	return text
+
+
+## Makes a consistent copy of the database now. Returns the backup path or "".
+func backup_now(tag := "") -> String:
+	if db == null:
+		return ""
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(_backup_dir()))
+	var stamp := Time.get_datetime_string_from_system().replace(":", "-").replace("T", "_")
+	var path := _backup_dir().path_join("%s%s%s.db" % [_backup_prefix(), stamp, tag])
+	var target := ProjectSettings.globalize_path(path)
+	if FileAccess.file_exists(path):
+		DirAccess.remove_absolute(target)
+	if not _exec("VACUUM INTO '%s';" % target.replace("'", "''")):
+		return ""
+	for old in list_backups().slice(BACKUPS_KEPT):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(old))
+	set_setting("last_backup", Time.get_datetime_string_from_system(false, true))
+	return path
+
+
+## Once a day.
+func backup_if_due() -> void:
+	if not get_setting("last_backup", "").begins_with(Time.get_date_string_from_system()):
+		backup_now()
+
+
+## Replaces the database with [param path] (a backup). The current data is
+## backed up first, so a restore can be undone.
+func restore_backup(path: String) -> bool:
+	if not FileAccess.file_exists(path):
+		return false
+	var copy := ProjectSettings.globalize_path(path) + ".restoring"
+	DirAccess.copy_absolute(ProjectSettings.globalize_path(path), copy)  # the backup list may drop it
+	backup_now("_before-restore")
+	close()
+	var err := DirAccess.copy_absolute(copy, ProjectSettings.globalize_path(db_path))
+	DirAccess.remove_absolute(copy)
+	return open(db_path) and err == OK and not recovered
+
+
+## Tries the backups, newest first. With no good backup the damaged file is
+## kept aside (".damaged") and a new database is started.
+func _recover_from_backup() -> bool:
+	var target := ProjectSettings.globalize_path(db_path)
+	for path in list_backups():
+		close()
+		if DirAccess.copy_absolute(ProjectSettings.globalize_path(path), target) == OK and _open_file() and _structure_ok():
+			return true
+	close()
+	if FileAccess.file_exists(db_path):
+		DirAccess.rename_absolute(target, target + ".damaged")
+	_open_file()
+	return false
