@@ -51,6 +51,7 @@ func _run() -> void:
 	await _test_spirits()
 	await _test_guide_pages()
 	await _test_play_quiz_through_ui()
+	await _test_survey()
 	DB.close()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_DB))
 	print("%d checks, %d failures" % [checks, failures])
@@ -590,6 +591,18 @@ func _test_tutorial() -> void:
 	check(Tutorial.current_step() == "results_rewards", "results step")
 	await _click(_tutorial_button("got_it"))
 	await _frames(3)
+	check(Tutorial.current_step() == "results_home", "then HOME is pointed at")
+	await _click(get_tree().current_scene.find_child("nav_home", true, false))
+	await _frames(5)
+	check(_scene_is("map") and Tutorial.current_step() == "map_pearls", "back on the map, the tour shows the pearls")
+	for step in ["map_spirit", "map_more", "nav_gallery", "nav_profile", "map_settings", "map_guide"]:
+		await _click(_tutorial_button("got_it"))
+		await _frames(3)
+		check(Tutorial.current_step() == step, "map tour step %s" % step)
+		check(Tutorial._target_rect().size != Vector2.ZERO, "map tour step %s points at something" % step)
+	check(Tutorial.is_active(), "tutorial still running until the last step")
+	await _click(_tutorial_button("got_it"))
+	await _frames(3)
 	check(not Tutorial.is_active(), "tutorial finished")
 	Game.goto("map")
 	await _frames(4)
@@ -645,6 +658,31 @@ func _test_guide_pages() -> void:
 	check(get_tree().current_scene.find_child("TutorialPopup", true, false) == null, "the back key closes the pages")
 	await _click(get_tree().current_scene.find_child("reset_tips", true, false))
 	check(not DB.has_seen_tutorial(uid, "quiz") and DB.has_seen_tutorial(uid, "welcome"), "tips reset (welcome kept)")
+	# More screens explain themselves on the first visit.
+	for key in ["leaderboard", "stories", "profile", "settings"]:
+		Game.goto(key)
+		await _frames(3)
+		check(get_tree().current_scene.find_child("TutorialPopup", true, false) != null, "%s tip on first visit" % key)
+		Game.handle_back()
+		await _frames(2)
+	for topic in GuidePages.GUIDE_TOPICS:
+		check(not GuidePages.pages_for(topic[1]).is_empty(), "guide topic %s has pages" % topic[1])
+	# Getting Started checklist.
+	var steps := DB.getting_started(uid)
+	check(steps.size() == 12 and steps[0][1] and not steps[2][1], "checklist starts with only the Guardian created")
+	check(steps[5][1] and steps[4][1], "visiting the Gallery and the Guiding Spirit is checked")
+	DB.mark_lesson_done(uid, "tl", 1)
+	DB.record_quiz(uid, "tl", 1, "", 100, 10, 10, 5, true)
+	steps = DB.getting_started(uid)
+	check(steps[1][1] and steps[2][1] and steps[3][1], "lesson, Easy quiz and culture checked off")
+	Game.goto("guide")
+	await _frames(3)
+	var list := get_tree().current_scene.find_child("checklist", true, false)
+	check(list != null and "do this next" in str(list.find_children("*", "Label", true, false).map(func(l): return l.text)),
+		"the Guide shows the checklist and what to do next")
+	DB.reset_tutorials(uid)
+	check(DB.getting_started(uid)[4][1], "showing tips again keeps the checklist")
+	DB.mark_tutorial_seen(uid, "welcome")
 	# A brand-new player's screen tips wait for the welcome walkthrough.
 	var other := DB.register_user("newcomer", "").user.id as int
 	Game.user = DB.get_user(other)
@@ -812,3 +850,87 @@ func _test_play_quiz_through_ui() -> void:
 		await _frames(1)
 	await _frames()
 	check(not Game.last_result.passed, "quiz failed after losing all hearts")
+
+
+func _test_survey() -> void:
+	var items := DB.survey_items()
+	check(DB.survey().criteria.size() == 9, "survey has 9 criteria")
+	check(items.size() == 27, "survey has 27 statements")
+	check(items[0].code == "1.1" and items[26].code == "9.3", "statements numbered 1.1 to 9.3")
+	check(DB.survey_report().respondents == 0, "no survey answers yet")
+	# Incomplete or invalid answers are refused and nothing is saved.
+	var all4 := {}
+	for it in items:
+		all4[it.code] = 4
+	check(not DB.save_survey(0, "", all4).ok, "survey needs a respondent type")
+	var missing := all4.duplicate()
+	missing.erase("9.3")
+	check(not DB.save_survey(0, "Student", missing).ok, "survey needs every statement")
+	var bad := all4.duplicate()
+	bad["1.1"] = 6
+	check(not DB.save_survey(0, "Student", bad).ok, "survey answers must be 1-5")
+	check(DB.survey_report().respondents == 0, "refused answers are not saved")
+	# Weighted mean: 4, 4 and 5 -> 4.33 (Excellent).
+	check(DB.save_survey(0, "Student", all4).ok, "survey saved")
+	check(DB.save_survey(Game.user_id(), "Teacher", all4, "Nice game").ok, "second survey saved")
+	var all5 := {}
+	for it in items:
+		all5[it.code] = 5
+	check(DB.save_survey(0, "IT Expert", all5).ok, "third survey saved")
+	var rep := DB.survey_report(1)
+	check(rep.respondents == 3, "3 respondents in round 1")
+	check(absf(rep.criteria[0].items[0].mean - 13.0 / 3.0) < 0.001, "weighted mean of 1.1 is 4.33")
+	check(absf(rep.overall - 13.0 / 3.0) < 0.001, "overall weighted mean is 4.33")
+	check(rep.overall_interpretation.begins_with("Excellent"), "4.33 is Excellent")
+	check(DB.interpret(3.41).begins_with("Very Good") and DB.interpret(3.40).begins_with("Good")
+		and DB.interpret(1.80).begins_with("Poor"), "interpretation ranges")
+	check(DB.survey_report(1, "Teacher").respondents == 1, "results by respondent type")
+	# Re-survey: a new round keeps the old answers apart.
+	check(DB.start_new_survey_round() == 2, "re-survey starts round 2")
+	var all3 := {}
+	for it in items:
+		all3[it.code] = 3
+	check(DB.save_survey(0, "Student", all3).ok, "round 2 survey saved")
+	check(DB.survey_rounds() == [1, 2], "two survey rounds")
+	check(absf(DB.survey_report(2).overall - 3.0) < 0.001, "round 2 mean is separate")
+	check(DB.survey_report(0).respondents == 4, "all rounds together")
+	var paths := DB.export_evaluation("user://evaluation_test")
+	check(paths.size() == 2 and FileAccess.file_exists(paths[0]) and FileAccess.file_exists(paths[1]), "evaluation exported as CSV")
+	var csv := FileAccess.get_file_as_string(paths[0])
+	check("FUNCTIONAL SUITABILITY" in csv and "4.33" in csv and "OVERALL" in csv, "summary CSV has the weighted means")
+	check(FileAccess.get_file_as_string(paths[1]).split("\n", false).size() == 5, "responses CSV has every response")
+	for f in paths:
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(f))
+	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://evaluation_test"))
+
+	# The survey through the screens: Settings > EVALUATION SURVEY.
+	Game.goto("settings")
+	await _frames()
+	await _click(get_tree().current_scene.find_child("survey", true, false))
+	await _frames()
+	check(_scene_is("survey"), "Settings opens the survey")
+	var scr := get_tree().current_scene
+	scr.find_child("respondent", true, false).select(1)
+	for it in items:
+		scr.find_child(scr.node_name(it.code, 5), true, false).button_pressed = true
+	await _click(scr.find_child(scr.node_name("1.1", 2), true, false))
+	check(scr.answers["1.1"] == 2, "clicking a number rates the statement")
+	scr.submit_survey()
+	await _frames()
+	check(DB.survey_report(2).respondents == 2, "survey screen saves the answers")
+	check(scr.answers.is_empty(), "the form is cleared for the next respondent")
+	var thanks := scr.find_children("*", "AcceptDialog", true, false)
+	check(thanks.size() == 1, "a thank-you message is shown")
+	for d in thanks:
+		d.get_ok_button().pressed.emit()
+	await _frames()
+	await _click(scr.find_child("results", true, false))
+	await _frames()
+	check(_scene_is("survey_results"), "survey opens the results")
+	check("OVERALL" in get_tree().current_scene.find_child("overall", true, false).text, "results show the overall mean")
+	Game.handle_back()
+	await _frames()
+	check(_scene_is("survey"), "back from results goes to the survey")
+	Game.handle_back()
+	await _frames()
+	check(_scene_is("settings"), "back from the survey goes to Settings")

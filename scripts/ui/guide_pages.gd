@@ -46,14 +46,47 @@ const SCREEN_TIPS := {
 	"gallery": [{"title": "Culture Gallery", "image": "guide_luzon",
 		"text": "Every cultural element you uncover is kept here. Locked ones say how to reveal them, or unlock them now with 5 Phrase Crystals."}],
 	"spirit": [{"title": "Your Guiding Spirit", "image": "guide_visayas",
-		"text": "Translate words and phrases, check how to PRONOUNCE them, and write sentences for the GRAMMAR CHECKER to mark."}],
+		"text": "Ask your Guiding Spirit anything about the language in the chat: it answers and speaks in its own voice. Below the chat: the translator, PRONOUNCE, and the GRAMMAR CHECKER that marks the sentences you write."}],
+	"grammar": [
+		{"title": "Grammar quiz", "image": "guide_mindanao",
+			"text": "The Grammar quiz opens after you pass Easy. You will choose the correct sentence, fill in the missing word, and write whole sentences in the language."},
+		{"title": "The grammar checker", "image": "guide_luzon",
+			"text": "When you write a sentence, the grammar checker compares it with real sentences of the language and tells you exactly what to fix: a missing word, the wrong marker, or the word order. Grammar quizzes pay Phrase Crystals."}],
+	"leaderboard": [{"title": "Leaderboard", "image": "guide_mindanao",
+		"text": "Every Guardian on this device is ranked by the total of their best scores. Pick an island to see who leads there. Replay levels with more hearts left to raise your best score."}],
+	"stories": [{"title": "Stories", "image": "guide_luzon",
+		"text": "Legends of the islands. Each island's story unlocks when you light its pearl, and the last story unlocks when all three pearls shine."}],
+	"profile": [{"title": "Your profile", "image": "guide_visayas",
+		"text": "Your hero, play time, rewards, badges and the levels you have passed in each language. GALLERY and SETTINGS are here too, and LOGOUT lets another player use the game."}],
+	"settings": [{"title": "Settings", "image": "guide_mindanao",
+		"text": "Choose Filipino or English for the game, set the music and sound volume, turn notices and your Guiding Spirit's voice on or off, then tap SAVE. EXIT leaves without changing anything."}],
+	"controls": [
+		{"title": "Moving around", "image": "guide_luzon",
+			"text": "The bar at the bottom of most screens has HOME (the Main Island map), GALLERY, BACK and PROFILE. The arrow at the top left also goes back."},
+		{"title": "The back key", "image": "guide_visayas",
+			"text": "On a phone, the Android back button works the same as BACK. On a computer, press Esc. If a pop-up is open, the back key closes it first."}],
+	"pronounce": [{"title": "BIGKAS: saying the words", "image": "guide_mindanao",
+		"text": "Tap BIGKAS under your Guiding Spirit in a quiz (or PRONOUNCE in the Guiding Spirit screen). It splits each word into syllables, shows the stressed one in CAPITALS, gives sound tips, and LISTEN plays it in your spirit's voice."}],
+	"rewards": [
+		{"title": "Earning rewards", "image": "guide_luzon",
+			"text": "Easy quizzes give Word Fragments, Medium and Grammar quizzes give Phrase Crystals, and Hard quizzes give Cultural Relics. Your first clear of a level pays the most; replays pay half."},
+		{"title": "Spending rewards", "image": "guide_visayas",
+			"text": "20 Word Fragments unlock a new language. 5 Phrase Crystals unlock a cultural element in the Gallery. 1 Cultural Relic buys an extra hint when your free hints run out."}],
+	"pearls": [{"title": "Island pearls", "image": "guide_mindanao",
+		"text": "A pearl lights up only when EVERY language of its island is mastered (Easy, Medium and Hard passed). Watch it glow on the map! Light Luzon, Visayas and Mindanao to awaken the Pearl of the Orient."}],
+	"saving": [{"title": "Saving and players", "image": "guide_luzon",
+		"text": "The game saves by itself after every lesson and quiz, and works without the internet. Each Guardian has their own progress. Use CONTINUE on the menu to pick your Guardian; the delete button there removes a Guardian and all of their progress."}],
 }
 
 ## Topics listed on the Guide screen.
 const GUIDE_TOPICS := [
-	["Welcome and the story", "welcome"], ["The Main Island", "map"], ["Languages", "language"],
-	["Levels and grammar quiz", "difficulty"], ["Lessons", "lesson"], ["Quizzes, hints and BIGKAS", "quiz"],
-	["Results and rewards", "results"], ["Culture Gallery", "gallery"], ["Guiding Spirit", "spirit"],
+	["Welcome and the story", "welcome"], ["Moving around", "controls"], ["The Main Island", "map"],
+	["Languages", "language"], ["Levels", "difficulty"], ["Lessons", "lesson"],
+	["Quizzes and hints", "quiz"], ["BIGKAS: pronunciation", "pronounce"], ["Grammar quiz and checker", "grammar"],
+	["Results", "results"], ["Rewards: earning and spending", "rewards"], ["Culture Gallery", "gallery"],
+	["Guiding Spirit", "spirit"], ["Island pearls", "pearls"], ["Stories", "stories"],
+	["Leaderboard", "leaderboard"], ["Your profile", "profile"], ["Settings", "settings"],
+	["Saving and players", "saving"],
 ]
 
 

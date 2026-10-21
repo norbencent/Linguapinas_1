@@ -203,6 +203,8 @@ func _ready() -> void:
 		Game.goto("difficulty")
 		return
 	_show_question()
+	if Game.category_code == Game.GRAMMAR:
+		GuidePages.maybe_show(self, "grammar")
 	Tutorial.show_steps(self, [
 		{"id": "quiz_answer", "target": answer_area,
 			"text": "Pick an answer, then tap CHECK. You have five hearts: a wrong answer costs one heart."},

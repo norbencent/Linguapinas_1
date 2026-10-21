@@ -331,6 +331,7 @@ func nav_bar(back: Variant) -> Control:
 	for i in targets.size():
 		var target: Variant = targets[i]
 		var b := Button.new()
+		b.name = ["nav_home", "nav_gallery", "nav_back", "nav_profile"][i]
 		b.flat = true
 		b.focus_mode = Control.FOCUS_NONE
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL

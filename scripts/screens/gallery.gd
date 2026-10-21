@@ -34,6 +34,7 @@ func _ready() -> void:
 	list = UI.vbox(12)
 	content.add_child(list)
 	_show(Game.region_code if Game.region_code in tabs else "luzon")
+	DB.mark_tutorial_seen(Game.user_id(), "visit:gallery")
 	GuidePages.maybe_show(self, "gallery")
 
 func _show(region_code: String) -> void:

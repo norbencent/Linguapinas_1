@@ -17,6 +17,7 @@ func _ready() -> void:
 	table = UI.vbox(8)
 	content.add_child(table)
 	_fill("")
+	GuidePages.maybe_show(self, "leaderboard")
 
 
 func _fill(region_code: String) -> void:

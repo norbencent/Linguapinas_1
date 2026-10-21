@@ -10,6 +10,32 @@ func _ready() -> void:
 	intro.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(intro)
 	content.add_child(head)
+
+	# Getting Started checklist: what to do next, in order.
+	var steps := DB.getting_started(Game.user_id())
+	var done := steps.filter(func(st): return st[1]).size()
+	content.add_child(UI.heading("Getting started", UI.RED, 24))
+	var check := UI.panel(Color("fffaf0"))
+	check.name = "checklist"
+	var cv := UI.vbox(6)
+	check.add_child(cv)
+	var bar := ProgressBar.new()
+	bar.max_value = steps.size()
+	bar.value = done
+	bar.show_percentage = false
+	bar.custom_minimum_size.y = 18
+	cv.add_child(bar)
+	cv.add_child(UI.label("%d of %d done" % [done, steps.size()], 17, UI.INK_SOFT, false, UI.font_body_black))
+	var next_marked := false
+	for st in steps:
+		var is_next: bool = not st[1] and not next_marked
+		next_marked = next_marked or is_next
+		var l := UI.label(("✔  " if st[1] else ("➜  " if is_next else "○  ")) + st[0] + ("   (do this next)" if is_next else ""),
+			19, UI.GREEN if st[1] else (UI.RED if is_next else UI.INK), true, UI.font_body_black if is_next else null)
+		cv.add_child(l)
+	content.add_child(check)
+
+	content.add_child(UI.heading("Guide topics", UI.RED, 24))
 	for topic in GuidePages.GUIDE_TOPICS:
 		var key: String = topic[1]
 		var row := UI.row_panel()

@@ -27,3 +27,4 @@ func _ready() -> void:
 		else:
 			v.add_child(UI.label("Restore the %s to unlock this story." % region.core_name, 18, Color("5f5446"), true))
 		content.add_child(card)
+	GuidePages.maybe_show(self, "stories")
