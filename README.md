@@ -51,9 +51,9 @@ bottom of every screen.
 
 **Settings** has the interface language (Filipino or English), music volume,
 sound-effects volume and notifications (the in-game pop-up notices), saved in
-the database. **Settings → SYSTEM** has text size, battery saver and the break
-reminder, the player data tools (check game data, backups and restore),
-privacy and security information, and About (version, features, limitations).
+the database. The game checks its saved data on every start, makes
+a backup every day and before a player is deleted, and repairs a damaged save
+from the newest backup.
 
 How the game meets the ISO/IEC 25010 quality characteristics is in
 [`docs/QUALITY.md`](docs/QUALITY.md); how to maintain, update and move it is in

@@ -262,7 +262,7 @@ func get_users() -> Array:
 func delete_user(user_id: int) -> bool:
 	if get_user(user_id).is_empty():
 		return false
-	# Safety: a deleted player can be brought back from Settings > SYSTEM.
+	# Safety: a copy of the data is kept before a player is deleted.
 	backup_now("_before-delete")
 	if not _exec("BEGIN;"):
 		return false
@@ -735,20 +735,6 @@ func list_backups() -> Array:
 	out.sort()
 	out.reverse()
 	return out
-
-
-## "linguapinas_2026-10-21_08-30-00_before-delete.db" -> "2026-10-21 08:30 (before deleting a player)"
-func backup_label(path: String) -> String:
-	var name := path.get_file().get_basename().trim_prefix(_backup_prefix())
-	var parts := name.split("_")
-	var text := name
-	if parts.size() >= 2:
-		text = "%s %s" % [parts[0], parts[1].substr(0, 5).replace("-", ":")]
-	if "before-delete" in name:
-		text += " (before deleting a player)"
-	elif "before-restore" in name:
-		text += " (before a restore)"
-	return text
 
 
 ## Makes a consistent copy of the database now. Returns the backup path or "".
