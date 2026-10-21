@@ -162,22 +162,3 @@ CREATE TABLE IF NOT EXISTS badges (
     earned_at TEXT NOT NULL DEFAULT (datetime('now')),
     PRIMARY KEY (user_id, code)
 );
-
--- System evaluation survey (database/survey.json). One row per completed
--- questionnaire; round 1 is the first survey, round 2 the re-survey after
--- improvements, and so on. Responses stay (anonymously) if a player is deleted.
-CREATE TABLE IF NOT EXISTS survey_responses (
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id         INTEGER REFERENCES users(id) ON DELETE SET NULL,
-    round           INTEGER NOT NULL CHECK (round >= 1),
-    respondent_type TEXT NOT NULL,
-    comment         TEXT NOT NULL DEFAULT '',
-    answered_at     TEXT NOT NULL DEFAULT (datetime('now'))
-);
-
-CREATE TABLE IF NOT EXISTS survey_answers (
-    response_id INTEGER NOT NULL REFERENCES survey_responses(id) ON DELETE CASCADE,
-    item        TEXT NOT NULL,
-    value       INTEGER NOT NULL CHECK (value BETWEEN 1 AND 5),
-    PRIMARY KEY (response_id, item)
-);

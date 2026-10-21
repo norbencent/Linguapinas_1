@@ -6,6 +6,7 @@ var sfx_players: Array[AudioStreamPlayer] = []
 var streams := {}
 var music_volume := 70
 var sfx_volume := 80
+var in_background := false
 
 const MUSIC_PATH := "res://assets/audio/music_loop.wav"
 
@@ -40,6 +41,17 @@ func apply(music_pct: int, sfx_pct: int) -> void:
 	music.stream_paused = music_volume == 0
 	for p in sfx_players:
 		p.volume_db = linear_to_db(maxf(sfx_volume / 100.0, 0.0001))
+
+
+## Pauses everything while the app is in the background (another app is
+## open, or the screen is off) and resumes afterwards.
+func set_background(on: bool) -> void:
+	in_background = on
+	music.stream_paused = on or music_volume == 0
+	for p in sfx_players:
+		p.stream_paused = on
+	if on:
+		Spirit.stop()
 
 
 func play(name: String) -> void:

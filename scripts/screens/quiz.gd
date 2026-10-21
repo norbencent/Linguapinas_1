@@ -7,6 +7,7 @@ var index := 0
 var hearts := Game.MAX_HEARTS
 var hints_left := Game.HINTS_PER_QUIZ
 var correct_count := 0
+var _finished := false
 var points := 0
 var hint_used_on_question := false
 var answered := false
@@ -203,6 +204,10 @@ func _ready() -> void:
 		Game.goto("difficulty")
 		return
 	_show_question()
+	Game.leave_warning = func() -> String:
+		if _finished or (index == 0 and not answered):
+			return ""
+		return "Leave the quiz? Your answers in this quiz will not be saved, and you will have to start it again."
 	if Game.category_code == Game.GRAMMAR:
 		GuidePages.maybe_show(self, "grammar")
 	Tutorial.show_steps(self, [
@@ -482,6 +487,7 @@ func _next() -> void:
 
 
 func _finish() -> void:
+	_finished = true
 	var passed := hearts > 0
 	var score := Game.score_for(points, hearts, Game.difficulty) if passed else points
 	var category := _category()

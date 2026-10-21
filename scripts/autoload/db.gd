@@ -30,8 +30,11 @@ const HINT_COST := {"cultural_relic": 1}
 const REPLAY_REWARD_SHARE := 0.5
 
 var db: SQLite
-const SURVEY_PATH := "res://database/survey.json"
 var db_path := DEFAULT_DB_PATH
+## True when the database was damaged at startup and restored from a backup.
+var recovered := false
+## Automatic backups kept per database file.
+const BACKUPS_KEPT := 7
 var last_error := ""
 
 
@@ -47,17 +50,31 @@ func _exit_tree() -> void:
 func open(path: String) -> bool:
 	close()
 	db_path = path
+	recovered = false
+	# Reliability: a damaged database is replaced by the newest good backup.
+	if not _open_file() or not _structure_ok():
+		recovered = _recover_from_backup()
+		if db == null:
+			return false
+	# Security: deleted rows (e.g. a deleted player) are overwritten on disk.
+	_exec("PRAGMA secure_delete = ON;")
+	_create_schema()
+	_migrate()
+	_seed_content()
+	backup_if_due()
+	return true
+
+
+func _open_file() -> bool:
 	db = SQLite.new()
-	db.path = path
+	db.path = db_path
 	db.foreign_keys = true
 	db.verbosity_level = SQLite.QUIET
 	if not db.open_db():
 		last_error = "Could not open database: %s" % db.error_message
 		push_error(last_error)
+		db = null
 		return false
-	_create_schema()
-	_migrate()
-	_seed_content()
 	return true
 
 
@@ -245,6 +262,8 @@ func get_users() -> Array:
 func delete_user(user_id: int) -> bool:
 	if get_user(user_id).is_empty():
 		return false
+	# Safety: a deleted player can be brought back from Settings > SYSTEM.
+	backup_now("_before-delete")
 	if not _exec("BEGIN;"):
 		return false
 	var ok := true
@@ -651,160 +670,135 @@ func get_total_score(user_id: int) -> int:
 	return int(row.get("s", 0))
 
 
-# ---------------------------------------------------------------- evaluation survey
+# ---------------------------------------------------------------- data integrity
+#
+# - SQLite checks the file itself (PRAGMA quick_check) every time the game
+#   starts; a damaged file is replaced by the newest good backup.
+# - verify_data() also checks every link between tables (foreign keys) and
+#   the game's own rules (no negative rewards, levels 1-3, scores in range).
+# - Changes that touch several tables run in one transaction
+#   (record_quiz, delete_user).
+# - A backup is made once a day and before a player is deleted (VACUUM INTO
+#   makes a consistent copy); the newest BACKUPS_KEPT are kept.
 
-var _survey: Dictionary = {}
+func _structure_ok() -> bool:
+	var rows := _select("PRAGMA quick_check;")
+	return not rows.is_empty() and str(rows[0].values()[0]) == "ok"
 
 
-## The instrument in database/survey.json.
-func survey() -> Dictionary:
-	if _survey.is_empty():
-		var data = JSON.parse_string(FileAccess.get_file_as_string(SURVEY_PATH))
-		_survey = data if data is Dictionary else {}
-	return _survey
+## Full check. Returns {"ok": bool, "problems": Array, "checked": Array}.
+func verify_data() -> Dictionary:
+	var problems: Array = []
+	var checked: Array = ["Database file structure"]
+	var integrity := _select("PRAGMA integrity_check;")
+	if integrity.is_empty() or str(integrity[0].values()[0]) != "ok":
+		problems.append("The database file is damaged.")
+	checked.append("Links between tables")
+	var fk := _select("PRAGMA foreign_key_check;")
+	if not fk.is_empty():
+		problems.append("%d rows point to missing records." % fk.size())
+	var rules := [
+		["Rewards are never negative", "SELECT COUNT(*) AS n FROM rewards WHERE amount < 0;"],
+		["Levels are Easy, Medium or Hard", "SELECT COUNT(*) AS n FROM progress WHERE difficulty NOT IN (1, 2, 3);"],
+		["Quiz results are in range", "SELECT COUNT(*) AS n FROM quiz_attempts WHERE score < 0 OR correct < 0 OR correct > total OR hearts_left < 0 OR hearts_left > 5;"],
+		["Every saved record belongs to a player", """SELECT (SELECT COUNT(*) FROM progress WHERE user_id NOT IN (SELECT id FROM users))
+			+ (SELECT COUNT(*) FROM rewards WHERE user_id NOT IN (SELECT id FROM users))
+			+ (SELECT COUNT(*) FROM quiz_attempts WHERE user_id NOT IN (SELECT id FROM users)) AS n;"""],
+		["Passwords are stored only as salted hashes", "SELECT COUNT(*) AS n FROM users WHERE length(password_hash) != 64 OR salt = '';"],
+		["Lesson content is complete", "SELECT CASE WHEN (SELECT COUNT(*) FROM words) > 0 AND (SELECT COUNT(*) FROM sentences) > 0 THEN 0 ELSE 1 END AS n;"],
+	]
+	for r in rules:
+		checked.append(r[0])
+		var n := int(_select_one(r[1]).get("n", 0))
+		if n > 0:
+			problems.append("%s: %d problem%s." % [r[0], n, "" if n == 1 else "s"])
+	return {"ok": problems.is_empty(), "problems": problems, "checked": checked}
 
 
-func survey_items() -> Array:
+func _backup_dir() -> String:
+	return db_path.get_base_dir().path_join("backups")
+
+
+func _backup_prefix() -> String:
+	return db_path.get_file().get_basename() + "_"
+
+
+## Backup files of this database, newest first.
+func list_backups() -> Array:
+	var dir := DirAccess.open(_backup_dir())
+	if dir == null:
+		return []
 	var out: Array = []
-	for c in survey().get("criteria", []):
-		out.append_array(c.items)
+	for f in dir.get_files():
+		if f.begins_with(_backup_prefix()) and f.ends_with(".db"):
+			out.append(_backup_dir().path_join(f))
+	out.sort()
+	out.reverse()
 	return out
 
 
-## The current survey round (1 = first survey, 2 = re-survey, ...).
-func survey_round() -> int:
-	return maxi(1, int(get_setting("survey_round", "1")))
+## "linguapinas_2026-10-21_08-30-00_before-delete.db" -> "2026-10-21 08:30 (before deleting a player)"
+func backup_label(path: String) -> String:
+	var name := path.get_file().get_basename().trim_prefix(_backup_prefix())
+	var parts := name.split("_")
+	var text := name
+	if parts.size() >= 2:
+		text = "%s %s" % [parts[0], parts[1].substr(0, 5).replace("-", ":")]
+	if "before-delete" in name:
+		text += " (before deleting a player)"
+	elif "before-restore" in name:
+		text += " (before a restore)"
+	return text
 
 
-## Starts a re-survey: new answers count for the next round.
-func start_new_survey_round() -> int:
-	set_setting("survey_round", str(survey_round() + 1))
-	return survey_round()
+## Makes a consistent copy of the database now. Returns the backup path or "".
+func backup_now(tag := "") -> String:
+	if db == null:
+		return ""
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(_backup_dir()))
+	var stamp := Time.get_datetime_string_from_system().replace(":", "-").replace("T", "_")
+	var path := _backup_dir().path_join("%s%s%s.db" % [_backup_prefix(), stamp, tag])
+	var target := ProjectSettings.globalize_path(path)
+	if FileAccess.file_exists(path):
+		DirAccess.remove_absolute(target)
+	if not _exec("VACUUM INTO '%s';" % target.replace("'", "''")):
+		return ""
+	for old in list_backups().slice(BACKUPS_KEPT):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(old))
+	set_setting("last_backup", Time.get_datetime_string_from_system(false, true))
+	return path
 
 
-## Saves one completed questionnaire. [param answers] is {item code: 1..5}.
-## Returns {"ok": bool, "error": String, "id": int}.
-func save_survey(user_id: int, respondent_type: String, answers: Dictionary, comment := "") -> Dictionary:
-	if not respondent_type in survey().get("respondent_types", []):
-		return {"ok": false, "error": "Choose who is answering."}
-	for item in survey_items():
-		var v := int(answers.get(item.code, 0))
-		if v < 1 or v > 5:
-			return {"ok": false, "error": "Please answer every statement (%s)." % item.code}
-	_exec("BEGIN TRANSACTION;")
-	var ok := _exec("INSERT INTO survey_responses(user_id, round, respondent_type, comment) VALUES(?, ?, ?, ?);",
-		[user_id if user_id > 0 else null, survey_round(), respondent_type, comment.strip_edges().left(500)])
-	var id := int(db.last_insert_rowid)
-	for item in survey_items():
-		ok = ok and _exec("INSERT INTO survey_answers(response_id, item, value) VALUES(?, ?, ?);", [id, item.code, int(answers[item.code])])
-	_exec("COMMIT;" if ok else "ROLLBACK;")
-	return {"ok": ok, "error": "" if ok else "Could not save the answers.", "id": id if ok else 0}
+## Once a day.
+func backup_if_due() -> void:
+	if not get_setting("last_backup", "").begins_with(Time.get_date_string_from_system()):
+		backup_now()
 
 
-## Verbal interpretation of a weighted mean (database/survey.json "scale").
-func interpret(mean: float) -> String:
-	for s in survey().get("scale", []):
-		if mean >= float(s.range[0]) - 0.0001:
-			return "%s (%s)" % [s.interpretation, s.label]
-	return "-"
+## Replaces the database with [param path] (a backup). The current data is
+## backed up first, so a restore can be undone.
+func restore_backup(path: String) -> bool:
+	if not FileAccess.file_exists(path):
+		return false
+	var copy := ProjectSettings.globalize_path(path) + ".restoring"
+	DirAccess.copy_absolute(ProjectSettings.globalize_path(path), copy)  # the backup list may drop it
+	backup_now("_before-restore")
+	close()
+	var err := DirAccess.copy_absolute(copy, ProjectSettings.globalize_path(db_path))
+	DirAccess.remove_absolute(copy)
+	return open(db_path) and err == OK and not recovered
 
 
-func survey_rounds() -> Array:
-	var out: Array = []
-	for row in _select("SELECT DISTINCT round FROM survey_responses ORDER BY round;"):
-		out.append(int(row.round))
-	return out
-
-
-## Weighted means for a round (0 = all rounds), optionally for one respondent type.
-## {"round", "respondents", "by_type": {type: n}, "criteria": [{code, name, mean, interpretation,
-##  items: [{code, text, mean, counts: {5: n, ...}}]}], "overall": float, "overall_interpretation"}
-func survey_report(round_no := 0, respondent_type := "") -> Dictionary:
-	var where := "WHERE 1 = 1"
-	var args: Array = []
-	if round_no > 0:
-		where += " AND r.round = ?"
-		args.append(round_no)
-	if respondent_type != "":
-		where += " AND r.respondent_type = ?"
-		args.append(respondent_type)
-	var n := int(_select_one("SELECT COUNT(*) AS n FROM survey_responses r %s;" % where, args).get("n", 0))
-	var by_type := {}
-	for row in _select("SELECT respondent_type AS t, COUNT(*) AS n FROM survey_responses r %s GROUP BY respondent_type;" % where, args):
-		by_type[row.t] = int(row.n)
-	var counts := {}  # item -> {value: count}
-	for row in _select("""SELECT a.item, a.value, COUNT(*) AS n FROM survey_answers a
-			JOIN survey_responses r ON r.id = a.response_id %s GROUP BY a.item, a.value;""" % where, args):
-		if not counts.has(row.item):
-			counts[row.item] = {}
-		counts[row.item][int(row.value)] = int(row.n)
-	var criteria: Array = []
-	var crit_sum := 0.0
-	for c in survey().get("criteria", []):
-		var items: Array = []
-		var sum := 0.0
-		for item in c.items:
-			var cnt: Dictionary = counts.get(item.code, {})
-			var mean := _weighted_mean(cnt)
-			items.append({"code": item.code, "text": item.text, "mean": mean, "counts": cnt})
-			sum += mean
-		var cmean := sum / maxf(1.0, c.items.size())
-		crit_sum += cmean
-		criteria.append({"code": c.code, "name": c.name, "mean": cmean, "interpretation": interpret(cmean), "items": items})
-	var overall := crit_sum / maxf(1.0, criteria.size())
-	return {"round": round_no, "respondents": n, "by_type": by_type, "criteria": criteria,
-		"overall": overall if n > 0 else 0.0, "overall_interpretation": interpret(overall) if n > 0 else "No responses yet"}
-
-
-## Weighted mean = (5*f5 + 4*f4 + 3*f3 + 2*f2 + 1*f1) / N
-static func _weighted_mean(counts: Dictionary) -> float:
-	var total := 0
-	var weighted := 0
-	for v in counts:
-		total += int(counts[v])
-		weighted += int(v) * int(counts[v])
-	return float(weighted) / total if total > 0 else 0.0
-
-
-## Writes the evaluation data as CSV files for the manuscript and returns
-## their paths: the summary (weighted means per round) and every response.
-func export_evaluation(folder := "user://evaluation") -> Array:
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(folder))
-	var paths: Array = []
-	# 1. Summary per round.
-	var summary := folder.path_join("survey_summary.csv")
-	var f := FileAccess.open(summary, FileAccess.WRITE)
-	f.store_csv_line(["Round", "Criterion", "Item", "Statement", "5", "4", "3", "2", "1", "Weighted mean", "Interpretation"])
-	for rnd in survey_rounds() + [0]:
-		var rep := survey_report(rnd)
-		for c in rep.criteria:
-			for it in c.items:
-				var cnt: Dictionary = it.counts
-				f.store_csv_line([str(rnd) if rnd > 0 else "All", c.name, it.code, it.text, str(cnt.get(5, 0)), str(cnt.get(4, 0)),
-					str(cnt.get(3, 0)), str(cnt.get(2, 0)), str(cnt.get(1, 0)), "%.2f" % it.mean, interpret(it.mean) if it.mean > 0 else "-"])
-			f.store_csv_line([str(rnd) if rnd > 0 else "All", c.name, "", "Criterion mean", "", "", "", "", "", "%.2f" % c.mean,
-				c.interpretation if rep.respondents > 0 else "-"])
-		f.store_csv_line([str(rnd) if rnd > 0 else "All", "OVERALL", "", "Respondents: %d" % rep.respondents, "", "", "", "", "",
-			"%.2f" % rep.overall, rep.overall_interpretation])
-	f.close()
-	paths.append(summary)
-	# 2. Every response (anonymous: no names).
-	var raw := folder.path_join("survey_responses.csv")
-	f = FileAccess.open(raw, FileAccess.WRITE)
-	var header := ["Response", "Round", "Respondent", "Answered at"]
-	for item in survey_items():
-		header.append(item.code)
-	header.append("Comment")
-	f.store_csv_line(header)
-	for r in _select("SELECT * FROM survey_responses ORDER BY id;"):
-		var line := [str(r.id), str(r.round), r.respondent_type, r.answered_at]
-		var values := {}
-		for a in _select("SELECT item, value FROM survey_answers WHERE response_id = ?;", [r.id]):
-			values[a.item] = str(a.value)
-		for item in survey_items():
-			line.append(values.get(item.code, ""))
-		line.append(r.comment)
-		f.store_csv_line(line)
-	f.close()
-	paths.append(raw)
-	return paths
+## Tries the backups, newest first. With no good backup the damaged file is
+## kept aside (".damaged") and a new database is started.
+func _recover_from_backup() -> bool:
+	var target := ProjectSettings.globalize_path(db_path)
+	for path in list_backups():
+		close()
+		if DirAccess.copy_absolute(ProjectSettings.globalize_path(path), target) == OK and _open_file() and _structure_ok():
+			return true
+	close()
+	if FileAccess.file_exists(db_path):
+		DirAccess.rename_absolute(target, target + ".damaged")
+	_open_file()
+	return false

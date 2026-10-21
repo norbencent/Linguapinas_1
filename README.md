@@ -51,7 +51,13 @@ bottom of every screen.
 
 **Settings** has the interface language (Filipino or English), music volume,
 sound-effects volume and notifications (the in-game pop-up notices), saved in
-the database.
+the database. **Settings → SYSTEM** has text size, battery saver and the break
+reminder, the player data tools (check game data, backups and restore),
+privacy and security information, and About (version, features, limitations).
+
+How the game meets the ISO/IEC 25010 quality characteristics is in
+[`docs/QUALITY.md`](docs/QUALITY.md); how to maintain, update and move it is in
+[`docs/MAINTENANCE.md`](docs/MAINTENANCE.md).
 
 ## Art
 
@@ -153,6 +159,9 @@ scripts/autoload/ui.gd     Prototype look: theme, page frame, banner, nav bar, F
 scripts/autoload/sound.gd  Music and sound effects
 scripts/ui/gem_button.gd   Gem button that keeps its diamond ends when stretched
 scripts/screens/*.gd       One script per screen (scenes/*.tscn)
+scripts/autoload/tutorial.gd First-time hand tour
+scripts/screens/system.gd  Settings > SYSTEM: display, data check, backups, privacy, about
+docs/                      Maintenance guide and ISO/IEC 25010 quality notes
 tests/test_runner.tscn     Automated test
 tools/marian_server/       Optional MarianNMT translation server (Python)
 ```
