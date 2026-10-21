@@ -89,9 +89,6 @@ func _ready() -> void:
 	vrow.add_child(spirit_voice)
 	v.add_child(vrow)
 
-	var survey := UI.pill_button("EVALUATION SURVEY", Color("6b3fa0"), _open_survey, 52, 20)
-	survey.name = "survey"
-	v.add_child(survey)
 	v.add_child(UI.gem_button(UI.t("save"), "green", _save, 84, 34))
 	v.add_child(UI.gem_button(UI.t("exit"), "red", _exit, 84, 34))
 	if Game.is_logged_in():
@@ -132,12 +129,6 @@ func _save_values() -> void:
 	Game.save_settings("fil" if lang_picker.selected == 0 else "en", int(music_slider.value),
 		int(sfx_slider.value), notify.button_pressed)
 	DB.set_setting("spirit_voice", "1" if spirit_voice.button_pressed else "0")
-
-
-## Keeps the settings and opens the evaluation survey.
-func _open_survey() -> void:
-	_save_values()
-	Game.goto("survey")
 
 
 func _exit() -> void:
