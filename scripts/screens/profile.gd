@@ -63,3 +63,4 @@ func _ready() -> void:
 	content.add_child(UI.gem_button(UI.t("gallery").to_upper(), "gold", func(): Game.goto("gallery"), 84, 30))
 	content.add_child(UI.gem_button(UI.t("setting"), "blue", func(): Game.open_settings("profile"), 84, 30))
 	content.add_child(UI.gem_button(UI.t("logout"), "red", Game.logout, 84, 30))
+	GuidePages.maybe_show(self, "profile")

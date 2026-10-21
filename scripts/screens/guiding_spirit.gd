@@ -109,6 +109,7 @@ func _ready() -> void:
 	_show_tips()
 	_check_server()
 	_meet_spirit()
+	DB.mark_tutorial_seen(Game.user_id(), "visit:spirit")
 	GuidePages.maybe_show(self, "spirit")
 
 

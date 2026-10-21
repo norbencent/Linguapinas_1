@@ -12,7 +12,9 @@ extends Node
 ##
 ## Before anyone has played, the guest steps (title, menu, name) run once.
 ## A new player then gets the player steps (map -> island -> language ->
-## level -> lesson -> quiz -> results). Progress is saved in the settings
+## level -> lesson -> quiz -> results), then a tour of the rest of the Main
+## Island (pearls, Guiding Spirit, leaderboard and stories, gallery,
+## profile, settings and GABAY). Progress is saved in the settings
 ## table, so it survives restarts. SKIP stops it; the Guide (GABAY) can
 ## replay it.
 
@@ -22,7 +24,8 @@ const GUEST := "tutorial:guest"
 
 ## Player steps in order. The last one ends the tutorial.
 const PLAYER_STEPS := ["map_island", "island_languages", "language_pick", "level_easy", "lesson_study",
-	"lesson_start", "quiz_answer", "quiz_spirit", "quiz_warrior", "results_rewards"]
+	"lesson_start", "quiz_answer", "quiz_spirit", "quiz_warrior", "results_rewards", "results_home",
+	"map_pearls", "map_spirit", "map_more", "nav_gallery", "nav_profile", "map_settings", "map_guide"]
 
 var _layer: CanvasLayer
 var _queue: Array = []

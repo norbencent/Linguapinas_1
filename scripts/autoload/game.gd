@@ -20,6 +20,8 @@ const SCENES := {
 	"spirit": "res://scenes/guiding_spirit.tscn",
 	"profile": "res://scenes/profile.tscn",
 	"guide": "res://scenes/guide.tscn",
+	"survey": "res://scenes/survey.tscn",
+	"survey_results": "res://scenes/survey_results.tscn",
 }
 
 const MAX_HEARTS := 5
@@ -38,7 +40,7 @@ var last_result: Dictionary = {}  # filled by the quiz for the results screen
 var settings_return := "title"   # where Settings' Exit button goes
 
 ## Screens that can be opened without a player.
-const PUBLIC_SCREENS := ["title", "menu", "new_game", "continue", "settings"]
+const PUBLIC_SCREENS := ["title", "menu", "new_game", "continue", "settings", "survey", "survey_results"]
 const PLAYTIME_SAVE_EVERY := 30.0
 var _unsaved_playtime := 0.0
 

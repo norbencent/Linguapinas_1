@@ -82,7 +82,9 @@ func _ready() -> void:
 	Tutorial.show_steps(self, [{"id": "results_rewards", "target": reward_pill if reward_pill else card,
 		"text": ("Well done! " if r.passed else "Out of hearts? No problem: review the lesson and try again. ")
 			+ "Passing Easy quizzes earns Word Fragments: collect %s to unlock a new language. " % DB.cost_text(DB.LANGUAGE_COST)
-			+ "Your first clear of each level also reveals a cultural element for the Gallery. Tap GABAY on the map any time for the full guide."}])
+			+ "Your first clear of each level also reveals a cultural element for the Gallery."},
+		{"id": "results_home", "target": find_child("nav_home", true, false), "wait": true,
+			"text": "Now tap HOME. I will show you the rest of the Main Island!"}])
 	_celebrate(summary.new_badges.duplicate())
 
 

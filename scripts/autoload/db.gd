@@ -30,6 +30,7 @@ const HINT_COST := {"cultural_relic": 1}
 const REPLAY_REWARD_SHARE := 0.5
 
 var db: SQLite
+const SURVEY_PATH := "res://database/survey.json"
 var db_path := DEFAULT_DB_PATH
 var last_error := ""
 
@@ -73,7 +74,8 @@ func _exec(sql: String, bindings: Array = []) -> bool:
 	if bindings.is_empty():
 		ok = db.query(sql)
 	else:
-		ok = db.query_with_bindings(sql, bindings)
+		# The SQLite plugin consumes the array, so callers can reuse theirs.
+		ok = db.query_with_bindings(sql, bindings.duplicate())
 	if not ok:
 		last_error = db.error_message
 		push_error("SQL error: %s\n%s" % [db.error_message, sql])
@@ -536,9 +538,34 @@ func mark_tutorial_seen(user_id: int, key: String) -> void:
 	_exec("INSERT OR IGNORE INTO tutorial_seen(user_id, key) VALUES(?, ?);", [user_id, key])
 
 
-## Shows every tip again (from the Guide screen).
+## Shows every tip again (from the Guide screen). Visits to screens
+## ("visit:..." keys, used by the Getting Started checklist) are kept.
 func reset_tutorials(user_id: int) -> void:
-	_exec("DELETE FROM tutorial_seen WHERE user_id = ?;", [user_id])
+	_exec("DELETE FROM tutorial_seen WHERE user_id = ? AND key NOT LIKE 'visit:%';", [user_id])
+
+
+## The Getting Started checklist on the Guide screen: [[step, done], ...] in
+## the order a new player should do them.
+func getting_started(user_id: int) -> Array:
+	var has := func(sql: String) -> bool:
+		return not _select_one(sql, [user_id]).is_empty()
+	var mastered := 0
+	for r in get_regions():
+		mastered += get_mastered_language_count(user_id, r.code)
+	return [
+		["Create your Guardian", true],
+		["Study your first lesson (ARALIN)", has.call("SELECT 1 AS x FROM progress WHERE user_id = ? AND lesson_done = 1;")],
+		["Pass an Easy quiz", has.call("SELECT 1 AS x FROM progress WHERE user_id = ? AND difficulty = 1 AND completed = 1;")],
+		["Uncover a cultural element", not get_unlocked_culture(user_id).is_empty()],
+		["Look at the Culture Gallery", has_seen_tutorial(user_id, "visit:gallery")],
+		["Talk with your Guiding Spirit", has_seen_tutorial(user_id, "visit:spirit")],
+		["Try the Grammar quiz", has.call("SELECT 1 AS x FROM quiz_attempts WHERE user_id = ? AND category_code = 'grammar';")],
+		["Pass a Medium quiz", has.call("SELECT 1 AS x FROM progress WHERE user_id = ? AND difficulty = 2 AND completed = 1;")],
+		["Pass a Hard quiz", has.call("SELECT 1 AS x FROM progress WHERE user_id = ? AND difficulty = 3 AND completed = 1;")],
+		["Unlock a new language with Word Fragments", has.call("SELECT 1 AS x FROM unlocked_languages WHERE user_id = ?;")],
+		["Master a language (Easy, Medium and Hard)", mastered > 0],
+		["Light an island pearl", not get_restored_cores(user_id).is_empty()],
+	]
 
 
 func _award_badge(user_id: int, code: String) -> bool:
@@ -622,3 +649,162 @@ func get_leaderboard(limit := 20, region_code := "") -> Array:
 func get_total_score(user_id: int) -> int:
 	var row := _select_one("SELECT COALESCE(SUM(best_score), 0) AS s FROM progress WHERE user_id = ? AND completed = 1;", [user_id])
 	return int(row.get("s", 0))
+
+
+# ---------------------------------------------------------------- evaluation survey
+
+var _survey: Dictionary = {}
+
+
+## The instrument in database/survey.json.
+func survey() -> Dictionary:
+	if _survey.is_empty():
+		var data = JSON.parse_string(FileAccess.get_file_as_string(SURVEY_PATH))
+		_survey = data if data is Dictionary else {}
+	return _survey
+
+
+func survey_items() -> Array:
+	var out: Array = []
+	for c in survey().get("criteria", []):
+		out.append_array(c.items)
+	return out
+
+
+## The current survey round (1 = first survey, 2 = re-survey, ...).
+func survey_round() -> int:
+	return maxi(1, int(get_setting("survey_round", "1")))
+
+
+## Starts a re-survey: new answers count for the next round.
+func start_new_survey_round() -> int:
+	set_setting("survey_round", str(survey_round() + 1))
+	return survey_round()
+
+
+## Saves one completed questionnaire. [param answers] is {item code: 1..5}.
+## Returns {"ok": bool, "error": String, "id": int}.
+func save_survey(user_id: int, respondent_type: String, answers: Dictionary, comment := "") -> Dictionary:
+	if not respondent_type in survey().get("respondent_types", []):
+		return {"ok": false, "error": "Choose who is answering."}
+	for item in survey_items():
+		var v := int(answers.get(item.code, 0))
+		if v < 1 or v > 5:
+			return {"ok": false, "error": "Please answer every statement (%s)." % item.code}
+	_exec("BEGIN TRANSACTION;")
+	var ok := _exec("INSERT INTO survey_responses(user_id, round, respondent_type, comment) VALUES(?, ?, ?, ?);",
+		[user_id if user_id > 0 else null, survey_round(), respondent_type, comment.strip_edges().left(500)])
+	var id := int(db.last_insert_rowid)
+	for item in survey_items():
+		ok = ok and _exec("INSERT INTO survey_answers(response_id, item, value) VALUES(?, ?, ?);", [id, item.code, int(answers[item.code])])
+	_exec("COMMIT;" if ok else "ROLLBACK;")
+	return {"ok": ok, "error": "" if ok else "Could not save the answers.", "id": id if ok else 0}
+
+
+## Verbal interpretation of a weighted mean (database/survey.json "scale").
+func interpret(mean: float) -> String:
+	for s in survey().get("scale", []):
+		if mean >= float(s.range[0]) - 0.0001:
+			return "%s (%s)" % [s.interpretation, s.label]
+	return "-"
+
+
+func survey_rounds() -> Array:
+	var out: Array = []
+	for row in _select("SELECT DISTINCT round FROM survey_responses ORDER BY round;"):
+		out.append(int(row.round))
+	return out
+
+
+## Weighted means for a round (0 = all rounds), optionally for one respondent type.
+## {"round", "respondents", "by_type": {type: n}, "criteria": [{code, name, mean, interpretation,
+##  items: [{code, text, mean, counts: {5: n, ...}}]}], "overall": float, "overall_interpretation"}
+func survey_report(round_no := 0, respondent_type := "") -> Dictionary:
+	var where := "WHERE 1 = 1"
+	var args: Array = []
+	if round_no > 0:
+		where += " AND r.round = ?"
+		args.append(round_no)
+	if respondent_type != "":
+		where += " AND r.respondent_type = ?"
+		args.append(respondent_type)
+	var n := int(_select_one("SELECT COUNT(*) AS n FROM survey_responses r %s;" % where, args).get("n", 0))
+	var by_type := {}
+	for row in _select("SELECT respondent_type AS t, COUNT(*) AS n FROM survey_responses r %s GROUP BY respondent_type;" % where, args):
+		by_type[row.t] = int(row.n)
+	var counts := {}  # item -> {value: count}
+	for row in _select("""SELECT a.item, a.value, COUNT(*) AS n FROM survey_answers a
+			JOIN survey_responses r ON r.id = a.response_id %s GROUP BY a.item, a.value;""" % where, args):
+		if not counts.has(row.item):
+			counts[row.item] = {}
+		counts[row.item][int(row.value)] = int(row.n)
+	var criteria: Array = []
+	var crit_sum := 0.0
+	for c in survey().get("criteria", []):
+		var items: Array = []
+		var sum := 0.0
+		for item in c.items:
+			var cnt: Dictionary = counts.get(item.code, {})
+			var mean := _weighted_mean(cnt)
+			items.append({"code": item.code, "text": item.text, "mean": mean, "counts": cnt})
+			sum += mean
+		var cmean := sum / maxf(1.0, c.items.size())
+		crit_sum += cmean
+		criteria.append({"code": c.code, "name": c.name, "mean": cmean, "interpretation": interpret(cmean), "items": items})
+	var overall := crit_sum / maxf(1.0, criteria.size())
+	return {"round": round_no, "respondents": n, "by_type": by_type, "criteria": criteria,
+		"overall": overall if n > 0 else 0.0, "overall_interpretation": interpret(overall) if n > 0 else "No responses yet"}
+
+
+## Weighted mean = (5*f5 + 4*f4 + 3*f3 + 2*f2 + 1*f1) / N
+static func _weighted_mean(counts: Dictionary) -> float:
+	var total := 0
+	var weighted := 0
+	for v in counts:
+		total += int(counts[v])
+		weighted += int(v) * int(counts[v])
+	return float(weighted) / total if total > 0 else 0.0
+
+
+## Writes the evaluation data as CSV files for the manuscript and returns
+## their paths: the summary (weighted means per round) and every response.
+func export_evaluation(folder := "user://evaluation") -> Array:
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(folder))
+	var paths: Array = []
+	# 1. Summary per round.
+	var summary := folder.path_join("survey_summary.csv")
+	var f := FileAccess.open(summary, FileAccess.WRITE)
+	f.store_csv_line(["Round", "Criterion", "Item", "Statement", "5", "4", "3", "2", "1", "Weighted mean", "Interpretation"])
+	for rnd in survey_rounds() + [0]:
+		var rep := survey_report(rnd)
+		for c in rep.criteria:
+			for it in c.items:
+				var cnt: Dictionary = it.counts
+				f.store_csv_line([str(rnd) if rnd > 0 else "All", c.name, it.code, it.text, str(cnt.get(5, 0)), str(cnt.get(4, 0)),
+					str(cnt.get(3, 0)), str(cnt.get(2, 0)), str(cnt.get(1, 0)), "%.2f" % it.mean, interpret(it.mean) if it.mean > 0 else "-"])
+			f.store_csv_line([str(rnd) if rnd > 0 else "All", c.name, "", "Criterion mean", "", "", "", "", "", "%.2f" % c.mean,
+				c.interpretation if rep.respondents > 0 else "-"])
+		f.store_csv_line([str(rnd) if rnd > 0 else "All", "OVERALL", "", "Respondents: %d" % rep.respondents, "", "", "", "", "",
+			"%.2f" % rep.overall, rep.overall_interpretation])
+	f.close()
+	paths.append(summary)
+	# 2. Every response (anonymous: no names).
+	var raw := folder.path_join("survey_responses.csv")
+	f = FileAccess.open(raw, FileAccess.WRITE)
+	var header := ["Response", "Round", "Respondent", "Answered at"]
+	for item in survey_items():
+		header.append(item.code)
+	header.append("Comment")
+	f.store_csv_line(header)
+	for r in _select("SELECT * FROM survey_responses ORDER BY id;"):
+		var line := [str(r.id), str(r.round), r.respondent_type, r.answered_at]
+		var values := {}
+		for a in _select("SELECT item, value FROM survey_answers WHERE response_id = ?;", [r.id]):
+			values[a.item] = str(a.value)
+		for item in survey_items():
+			line.append(values.get(item.code, ""))
+		line.append(r.comment)
+		f.store_csv_line(line)
+	f.close()
+	paths.append(raw)
+	return paths

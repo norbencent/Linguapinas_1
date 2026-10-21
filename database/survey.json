@@ -1,0 +1,51 @@
+{
+ "title": "LINGUAPINAS System Evaluation Questionnaire",
+ "about": "Software quality evaluation based on ISO/IEC 25010. Answered in the game (Settings > EVALUATION SURVEY). Answers are saved in the game's SQLite database by survey round, so the same questionnaire can be answered again (re-survey) after the system is improved.",
+ "instructions": "Read each statement and choose the number that best describes your evaluation of LINGUAPINAS.",
+ "respondent_types": ["Student", "Teacher", "IT Expert", "Other"],
+ "scale": [
+  {"value": 5, "label": "Strongly Agree", "range": [4.21, 5.00], "interpretation": "Excellent"},
+  {"value": 4, "label": "Agree", "range": [3.41, 4.20], "interpretation": "Very Good"},
+  {"value": 3, "label": "Neutral", "range": [2.61, 3.40], "interpretation": "Good"},
+  {"value": 2, "label": "Disagree", "range": [1.81, 2.60], "interpretation": "Fair"},
+  {"value": 1, "label": "Strongly Disagree", "range": [1.00, 1.80], "interpretation": "Poor"}
+ ],
+ "criteria": [
+  {"code": "1", "name": "FUNCTIONAL SUITABILITY", "items": [
+   {"code": "1.1", "text": "The available functions support the main purpose of LINGUAPINAS as a Philippine-language educational game."},
+   {"code": "1.2", "text": "Menus and buttons open the screens or perform the actions indicated by their labels."},
+   {"code": "1.3", "text": "Island-group or language selection follows the rules implemented in the game."}]},
+  {"code": "2", "name": "PERFORMANCE EFFICIENCY", "items": [
+   {"code": "2.1", "text": "The application responds to common user actions within an acceptable time on the test device."},
+   {"code": "2.2", "text": "Transitions between available screens occur without excessive delay."},
+   {"code": "2.3", "text": "Images, animations, and audio load or play within an acceptable time, where implemented."}]},
+  {"code": "3", "name": "COMPATIBILITY", "items": [
+   {"code": "3.1", "text": "The application runs in the intended operating environment used for evaluation."},
+   {"code": "3.2", "text": "The implemented scenes, controls, and media work together without interfering with one another."},
+   {"code": "3.3", "text": "Audio playback, where implemented, does not prevent users from continuing an activity."}]},
+  {"code": "4", "name": "INTERACTION CAPABILITY", "items": [
+   {"code": "4.1", "text": "The interface makes the main navigation options easy to identify."},
+   {"code": "4.2", "text": "Text, labels, and instructions are readable on the test device."},
+   {"code": "4.3", "text": "Buttons and interactive controls are easy to recognize and operate."}]},
+  {"code": "5", "name": "RELIABILITY", "items": [
+   {"code": "5.1", "text": "The application launches successfully in the test environment."},
+   {"code": "5.2", "text": "The main learning flow can be completed without a crash or blocking error."},
+   {"code": "5.3", "text": "Repeated use of the same function produces consistent results."}]},
+  {"code": "6", "name": "SECURITY", "items": [
+   {"code": "6.1", "text": "The application requests or uses only the user information needed for its implemented functions."},
+   {"code": "6.2", "text": "Player information, if collected, is not unnecessarily exposed through the interface."},
+   {"code": "6.3", "text": "Local database files or stored data, if used, are handled in a way that avoids obvious unintended exposure."}]},
+  {"code": "7", "name": "MAINTAINABILITY", "items": [
+   {"code": "7.1", "text": "Related functions are separated clearly enough to support corrections and future updates."},
+   {"code": "7.2", "text": "The structure allows developers to understand how the main game functions are connected."},
+   {"code": "7.3", "text": "Relevant dependencies, setup requirements, and known limitations are identifiable to a developer."}]},
+  {"code": "8", "name": "FLEXIBILITY", "items": [
+   {"code": "8.1", "text": "The application can be configured or adjusted for its intended environment without disproportionate effort."},
+   {"code": "8.2", "text": "The project can be transferred to another compatible development or test environment using documented setup steps."},
+   {"code": "8.3", "text": "Language lessons or quiz content can be updated without changing unrelated parts, if supported by the current design."}]},
+  {"code": "9", "name": "SAFETY", "items": [
+   {"code": "9.1", "text": "The game provides appropriate warnings or guidance for potentially disruptive actions, where relevant."},
+   {"code": "9.2", "text": "If an error occurs, the application avoids causing avoidable loss of user progress where saving is implemented."},
+   {"code": "9.3", "text": "The application handles its implemented functions in a way that does not create an evident risk to the user or device during normal use."}]}
+ ]
+}
