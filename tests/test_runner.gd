@@ -865,7 +865,7 @@ func _test_quality() -> void:
 	Game.category_code = ""
 	var slowest := 0
 	var slow_name := ""
-	for screen in ["map", "island", "language", "difficulty", "lesson", "gallery", "spirit", "profile", "leaderboard", "guide", "system"]:
+	for screen in ["map", "island", "language", "difficulty", "lesson", "gallery", "spirit", "profile", "leaderboard", "guide"]:
 		var t0 := Time.get_ticks_msec()
 		Game.goto(screen)
 		await _frames(2)
@@ -875,26 +875,8 @@ func _test_quality() -> void:
 			slow_name = screen
 	check(slowest < 2000, "every screen opens in under 2 s (slowest: %s %d ms)" % [slow_name, slowest])
 
-	# Interaction capability and performance: text size and battery saver.
-	Game.goto("settings")
-	await _frames()
-	await _click(get_tree().current_scene.find_child("system", true, false))
-	await _frames(3)
-	check(_scene_is("system"), "Settings opens SYSTEM")
-	var sys := get_tree().current_scene
-	sys.size_picker.select(1)
-	sys.size_picker.item_selected.emit(1)
-	check(Game.text_size() == "large" and is_equal_approx(get_tree().root.content_scale_factor, 1.12), "large text scales the interface")
-	sys.saver.button_pressed = true
-	check(Game.battery_saver_on() and Engine.max_fps == 30, "battery saver caps the frame rate")
-	sys.size_picker.select(0)
-	sys.size_picker.item_selected.emit(0)
-	sys.saver.button_pressed = false
-	check(is_equal_approx(get_tree().root.content_scale_factor, 1.0) and Engine.max_fps == 0, "display back to normal")
-	check(sys.find_child("version", true, false).text.begins_with("Version"), "SYSTEM shows the version")
-
 	# Reliability: the data check passes, and a bad row is found.
-	var r: Dictionary = sys._check()
+	var r: Dictionary = DB.verify_data()
 	check(r.ok and r.checked.size() >= 7, "game data check passes (%s)" % str(r.problems))
 	DB._exec("UPDATE rewards SET amount = -5 WHERE user_id = ?;", [uid])
 	DB.add_reward(uid, "word_fragment", 1)
@@ -909,19 +891,9 @@ func _test_quality() -> void:
 	check(DB.delete_user(gone), "player deleted")
 	var backups := DB.list_backups()
 	check(backups.size() > 0 and "before-delete" in backups[0] and backups.size() <= DB.BACKUPS_KEPT, "a backup is made before deleting a player")
-	check("(before deleting a player)" in DB.backup_label(backups[0]), "backup label explains it")
-	Game.goto("system")
-	await _frames(3)
-	sys = get_tree().current_scene
-	check(sys.find_child("restore_0", true, false) != null, "SYSTEM lists the backups")
-	sys._confirm_restore(backups[0])
-	await _frames(1)
-	check(sys.find_child("RestoreConfirm", true, false) != null, "restoring asks first")
-	check(sys.restore(backups[0]), "backup restored")
-	await _frames(3)
+	check(DB.restore_backup(backups[0]), "backup restored")
 	var back: Dictionary = DB.login_user("oops", "")
 	check(back.ok and DB.get_rewards(back.user.id).word_fragment == 7, "the deleted player is back with their rewards")
-	check(_scene_is("title") and not Game.is_logged_in(), "after a restore the player chooses again")
 	check(DB.list_backups().any(func(b): return "before-restore" in b), "the restore itself can be undone")
 	DB.delete_user(back.user.id)
 	Game.user = DB.get_user(uid)

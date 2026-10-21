@@ -96,10 +96,9 @@ update automatically.
   is replaced by the newest good backup and the player is told.
 - A backup is made every day and before a player is deleted, in
   `user://backups/` (the newest 7 are kept).
-- Settings → SYSTEM → CHECK GAME DATA runs the full check (`DB.verify_data()`):
-  file structure, links between tables, and the game's rules.
-- Settings → SYSTEM lists the backups and restores one (the current data is
-  backed up first).
+- `DB.verify_data()` runs the full check: file structure, links between
+  tables, and the game's rules. `DB.restore_backup(path)` restores a backup
+  (the current data is backed up first); there is no in-game button for it.
 
 ## Finding and fixing problems
 

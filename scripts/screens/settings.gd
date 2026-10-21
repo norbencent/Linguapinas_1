@@ -89,9 +89,6 @@ func _ready() -> void:
 	vrow.add_child(spirit_voice)
 	v.add_child(vrow)
 
-	var system := UI.pill_button("SYSTEM: DISPLAY, DATA & ABOUT", Color("6b3fa0"), _open_system, 52, 18)
-	system.name = "system"
-	v.add_child(system)
 	v.add_child(UI.gem_button(UI.t("save"), "green", _save, 84, 34))
 	v.add_child(UI.gem_button(UI.t("exit"), "red", _exit, 84, 34))
 	if Game.is_logged_in():
@@ -132,12 +129,6 @@ func _save_values() -> void:
 	Game.save_settings("fil" if lang_picker.selected == 0 else "en", int(music_slider.value),
 		int(sfx_slider.value), notify.button_pressed)
 	DB.set_setting("spirit_voice", "1" if spirit_voice.button_pressed else "0")
-
-
-## Keeps the settings and opens SYSTEM.
-func _open_system() -> void:
-	_save_values()
-	Game.goto("system")
 
 
 func _exit() -> void:

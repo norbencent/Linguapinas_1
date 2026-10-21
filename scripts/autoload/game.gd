@@ -20,7 +20,6 @@ const SCENES := {
 	"spirit": "res://scenes/guiding_spirit.tscn",
 	"profile": "res://scenes/profile.tscn",
 	"guide": "res://scenes/guide.tscn",
-	"system": "res://scenes/system.tscn",
 }
 
 const MAX_HEARTS := 5
@@ -39,7 +38,7 @@ var last_result: Dictionary = {}  # filled by the quiz for the results screen
 var settings_return := "title"   # where Settings' Exit button goes
 
 ## Screens that can be opened without a player.
-const PUBLIC_SCREENS := ["title", "menu", "new_game", "continue", "settings", "system"]
+const PUBLIC_SCREENS := ["title", "menu", "new_game", "continue", "settings"]
 const PLAYTIME_SAVE_EVERY := 30.0
 var _unsaved_playtime := 0.0
 
@@ -79,7 +78,6 @@ func _process(delta: float) -> void:
 func _ready() -> void:
 	# The Android back key goes back a screen instead of closing the app.
 	get_tree().quit_on_go_back = false
-	apply_display()
 	_fit_window.call_deferred()
 
 
@@ -88,34 +86,10 @@ func _ready() -> void:
 ## Safety: a reminder to rest after this much continuous play.
 const BREAK_EVERY := 30.0 * 60.0
 var _break_timer := 0.0
-## Interaction capability: "Large" text scales the whole interface up.
-const TEXT_SCALE := {"normal": 1.0, "large": 1.12}
 
 
 func break_reminder_on() -> bool:
 	return DB.get_setting("break_reminder", "1") == "1"
-
-
-func text_size() -> String:
-	var s := DB.get_setting("text_size", "normal")
-	return s if TEXT_SCALE.has(s) else "normal"
-
-
-func battery_saver_on() -> bool:
-	return DB.get_setting("battery_saver", "0") == "1"
-
-
-## Performance efficiency: the battery saver caps the frame rate at 30.
-func apply_display() -> void:
-	get_tree().root.content_scale_factor = TEXT_SCALE[text_size()]
-	Engine.max_fps = 30 if battery_saver_on() else 0
-
-
-func save_display(size: String, saver: bool, reminder: bool) -> void:
-	DB.set_setting("text_size", size if TEXT_SCALE.has(size) else "normal")
-	DB.set_setting("battery_saver", "1" if saver else "0")
-	DB.set_setting("break_reminder", "1" if reminder else "0")
-	apply_display()
 
 
 ## On a PC, sizes the portrait window to the screen: as tall as fits above
