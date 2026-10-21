@@ -27,6 +27,23 @@ Android export preset (`export_presets.cfg`, package `com.linguapinas.game`).
    or connect your phone with USB debugging on and press the Android
    "Remote Debug" button to install it directly.
 
+### If the APK does not install on a phone
+
+| What you see | Why | What to do |
+| --- | --- | --- |
+| "App not installed", "There was a problem parsing the package" or "not compatible" on Android 7 or newer | The phone runs 32-bit Android (common on budget and Android Go phones). The APK is 64-bit only (`arm64-v8a`), because the SQLite addon ships Android libraries only for 64-bit. | Use a 64-bit phone for now. 32-bit support needs a 32-bit build of the SQLite addon (`libgdsqlite.android.*.arm32.so`, built from source with the Android NDK) and then `architectures/armeabi-v7a=true` in `export_presets.cfg`. |
+| Will not install on Android 6 or older | Godot 4.5 needs Android 7.0 or newer. | Use a phone with Android 7.0+. |
+| "App not installed as package conflicts with an existing package" | A LinguaPinas built on another computer (different signing key) is already on the phone. | Uninstall the old LinguaPinas first, then install the new APK. |
+| Blocked by Play Protect or "unknown sources" | The APK is not from the Play Store. | Allow installs from the browser/file manager, then tap "Install anyway". |
+| Download or install fails part-way | Not enough free space, or the download was incomplete. | Free some space and download the APK again. |
+| Opens to a black screen or closes at once | The phone does not support OpenGL ES 3.0 (phones from before about 2014). | Use a newer phone. |
+
+To keep the APK small, the export leaves out art the game does not load (the
+uncut warrior sprite sheets in `assets/enemies/<island>/`, which
+`tools/art/extract_enemy_frames.py` cuts into `assets/enemies/frames/`, and
+unused hero and background pictures), and the quiz backgrounds are compressed
+(WebP, quality 0.85). The game data is about 46 MB instead of 168 MB.
+
 The game is fully offline. The SQLite database is created automatically on
 first launch at `user://linguapinas.db`:
 
