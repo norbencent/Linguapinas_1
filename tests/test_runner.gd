@@ -421,7 +421,7 @@ func _test_reward_economy() -> void:
 	s = DB.record_quiz(uid, "tl", 1, "", 100, 10, 10, 5, true)
 	check(DB.get_rewards(uid).word_fragment == 20, "20 fragments collected")
 	check(DB.unlock_language(uid, "ilo").ok and DB.is_language_unlocked(uid, "ilo"), "Ilocano bought")
-	check(DB.get_rewards(uid).word_fragment == 0, "fragments spent")
+	check(DB.get_rewards(uid).word_fragment == 15, "5 fragments spent")
 	check(not DB.unlock_language(uid, "pag").ok, "coming-soon languages can't be bought")
 	# Culture with crystals, hints with relics.
 	var locked := DB.get_culture_items().filter(func(c): return not DB.is_culture_unlocked(uid, c.title))
@@ -471,7 +471,7 @@ func _test_pronunciation_and_grammar() -> void:
 func _test_new_screens() -> void:
 	var uid := DB.register_user("newbie", "").user.id as int
 	Game.user = DB.get_user(uid)
-	# Language shop: Ilocano is locked; with 20 fragments the UNLOCK button buys it.
+	# Language shop: Ilocano is locked; with 5 fragments the UNLOCK button buys it.
 	Game.region_code = "luzon"
 	Game.goto("language")
 	await _frames(3)
@@ -481,7 +481,7 @@ func _test_new_screens() -> void:
 	Game.goto("difficulty")
 	await _frames(3)
 	check(_scene_is("language"), "a locked language can't be opened")
-	DB.add_reward(uid, "word_fragment", 20)
+	DB.add_reward(uid, "word_fragment", 5)
 	Game.goto("language")
 	await _frames(3)
 	await _click(get_tree().current_scene.find_child("locked_ilo", true, false).find_child("unlock", true, false))
