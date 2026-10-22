@@ -116,7 +116,7 @@ music and sound effects in `assets/audio` were generated for this project.
 | Levels unlock in order (Easy → Medium → Hard) | Implemented |
 | Five-heart system; review the lesson after losing all hearts | Implemented |
 | Rewards: Word Fragments (Easy), Phrase Crystals (Medium, Grammar), Cultural Relics (Hard) | Implemented: a first clear pays in full, replays and practice pay half |
-| Spending rewards | 20 Word Fragments unlock a language (the first language of each island is free); 5 Phrase Crystals unlock a culture item; 1 Cultural Relic buys an extra hint when free hints run out |
+| Spending rewards | 5 Word Fragments unlock a language (the first language of each island is free); 5 Phrase Crystals unlock a culture item; 1 Cultural Relic buys an extra hint when free hints run out |
 | Island pearls (Luzon, Visayas, Mindanao Pearl) and the Pearl of the Orient, with a light-up animation (rays, rings of light, sparkles) when a pearl is lit; the map shows each island's progress (e.g. 2/4) | Implemented |
 | Culture Showcase Gallery (food, festivals, clothing, textiles, art, dances, music, crafts, heritage) | Implemented: 46 cultural elements, at least one for each of the 30 languages, each with a picture. Clearing a level for the first time reveals one (shown on the Results screen); the rest can be unlocked with Phrase Crystals. Lessons show the language's unlocked culture |
 | Culture questions in quizzes | Implemented: 1 per Easy quiz, 2 per Medium and Hard quiz, from the language's and region's culture items |

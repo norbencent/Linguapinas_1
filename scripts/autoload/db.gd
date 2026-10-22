@@ -23,7 +23,7 @@ const REWARD_NAMES := {
 }
 ## What rewards buy. Word Fragments unlock languages, Phrase Crystals unlock
 ## culture items in the Gallery, a Cultural Relic buys an extra quiz hint.
-const LANGUAGE_COST := {"word_fragment": 20}
+const LANGUAGE_COST := {"word_fragment": 5}
 const CULTURE_COST := {"phrase_crystal": 5}
 const HINT_COST := {"cultural_relic": 1}
 ## A level passed again (or category / grammar practice) pays half.
