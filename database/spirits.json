@@ -5,7 +5,8 @@
    "name": "Maelor",
    "title": "Spirit of the Northern Mountains",
    "personality": "Wise and warm, like a grandfather. Speaks slowly and kindly, calls you 'apo' (child), and loves old Filipino proverbs.",
-   "voice": {"espeak_variant": "m3", "pitch": 28, "speed": 128, "device_pitch": 0.7, "device_rate": 0.85},
+   "voice": {"ph": {"voice": "mb-id1", "pitch": 40, "speed": 150}, "en": {"voice": "mb-us2", "pitch": 40, "speed": 150},
+    "es": {"voice": "mb-es1", "pitch": 40, "speed": 150}, "espeak_variant": "m3", "device_pitch": 0.85, "device_rate": 1.0},
    "about": ["Ako si Maelor, ang espiritu ng mga bundok ng Luzon. Isang libong taon ko nang binabantayan ang mga hagdan-hagdang palayan. Tutulungan kitang matuto ng Tagalog, Ilocano, Kapampangan, Bikolano at iba pang wika ng Luzon.",
              "I am Maelor, spirit of the northern mountains of Luzon. I have watched over the rice terraces for a thousand years. I will help you learn Tagalog, Ilocano, Kapampangan, Bikolano and the other languages of Luzon."],
    "lines": {
@@ -27,7 +28,8 @@
    "name": "Marea",
    "title": "Spirit of the Visayan Seas",
    "personality": "Cheerful and playful, full of energy. Talks about waves, fish and the sea, and cheers loudly when you get it right.",
-   "voice": {"espeak_variant": "f4", "pitch": 72, "speed": 172, "device_pitch": 1.35, "device_rate": 1.1},
+   "voice": {"ph": {"voice": "mb-id1", "pitch": 90, "speed": 172, "shift": 1.4}, "en": {"voice": "mb-us1", "pitch": 70, "speed": 172},
+    "es": {"voice": "mb-es3", "pitch": 70, "speed": 172}, "espeak_variant": "f4", "device_pitch": 1.3, "device_rate": 1.15},
    "about": ["Ako si Marea, ang espiritu ng mga dagat ng Visayas! Lumalangoy ako sa paligid ng Cebu, Iloilo, Samar at bawat isla sa pagitan nila.",
              "I'm Marea, spirit of the Visayan seas! I splash around Cebu, Iloilo, Samar and every island in between. Let's learn Cebuano, Hiligaynon, Waray-Waray and more!"],
    "lines": {
@@ -49,7 +51,8 @@
    "name": "Lanora",
    "title": "Spirit of the Southern Lakes",
    "personality": "Calm, gentle and patient, a weaver of stories. Speaks softly and talks about weaving, music and the lakes of Mindanao.",
-   "voice": {"espeak_variant": "f2", "pitch": 52, "speed": 142, "device_pitch": 1.05, "device_rate": 0.9},
+   "voice": {"ph": {"voice": "mb-id1", "pitch": 80, "speed": 158, "shift": 1.32}, "en": {"voice": "mb-us1", "pitch": 45, "speed": 158},
+    "es": {"voice": "mb-es3", "pitch": 50, "speed": 158}, "espeak_variant": "f2", "device_pitch": 1.1, "device_rate": 1.05},
    "about": ["Ako si Lanora, ang espiritu ng Mindanao. Iniingatan ko ang mga kuwento ng Lawa ng Lanao, ang mga awit ng kulintang at ang mga disenyo ng mga manghahabi.",
              "I am Lanora, spirit of Mindanao. I keep the stories of Lake Lanao, the songs of the kulintang and the patterns of the weavers. Let us learn Bisaya, Tausug, Chavacano and more."],
    "lines": {

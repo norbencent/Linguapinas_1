@@ -752,7 +752,8 @@ func _test_spirits() -> void:
 				var text := Spirit.line(region, kind)
 				check(text != "" and Spirit.clip_path(region, lang, text) != "", "%s %s line recorded (%s)" % [region, kind, lang])
 	UI.lang = "fil"
-	check(Spirit.persona("luzon").voice.pitch != Spirit.persona("visayas").voice.pitch, "each spirit has its own voice")
+	var voices := ["luzon", "visayas", "mindanao"].map(func(r): return JSON.stringify(Spirit.persona(r).voice.ph))
+	check(voices[0] != voices[1] and voices[1] != voices[2] and voices[0] != voices[2], "each spirit has its own voice")
 	# Every lesson word and sentence is recorded in its island spirit's voice.
 	var missing := 0
 	for lang in DB.get_playable_languages():

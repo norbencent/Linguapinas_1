@@ -154,12 +154,12 @@ static func _voice() -> String:
 	return voices[0].id if not voices.is_empty() else ""
 
 
-## Reads [param text] aloud slowly. Returns false if the device has no voice.
+## Reads [param text] aloud. Returns false if the device has no voice.
 static func speak(text: String) -> bool:
 	if not can_speak():
 		return false
 	DisplayServer.tts_stop()
-	DisplayServer.tts_speak(text, _voice(), clampi(int(Sound.sfx_volume), 10, 100), 1.0, 0.8)
+	DisplayServer.tts_speak(text, _voice(), clampi(int(Sound.sfx_volume), 10, 100), 1.0, 1.0)
 	return true
 
 
