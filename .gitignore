@@ -7,3 +7,5 @@ __pycache__/
 *.pyc
 .venv/
 tools/marian_server/models/
+tools/voice/models/
+tools/voice/samples/

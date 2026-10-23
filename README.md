@@ -140,18 +140,24 @@ on the leaderboard; category practice still earns rewards.
 ## Spirit voices
 
 The spirits' voices are recorded by `tools/voice/make_spirit_voices.py` with
-MBROLA voices through eSpeak NG (`apt install espeak-ng ffmpeg mbrola
-mbrola-id1 mbrola-us1 mbrola-us2 mbrola-es1 mbrola-es3`). Philippine languages
-are read with the Indonesian voice (it follows the same spelling rules),
-Chavacano with a Spanish voice and English lines with an American voice.
-Maelor has a calm, deep grandfather's voice; Marea a bright, quick voice; and
-Lanora a soft, gentle voice (the female spirits' voices are pitch-shifted).
-Every clip is trimmed, evened out in loudness and given a soft echo. Each
-spirit's voices, pitch, speed and shift are in `database/spirits.json`. After changing lessons or lines, run the script
-again. To use native speakers' recordings instead, save an `.ogg` over the
-clip listed for that text in `assets/voice/manifest.json`. Text without a
-clip (free answers in the chat) is read by the device's own voice, tuned to
-the spirit, when the device has one.
+[Kokoro](https://github.com/thewh1teagle/kokoro-onnx), a neural
+text-to-speech model (Apache-2.0) that sounds like a real person
+(`pip install kokoro-onnx soundfile`, plus ffmpeg; the script downloads the
+350 MB model once into `tools/voice/models/`). Each spirit has its own voice:
+Maelor a warm, calm man's voice (`am_michael`), Marea a bright, cheerful
+woman's voice (`af_heart`) and Lanora a soft, gentle woman's voice
+(`af_bella`). Kokoro has no Philippine language, so the script turns
+Philippine spelling into its sounds first (clear vowels, "ng" as one sound,
+tapped r, glottal stop, stress on the second-to-last syllable unless an
+accent mark says otherwise) and Kokoro speaks those sounds; Chavacano uses
+Kokoro's Spanish rules and English lines are read as English. The voices and
+speeds are in `database/spirits.json`. `--sample` records a few lines of each
+spirit into `tools/voice/samples/` to listen to first. After changing lessons
+or lines, run the script again. To use native speakers' recordings instead,
+save an `.ogg` over the clip listed for that text in
+`assets/voice/manifest.json`. Text without a clip (free answers in the chat)
+is read by the device's own voice, tuned to the spirit, when the device has
+one.
 
 ## MarianNMT (optional)
 
