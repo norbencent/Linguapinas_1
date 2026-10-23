@@ -139,15 +139,45 @@ on the leaderboard; category practice still earns rewards.
 
 ## Spirit voices
 
-The spirits' voices are recorded with eSpeak NG by
-`tools/voice/make_spirit_voices.py` (Philippine languages are read with its
-Indonesian voice, which follows the same spelling rules; Chavacano with its
-Spanish voice). Each spirit has its own pitch, speed and voice in
-`database/spirits.json`. After changing lessons or lines, run the script
-again. To use native speakers' recordings instead, save an `.ogg` over the
-clip listed for that text in `assets/voice/manifest.json`. Text without a
-clip (free answers in the chat) is read by the device's own voice, tuned to
-the spirit, when the device has one.
+The spirits' voices are recorded by `tools/voice/make_spirit_voices.py` with
+[Kokoro](https://github.com/thewh1teagle/kokoro-onnx), a neural
+text-to-speech model (Apache-2.0) that sounds like a real person
+(`pip install kokoro-onnx soundfile`, plus ffmpeg; the script downloads the
+350 MB model once into `tools/voice/models/`). Each spirit has its own voice:
+Maelor a warm, calm man's voice (`am_michael`), Marea a bright, cheerful
+woman's voice (`af_heart`) and Lanora a soft, gentle woman's voice
+(`af_bella`). Kokoro has no Philippine language, so the script turns
+Philippine spelling into its sounds first (clear vowels, "ng" as one sound,
+tapped r, glottal stop, stress on the second-to-last syllable unless an
+accent mark says otherwise) and Kokoro speaks those sounds; Chavacano uses
+Kokoro's Spanish rules and English lines are read as English. The voices and
+speeds are in `database/spirits.json`. `--sample` records a few lines of each
+spirit into `tools/voice/samples/` to listen to first. After changing lessons
+or lines, run the script again. To use native speakers' recordings instead,
+save an `.ogg` over the clip listed for that text in
+`assets/voice/manifest.json`. Text without a clip (free answers in the chat)
+is read by the device's own voice, tuned to the spirit, when the device has
+one.
+
+### Native-speaker voices with SapinSapin (Orpheus)
+
+For more natural Philippine pronunciation, `tools/voice/make_spirit_voices_orpheus.py`
+records every Philippine word, sentence and Filipino spirit line with
+[SapinSapin](https://github.com/sapinsapin/halohalo)'s Orpheus 3B voice models.
+There is one model per language (Filipino/Tagalog, Ilocano, Kapampangan, Bikol,
+Cebuano/Bisaya, Hiligaynon, Waray, Tausug), each trained on recordings of real
+native speakers. Chavacano and English keep the Kokoro voice. Each spirit has a
+speaker per language (`"orpheus"` in `database/spirits.json`, the first one is
+used); `--audition` records every listed speaker so you can choose. `--check`
+transcribes each take with SapinSapin's speech recognition and keeps the
+clearest of three. The clips are written over the files in
+`assets/voice/manifest.json`, so nothing else in the game changes.
+
+It needs an NVIDIA GPU (about 8 GB) and Hugging Face access, so the easiest way
+is the Google Colab notebook `tools/voice/orpheus_colab.ipynb` (free T4 GPU):
+open it in Colab, run the cells, and push the result to a branch or download it
+as a zip. The SapinSapin models are for research and non-commercial use
+(CC-BY-NC 4.0).
 
 ## MarianNMT (optional)
 
