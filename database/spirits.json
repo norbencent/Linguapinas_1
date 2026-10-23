@@ -1,5 +1,5 @@
 {
- "about": "The three Guiding Spirits: personality, voice and what they say. Lines are [Filipino, English]. Edit freely, then run tools/voice/make_spirit_voices.py to record the voices again.",
+ "about": "The three Guiding Spirits: personality, voice and what they say. Lines are [Filipino, English]. Edit freely, then run tools/voice/make_spirit_voices.py to record the voices again. Philippine-language clips can instead be recorded with SapinSapin's native-speaker Orpheus models (tools/voice/make_spirit_voices_orpheus.py): \"orpheus\" lists the speaker ids to try for each language, the first one is used.",
  "spirits": {
   "luzon": {
    "name": "Maelor",
@@ -9,7 +9,38 @@
     "kokoro": "am_michael",
     "speed": 0.95,
     "device_pitch": 0.85,
-    "device_rate": 1.0
+    "device_rate": 1.0,
+    "orpheus": {
+     "fil": [
+      "FIL_0008",
+      "FIL_0064",
+      "FIL_0003",
+      "FIL_0000"
+     ],
+     "ilo": [
+      "ILO_1755",
+      "ILO_1707",
+      "ILO_1724",
+      "ILO_1711"
+     ],
+     "pam": [
+      "PAM_0402",
+      "PAM_0498",
+      "PAM_0528",
+      "PAM_0592"
+     ],
+     "bcl": [
+      "BIK_0982",
+      "BIK_0800",
+      "BIK_0895",
+      "BIK_0979"
+     ],
+     "eng": [
+      "ENG_1879",
+      "ENG_1905"
+     ]
+    },
+    "orpheus_speed": 1.0
    },
    "about": [
     "Ako si Maelor, ang espiritu ng mga bundok ng Luzon. Isang libong taon ko nang binabantayan ang mga hagdan-hagdang palayan. Tutulungan kitang matuto ng Tagalog, Ilocano, Kapampangan, Bikolano at iba pang wika ng Luzon.",
@@ -92,7 +123,38 @@
     "kokoro": "af_heart",
     "speed": 1.05,
     "device_pitch": 1.3,
-    "device_rate": 1.15
+    "device_rate": 1.15,
+    "orpheus": {
+     "fil": [
+      "FIL_0003",
+      "FIL_0000",
+      "FIL_0008",
+      "FIL_0064"
+     ],
+     "ceb": [
+      "CEB_0312",
+      "CEB_0314",
+      "CEB_0200",
+      "CEB_0288"
+     ],
+     "hil": [
+      "HIL_0624",
+      "HIL_0623",
+      "HIL_0717",
+      "HIL_0619"
+     ],
+     "war": [
+      "WAR_1047",
+      "WAR_1046",
+      "WAR_1015",
+      "WAR_1054"
+     ],
+     "eng": [
+      "ENG_1905",
+      "ENG_1904"
+     ]
+    },
+    "orpheus_speed": 1.0
    },
    "about": [
     "Ako si Marea, ang espiritu ng mga dagat ng Visayas! Lumalangoy ako sa paligid ng Cebu, Iloilo, Samar at bawat isla sa pagitan nila.",
@@ -175,7 +237,32 @@
     "kokoro": "af_bella",
     "speed": 0.98,
     "device_pitch": 1.1,
-    "device_rate": 1.05
+    "device_rate": 1.05,
+    "orpheus": {
+     "fil": [
+      "FIL_0000",
+      "FIL_0003",
+      "FIL_0064",
+      "FIL_0008"
+     ],
+     "ceb": [
+      "CEB_0314",
+      "CEB_0312",
+      "CEB_0288",
+      "CEB_0200"
+     ],
+     "tsg": [
+      "TSG_1450",
+      "TSG_1445",
+      "TSG_1463",
+      "TSG_1447"
+     ],
+     "eng": [
+      "ENG_1904",
+      "ENG_1905"
+     ]
+    },
+    "orpheus_speed": 1.0
    },
    "about": [
     "Ako si Lanora, ang espiritu ng Mindanao. Iniingatan ko ang mga kuwento ng Lawa ng Lanao, ang mga awit ng kulintang at ang mga disenyo ng mga manghahabi.",

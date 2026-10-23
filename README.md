@@ -159,6 +159,26 @@ save an `.ogg` over the clip listed for that text in
 is read by the device's own voice, tuned to the spirit, when the device has
 one.
 
+### Native-speaker voices with SapinSapin (Orpheus)
+
+For more natural Philippine pronunciation, `tools/voice/make_spirit_voices_orpheus.py`
+records every Philippine word, sentence and Filipino spirit line with
+[SapinSapin](https://github.com/sapinsapin/halohalo)'s Orpheus 3B voice models.
+There is one model per language (Filipino/Tagalog, Ilocano, Kapampangan, Bikol,
+Cebuano/Bisaya, Hiligaynon, Waray, Tausug), each trained on recordings of real
+native speakers. Chavacano and English keep the Kokoro voice. Each spirit has a
+speaker per language (`"orpheus"` in `database/spirits.json`, the first one is
+used); `--audition` records every listed speaker so you can choose. `--check`
+transcribes each take with SapinSapin's speech recognition and keeps the
+clearest of three. The clips are written over the files in
+`assets/voice/manifest.json`, so nothing else in the game changes.
+
+It needs an NVIDIA GPU (about 8 GB) and Hugging Face access, so the easiest way
+is the Google Colab notebook `tools/voice/orpheus_colab.ipynb` (free T4 GPU):
+open it in Colab, run the cells, and push the result to a branch or download it
+as a zip. The SapinSapin models are for research and non-commercial use
+(CC-BY-NC 4.0).
+
 ## MarianNMT (optional)
 
 The Guiding Spirit answers from the SQLite dictionary first. For free-form
