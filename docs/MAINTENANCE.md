@@ -13,7 +13,7 @@ singletons), started in this order:
 | --- | --- | --- |
 | `DB` | `scripts/autoload/db.gd` | The only code that talks to SQLite: players, lessons, progress, rewards, culture, leaderboard, data checks and backups |
 | `Game` | `scripts/autoload/game.gd` | The current player and language, screen navigation and the back key, quiz building and scoring, display settings, leave warnings, break reminder |
-| `Spirit` | `scripts/autoload/spirit.gd` | Guiding Spirits: personalities, recorded voices, translation (dictionary, optional MarianNMT) |
+| `Spirit` | `scripts/autoload/spirit.gd` | Guiding Spirits: personalities and lines, translation (dictionary, optional MarianNMT) |
 | `Sound` | `scripts/autoload/sound.gd` | Music and sound effects |
 | `UI` | `scripts/autoload/ui.gd` | The look of the game: theme, page frame, buttons, nav bar, Filipino/English text |
 | `Tutorial` | `scripts/autoload/tutorial.gd` | The first-time hand tour |
@@ -36,9 +36,9 @@ Other folders:
 - `scripts/spirit_brain.gd`: the Guiding Spirit chat (offline).
 - `scenes/*.tscn`: one tiny scene per screen; each only attaches its script.
   The screen names are listed in `Game.SCENES`.
-- `database/spirits.json`: the spirits' lines and voice settings.
-- `assets/`: pictures, fonts, sounds and recorded voices.
-- `tools/`: Python scripts that make the art cards and record voices.
+- `database/spirits.json`: the spirits' personalities and lines.
+- `assets/`: pictures, fonts, music and sound effects.
+- `tools/`: Python scripts that make the art cards.
 - `tests/test_runner.gd`: the automated test.
 
 ## Dependencies
@@ -48,7 +48,6 @@ Other folders:
 | Running and exporting | Godot 4.4 or newer, standard build (made with 4.5.1) |
 | Database | godot-sqlite 4.5 GDExtension, included in `addons/godot-sqlite` (Windows, macOS, Linux, Android binaries) |
 | Android build | Godot Android export templates, Android SDK, OpenJDK 17 |
-| Recording spirit voices (optional) | Python 3, eSpeak NG, ffmpeg (`tools/voice/make_spirit_voices.py`) |
 | Culture placeholder cards (optional) | Python 3 with Pillow (`tools/art/make_culture_cards.py`) |
 | Free translation (optional) | Python MarianNMT server (`tools/marian_server`) |
 
@@ -79,9 +78,7 @@ need to change.
 | Make a language playable | its entry in `languages`: `"playable": 1`, then add its words, sentences and tips |
 
 Then **increase `"version"`** at the top of the file. On the next start the game
-reloads the content and keeps every player's progress. After changing words or
-sentences, run `python tools/voice/make_spirit_voices.py` to record the new
-clips (optional: without a clip, the device voice is used).
+reloads the content and keeps every player's progress.
 
 Wrong or unclear content is fixed the same way: correct the entry and raise
 the version. The quiz questions are built from the content each time, so they
@@ -111,11 +108,10 @@ update automatically.
 
 ## Known limitations
 
-- Spirit voices are synthesized with eSpeak NG; native-speaker recordings can
-  replace any clip (`assets/voice/manifest.json`).
+- The Guiding Spirits speak through text only: there are no voice clips.
 - 10 of the 30 listed languages have lessons; the other 20 appear on the maps.
-- There is no speech recognition: the game shows and plays pronunciation but
-  does not grade the player's voice.
+- Pronunciation is shown as text (syllables, stress, sound tips); there is no
+  audio of the words and no speech recognition.
 - Free translation needs the optional MarianNMT server; without it the
   built-in dictionary answers.
 - Progress is stored on one device; there is no online account or sync.

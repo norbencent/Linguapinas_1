@@ -6,7 +6,7 @@ extends RefCounted
 ## pronunciation helper, the grammar checker, the culture items and the
 ## player's progress and rewards. Each spirit answers in its own style.
 ##
-## ask() returns {"text": String, "say": Array of [lang, text] to speak,
+## ask() returns {"text": String, "say": Array of [lang, text] the answer is about,
 ## "intent": String, "suggest": Array of follow-up questions}.
 
 const OPENERS := {
