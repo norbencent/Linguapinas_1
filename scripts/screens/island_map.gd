@@ -111,7 +111,7 @@ func _ready() -> void:
 		{"id": "map_pearls", "target": cores,
 			"text": "These are the island pearls. The numbers show how many languages you have mastered (Easy, Medium and Hard passed). Master them all to light the pearl, and light all three to wake the Pearl of the Orient!"},
 		{"id": "map_spirit", "target": spirit_button,
-			"text": "Talk to me here any time! Ask me about words and grammar, translate, hear how words are said, and let my grammar checker mark your sentences."},
+			"text": "Talk to me here any time! Ask me about words and grammar, translate, see how words are said, and let my grammar checker mark your sentences."},
 		{"id": "map_more", "target": row,
 			"text": "LEADERBOARD shows the best Guardians on this device. STORIES are legends you unlock by lighting the pearls. GABAY is the full guide."},
 		{"id": "nav_gallery", "target": find_child("nav_gallery", true, false),
@@ -119,7 +119,7 @@ func _ready() -> void:
 		{"id": "nav_profile", "target": find_child("nav_profile", true, false),
 			"text": "PROFILE shows your hero, rewards, badges and recent quizzes. HOME brings you back to this map and BACK returns to the last screen."},
 		{"id": "map_settings", "target": settings,
-			"text": "SETTINGS: language of the game (Filipino or English), music, sounds, notices and my voice. Your progress is saved automatically after every lesson and quiz."},
+			"text": "SETTINGS: language of the game (Filipino or English), music, sounds and notices. Your progress is saved automatically after every lesson and quiz."},
 		{"id": "map_guide", "target": find_child("guide_button", true, false),
 			"text": "That's the whole tour! Open GABAY whenever you need help: it has every guide page, your Getting Started checklist, and can replay this tutorial. Mabuhay, Guardian!"},
 	]

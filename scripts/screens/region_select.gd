@@ -16,7 +16,7 @@ func _ready() -> void:
 	content.add_child(UI.ribbon(UI.t("language"), color))
 	content.add_child(UI.center(UI.image(UI.tex["guide_" + code], Vector2(120, 120))))
 	content.add_child(UI.heading(UI.GUIDES[code].to_upper(), color, 26))
-	var greet := UI.label(Spirit.speak_line(code, "greet"), 20, UI.INK, true)
+	var greet := UI.label(Spirit.line(code, "greet"), 20, UI.INK, true)
 	greet.name = "greeting"
 	var title := UI.label(Spirit.persona(code).get("title", ""), 16, UI.INK_SOFT, true)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

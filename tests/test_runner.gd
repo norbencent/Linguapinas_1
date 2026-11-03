@@ -742,31 +742,18 @@ func _test_pearls() -> void:
 
 
 func _test_spirits() -> void:
-	# Three personalities, each with every kind of line, recorded in its own voice.
+	# Three personalities, each with every kind of line. The spirits have no voice.
 	var names := {"luzon": "Maelor", "visayas": "Marea", "mindanao": "Lanora"}
 	for region in names:
 		check(Spirit.spirit_name(region) == names[region], "%s spirit is %s" % [region, names[region]])
+		check(not Spirit.persona(region).has("voice"), "%s spirit has no voice settings" % region)
 		for kind in ["greet", "correct", "wrong", "hint", "pass", "fail", "pronounce", "unknown", "about"]:
 			for lang in ["fil", "en"]:
 				UI.lang = lang
-				var text := Spirit.line(region, kind)
-				check(text != "" and Spirit.clip_path(region, lang, text) != "", "%s %s line recorded (%s)" % [region, kind, lang])
+				check(Spirit.line(region, kind) != "", "%s %s line (%s)" % [region, kind, lang])
 	UI.lang = "fil"
-	check(Spirit.persona("luzon").voice.pitch != Spirit.persona("visayas").voice.pitch, "each spirit has its own voice")
-	# Every lesson word and sentence is recorded in its island spirit's voice.
-	var missing := 0
-	for lang in DB.get_playable_languages():
-		for w in DB.get_words(lang.code) + DB.get_sentences(lang.code):
-			if Spirit.clip_path(lang.region_code, lang.code, w.native) == "":
-				missing += 1
-	check(missing == 0, "every lesson word and sentence has a voice clip (%d missing)" % missing)
-	Spirit.last_said.clear()
-	check(Spirit.say_word("ceb", "Salamat"), "Marea says a Cebuano word")
-	check(Spirit.last_said.back() == ["visayas", "ceb", "Salamat"], "said by the Visayas spirit")
-	DB.set_setting("spirit_voice", "0")
-	check(not Spirit.say_word("tl", "Salamat"), "the voice can be switched off")
-	DB.set_setting("spirit_voice", "1")
-	Spirit.stop()
+	check(not Spirit.has_method("say") and not ResourceLoader.exists("res://assets/voice/manifest.json"),
+		"no spirit voice clips or playback")
 	# The brain answers real questions.
 	UI.lang = "en"
 	var a: Dictionary = await SpiritBrain.ask("How do I say thank you?", "tl")
@@ -809,7 +796,6 @@ func _test_spirits() -> void:
 	var quiz := get_tree().current_scene
 	quiz._answer(quiz.questions[0].answer)
 	check("Maelor:" in quiz.feedback_label.text and quiz.spirit_said != "", "Maelor reacts to a right answer")
-	Spirit.stop()
 	Game.leave_warning = Callable()  # the test leaves the quiz half-way
 
 
@@ -956,7 +942,7 @@ func _test_quality() -> void:
 
 	# Compatibility: the game goes quiet in the background and comes back.
 	Sound.set_background(true)
-	check(Sound.in_background and not Spirit.voice.playing, "sound and voices pause in the background")
+	check(Sound.in_background, "sound pauses in the background")
 	Sound.set_background(false)
 	check(not Sound.in_background, "sound resumes")
 

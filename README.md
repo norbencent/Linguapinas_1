@@ -108,7 +108,7 @@ music and sound effects in `assets/audio` were generated for this project.
 | Easy: vocabulary multiple choice (both directions) | Implemented |
 | Medium: sentence building, dialogue selection, comprehension | Implemented |
 | Hard: context-based "what would you say", sentence building with decoy words, typed recall | Implemented |
-| Pronunciation help from the Guiding Spirit (BIGKAS button in quizzes, PRONOUNCE in the Guiding Spirit screen): syllables, stressed syllable, sound tips, LISTEN with the device's text-to-speech voice | Implemented (no native recordings or speech recognition yet) |
+| Pronunciation help from the Guiding Spirit (BIGKAS button in quizzes, PRONOUNCE in the Guiding Spirit screen): syllables, stressed syllable, sound tips | Implemented (text only; no audio or speech recognition) |
 | Grammar quiz per language (pick the correct sentence, fill in the missing marker or pronoun, write sentences) | Implemented: opens after Easy, earns Phrase Crystals |
 | Grammar checker (spelling, missing / extra words, word order, with the matching grammar tip) | Implemented in the grammar quiz and in the Guiding Spirit screen; it compares with the game's sentence bank |
 | Easy: picture matching | Not implemented (needs image assets) |
@@ -122,7 +122,7 @@ music and sound effects in `assets/audio` were generated for this project.
 | Culture questions in quizzes | Implemented: 1 per Easy quiz, 2 per Medium and Hard quiz, from the language's and region's culture items |
 | Stories unlocked by lighting the island pearls | Implemented: one story per region plus the Pearl story |
 | Leaderboard (all players on the device, filter by region) | Implemented |
-| Guiding Spirits with their own personality and voice: Maelor (Luzon, a wise elder who loves proverbs), Marea (Visayas, a cheerful sea spirit) and Lanora (Mindanao, a calm weaver of stories). They greet you, react to every answer, give hints, celebrate and comfort you, and say every lesson word and sentence in their own recorded voice | Implemented (database/spirits.json, assets/voice/, SPIRIT VOICE switch in Settings) |
+| Guiding Spirits with their own personality: Maelor (Luzon, a wise elder who loves proverbs), Marea (Visayas, a cheerful sea spirit) and Lanora (Mindanao, a calm weaver of stories). They greet you, react to every answer, give hints, celebrate and comfort you, in text (the spirits have no voice) | Implemented (database/spirits.json) |
 | Talk to your Guiding Spirit (chat): "How do I say thank you?", "What does kumusta mean?", "Pronounce salamat", "Is this correct: gusto ko tubig", "Tell me about Sinulog", "What should I do next?", in English or Filipino. Answers offline from the dictionary, pronunciation helper, grammar checker, culture items and your progress | Implemented (scripts/spirit_brain.gd) |
 | Guiding Spirit: offline dictionary, word-by-word gloss, grammar tips, quiz hints | Implemented |
 | Guiding Spirit: MarianNMT machine translation | Implemented as an optional local server (see below) |
@@ -136,18 +136,6 @@ more languages get lessons, they are added to the requirement automatically
 (`is_core_restored` in `scripts/autoload/db.gd`). Lighting all three unlocks
 the Pearl of the Orient. Only "All categories" quizzes unlock levels and count
 on the leaderboard; category practice still earns rewards.
-
-## Spirit voices
-
-The spirits' voices are recorded with eSpeak NG by
-`tools/voice/make_spirit_voices.py` (Philippine languages are read with its
-Indonesian voice, which follows the same spelling rules; Chavacano with its
-Spanish voice). Each spirit has its own pitch, speed and voice in
-`database/spirits.json`. After changing lessons or lines, run the script
-again. To use native speakers' recordings instead, save an `.ogg` over the
-clip listed for that text in `assets/voice/manifest.json`. Text without a
-clip (free answers in the chat) is read by the device's own voice, tuned to
-the spirit, when the device has one.
 
 ## MarianNMT (optional)
 

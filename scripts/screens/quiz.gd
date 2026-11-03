@@ -214,7 +214,7 @@ func _ready() -> void:
 		{"id": "quiz_answer", "target": answer_area,
 			"text": "Pick an answer, then tap CHECK. You have five hearts: a wrong answer costs one heart."},
 		{"id": "quiz_spirit", "target": guide,
-			"text": "Stuck? Tap me for a hint. Tap BIGKAS under me to see and hear how the words are said."},
+			"text": "Stuck? Tap me for a hint. Tap BIGKAS under me to see how the words are said."},
 		{"id": "quiz_warrior", "target": stage,
 			"text": "Every right answer is a strike against the warrior. Defeat them by finishing the quiz with hearts left!"}])
 
@@ -416,7 +416,7 @@ func _use_hint() -> void:
 			typed_edit.placeholder_text = "%s..." % q.answer.substr(0, reveal)
 	hints_left -= 1
 	var hint_region := Spirit.region_of(Game.language_code)
-	feedback_label.text = "%s: %s" % [Spirit.spirit_name(hint_region), Spirit.speak_line(hint_region, "hint")]
+	feedback_label.text = "%s: %s" % [Spirit.spirit_name(hint_region), Spirit.line(hint_region, "hint")]
 	feedback_label.add_theme_color_override("font_color", Color("5a3591"))
 	hint_used_on_question = true
 	_refresh_bar()
@@ -454,9 +454,9 @@ func _answer(given: String) -> void:
 		else:
 			feedback_label.text = "Grammar check:\n" + "\n".join(lines)
 		explain_label.text = "%s: %s\n%s" % ["Correct sentence", q.answer, q.explain]
-	# The island's Guiding Spirit reacts, in its own voice and personality.
+	# The island's Guiding Spirit reacts, in its own personality.
 	var region := Spirit.region_of(Game.language_code)
-	spirit_said = Spirit.speak_line(region, "correct" if ok else "wrong")
+	spirit_said = Spirit.line(region, "correct" if ok else "wrong")
 	feedback_label.text += "\n%s: %s" % [Spirit.spirit_name(region), spirit_said]
 	for b in option_buttons:
 		b.disabled = true

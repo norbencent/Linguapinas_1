@@ -50,8 +50,6 @@ func set_background(on: bool) -> void:
 	music.stream_paused = on or music_volume == 0
 	for p in sfx_players:
 		p.stream_paused = on
-	if on:
-		Spirit.stop()
 
 
 func play(name: String) -> void:

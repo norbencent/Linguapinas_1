@@ -1,20 +1,15 @@
 class_name Pronounce
 extends RefCounted
-## Pronunciation help used by the Guiding Spirit: syllables, the usual stress,
-## sound tips for Philippine spelling, and reading words aloud with the
-## device's text-to-speech voice.
+## Pronunciation help used by the Guiding Spirit (text only): syllables, the
+## usual stress and sound tips for Philippine spelling.
 ##
-## There are no native recordings yet, so the stress shown is the usual
-## pattern (second-to-last syllable) unless the word has an accent mark, and
-## the voice is whatever the device provides (an Indonesian, Malay or Spanish
-## voice reads Philippine spelling better than an English one).
+## The stress shown is the usual pattern (second-to-last syllable) unless the
+## word has an accent mark.
 
 const VOWELS := "aeiouáéíóúàèìòùâêîôû"
 const ACCENTED := "áéíóúàèìòùâêîôû"
 ## Consonant pairs that start a syllable together (mostly in Spanish loanwords).
 const ONSET_CLUSTERS := ["bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "tr", "ts"]
-## Voices to try, best first. Matched against the start of the voice language.
-const VOICE_PREFERENCE := ["fil", "tl", "id", "ms", "es"]
 
 
 ## "salamat" -> ["sa", "la", "mat"]. "ng" counts as one consonant; a hyphen
@@ -139,30 +134,6 @@ static func _words(text: String) -> Array:
 	return cleaned.split(" ", false)
 
 
-# ---------------------------------------------------------------- voice
-
-static func can_speak() -> bool:
-	return DisplayServer.get_name() != "headless" and not DisplayServer.tts_get_voices().is_empty()
-
-
-static func _voice() -> String:
-	var voices := DisplayServer.tts_get_voices()
-	for want in VOICE_PREFERENCE:
-		for v in voices:
-			if str(v.get("language", "")).to_lower().begins_with(want):
-				return v.id
-	return voices[0].id if not voices.is_empty() else ""
-
-
-## Reads [param text] aloud slowly. Returns false if the device has no voice.
-static func speak(text: String) -> bool:
-	if not can_speak():
-		return false
-	DisplayServer.tts_stop()
-	DisplayServer.tts_speak(text, _voice(), clampi(int(Sound.sfx_volume), 10, 100), 1.0, 0.8)
-	return true
-
-
 # ---------------------------------------------------------------- panel
 
 ## The Guiding Spirit's pronunciation pop-up for [param texts] (words or
@@ -197,9 +168,8 @@ static func show_panel(parent: Control, texts: Array, language_code: String, reg
 	hl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(hl)
 	v.add_child(head)
-	var voice_ok := can_speak()
 	if texts.is_empty():
-		v.add_child(UI.label("There are no %s words to say yet. Answer the question, then ask me again to hear the answer."
+		v.add_child(UI.label("There are no %s words to say yet. Answer the question, then ask me again to see how the answer is said."
 			% DB.get_language(language_code).get("name", ""), 18, UI.INK, true))
 	for text in texts:
 		var entry := UI.panel(Color("fffaf0"), Color("c9a76b"))
@@ -209,22 +179,12 @@ static func show_panel(parent: Control, texts: Array, language_code: String, reg
 		var word := UI.label(str(text), 24, UI.RED, true, UI.font_body_black)
 		word.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(word)
-		# The island's spirit says it in its own recorded voice; the device
-		# voice is the fallback for words without a recording.
-		var listen := UI.pill_button("LISTEN", Color("6b3fa0"), func():
-			if not Spirit.say(region, str(text), language_code, true):
-				speak(str(text)), 46, 16)
-		listen.name = "listen"
-		listen.disabled = not (voice_ok or Spirit.clip_path(region, language_code, str(text)) != "")
-		row.add_child(listen)
 		ev.add_child(row)
 		ev.add_child(UI.label(phrase_guide(str(text)), 22, Color("5a3591"), true, UI.font_body_black))
 		v.add_child(entry)
 	var all_text := " ".join(texts.map(func(x): return str(x)))
 	for tip in tips(all_text, language_code):
 		v.add_child(UI.label("• " + tip, 16, UI.INK, true))
-	if texts.size() > 0:
-		Spirit.say(region, Spirit.line(region, "pronounce"), "fil" if UI.lang == "fil" else "en", true)
 	var close := UI.pill_button("CLOSE", UI.INK_SOFT, func():
 		Game.overlays.erase(overlay)
 		overlay.queue_free(), 52, 20)

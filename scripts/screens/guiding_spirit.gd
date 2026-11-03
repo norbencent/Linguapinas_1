@@ -1,6 +1,6 @@
 extends Control
-## The Guiding Spirit: talk to your island's spirit (it answers and speaks
-## in its own voice), plus the translator, grammar checker and tips.
+## The Guiding Spirit: talk to your island's spirit (it answers in its own
+## style), plus the translator, grammar checker and tips.
 
 var lang_picker: OptionButton
 var direction_picker: OptionButton
@@ -127,39 +127,24 @@ func _meet_spirit() -> void:
 		chat_log.remove_child(c)
 		c.queue_free()
 	var hello := Spirit.line(region, "greet")
-	_bubble(hello, false, [["fil" if UI.lang == "fil" else "en", hello]])
-	Spirit.say(region, hello, "fil" if UI.lang == "fil" else "en", true)
+	_bubble(hello, false)
 
 
-## Asks the spirit; its answer appears in the chat and is spoken.
+## Asks the spirit; its answer appears in the chat.
 func ask(question: String) -> Dictionary:
 	if question.strip_edges() == "":
 		return {}
 	chat_input.text = ""
-	_bubble(question, true, [])
+	_bubble(question, true)
 	var answer: Dictionary = await SpiritBrain.ask(question, _current_lang())
 	if not is_inside_tree():
 		return answer
-	_bubble(answer.text, false, answer.say)
+	_bubble(answer.text, false)
 	_set_chips(answer.suggest)
-	_speak(answer.say, true)
 	return answer
 
 
-func _speak(say: Array, interrupt: bool) -> void:
-	var first := true
-	for item in say:
-		var lang: String = item[0]
-		if lang in ["fil", "en"]:
-			Spirit.say(_region(), item[1], lang, interrupt and first)
-		else:
-			if interrupt and first:
-				Spirit.stop()
-			Spirit.say_word(lang, item[1])
-		first = false
-
-
-func _bubble(text: String, mine: bool, say: Array) -> void:
+func _bubble(text: String, mine: bool) -> void:
 	var row := UI.hbox(8)
 	var bubble := PanelContainer.new()
 	bubble.add_theme_stylebox_override("panel", UI._box(Color("fff2c2") if mine else Color("ffffff"), 16,
@@ -170,10 +155,6 @@ func _bubble(text: String, mine: bool, say: Array) -> void:
 	if not mine:
 		v.add_child(UI.label(Spirit.spirit_name(_region()), 16, Color("5a3591"), false, UI.font_body_black))
 	v.add_child(UI.label(text, 18, UI.INK, true))
-	if not say.is_empty():
-		var again := UI.pill_button("LISTEN", Color("6b3fa0"), func(): _speak(say, true), 40, 14)
-		again.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-		v.add_child(again)
 	if mine:
 		var pad := Control.new()
 		pad.custom_minimum_size.x = 60
