@@ -98,7 +98,7 @@ func _ready() -> void:
 func _add_map(content: VBoxContainer, code: String) -> void:
 	var map := UI.image(UI.tex["lang_map_" + code], Vector2(0, 420))
 	content.add_child(map)
-	UI.clickable(map, func(): _show_map(code)).set_anchors_preset(Control.PRESET_FULL_RECT)
+	UI.clickable(map, func(): _show_map(code)).set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var hint := UI.label("Pindutin ang mapa para palakihin" if UI.lang == "fil" else "Tap the map to enlarge", 16, UI.INK_SOFT)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	content.add_child(hint)

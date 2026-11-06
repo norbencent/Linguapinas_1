@@ -51,6 +51,7 @@ func _run() -> void:
 	await _test_spirits()
 	await _test_guide_pages()
 	await _test_play_quiz_through_ui()
+	await _test_easy_touch()
 	await _test_quality()
 	DB.close()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_DB))
@@ -954,3 +955,65 @@ func _test_quality() -> void:
 	DB.delete_user(pw.id)
 	for b in DB.list_backups():
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(b))
+
+
+func _tap_at(p: Vector2) -> void:
+	for pressed in [true, false]:
+		var e := InputEventMouseButton.new()
+		e.button_index = MOUSE_BUTTON_LEFT
+		e.pressed = pressed
+		e.position = p
+		e.global_position = p
+		get_viewport().push_input(e, true)
+		await _frames(1)
+
+
+## Taps land where the finger is: on a language map's labels, and on the
+## sea right next to a small island of the Main Island map.
+func _test_easy_touch() -> void:
+	var uid := DB.register_user("toucher", "").user.id as int
+	Game.user = DB.get_user(uid)
+	DB.mark_tutorial_seen(uid, "welcome")
+	Game.region_code = "luzon"
+	Game.goto("language")
+	await _frames(3)
+	var map_img: TextureRect = null
+	for t in get_tree().current_scene.find_children("*", "TextureRect", true, false):
+		if t.texture == UI.tex["lang_map_luzon"]:
+			map_img = t
+	var tap: Button = map_img.get_child(0)
+	check(tap.get_global_rect().is_equal_approx(map_img.get_global_rect()), "the whole language map is tappable")
+	var sc: ScrollContainer = map_img.get_parent().get_parent()
+	sc.ensure_control_visible(map_img)
+	await _frames(2)
+	var r := map_img.get_global_rect()
+	for f in [Vector2(0.2, 0.3), Vector2(0.5, 0.5), Vector2(0.8, 0.7)]:
+		Game.overlays.clear()
+		await _tap_at(r.position + r.size * f)
+		check(not Game.overlays.is_empty(), "tapping the language map at %s enlarges it" % f)
+		for o in Game.overlays:
+			o.queue_free()
+		await _frames(2)
+	for region in ["luzon", "visayas", "mindanao"]:
+		Game.overlays.clear()
+		Game.goto("map")
+		await _frames(4)
+		var b: TextureButton = get_tree().current_scene.find_child(region, true, false)
+		var art := b.texture_normal.get_image()
+		var mask := b.texture_click_mask
+		check(mask.get_true_bit_count() > 1.5 * art.get_used_rect().size.x, "%s has a tap area" % region)
+		# A sea pixel next to the land that is inside the tap area.
+		var spot := Vector2i(-1, -1)
+		for y in range(0, art.get_height(), 3):
+			for x in range(0, art.get_width(), 3):
+				if mask.get_bitv(Vector2i(x, y)) and art.get_pixel(x, y).a < 0.05:
+					spot = Vector2i(x, y)
+					break
+			if spot.x >= 0:
+				break
+		var br := b.get_global_rect()
+		var s := minf(br.size.x / art.get_width(), br.size.y / art.get_height())
+		var origin := br.position + (br.size - Vector2(art.get_size()) * s) / 2
+		await _tap_at(origin + (Vector2(spot) + Vector2(0.5, 0.5)) * s)
+		await _frames(3)
+		check(spot.x >= 0 and _scene_is("island") and Game.region_code == region, "tapping the sea next to %s opens it" % region)

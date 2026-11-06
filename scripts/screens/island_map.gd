@@ -58,9 +58,7 @@ func _ready() -> void:
 		b.ignore_texture_size = true
 		b.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
 		b.set_anchors_preset(Control.PRESET_FULL_RECT)
-		var mask := BitMap.new()
-		mask.create_from_image_alpha(t.get_image(), 0.3)
-		b.texture_click_mask = mask
+		b.texture_click_mask = tap_mask(region, t)
 		b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		if region in restored:
 			b.modulate = Color(1.15, 1.15, 1.15)
@@ -126,6 +124,19 @@ func _ready() -> void:
 	var tour := func(): Tutorial.show_steps(self, rest if Tutorial.is_done("results_rewards") else first)
 	if GuidePages.maybe_show(self, "welcome", tour) == null:
 		tour.call()
+
+
+## Where a tap opens [param region]: its land plus the sea around it, so the
+## small islands are easy to hit with a finger (assets/ui/map_<region>_tap.png,
+## made by tools/art/make_island_tap_masks.py). Falls back to the land only.
+static func tap_mask(region: String, art: Texture2D) -> BitMap:
+	var mask := BitMap.new()
+	var path := "res://assets/ui/map_%s_tap.png" % region
+	var img: Image = (load(path) as Texture2D).get_image() if ResourceLoader.exists(path) else art.get_image()
+	if img.is_compressed():
+		img.decompress()
+	mask.create_from_image_alpha(img, 0.3)
+	return mask
 
 
 ## Where the island is drawn inside its (full-size) button, in screen space.
