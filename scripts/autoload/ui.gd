@@ -39,7 +39,7 @@ var lang := "fil"
 
 const STRINGS := {
 	"start": ["SIMULAN", "START"],
-	"setting": ["SETTING", "SETTING"],
+	"setting": ["PAGSASAAYOS", "SETTINGS"],
 	"new_game": ["BAGONG LARO", "NEW GAME"],
 	"continue": ["MAGPATULOY", "CONTINUE"],
 	"save": ["I-SAVE", "SAVE"],
@@ -83,7 +83,7 @@ const STRINGS := {
 	"stories": ["Mga Kuwento", "Stories"],
 	"spirit": ["Gabay na Espiritu", "Guiding Spirit"],
 	"results": ["Resulta", "Results"],
-	"settings_title": ["SETTING", "SETTING"],
+	"settings_title": ["PAGSASAAYOS", "SETTINGS"],
 	"hint": ["Tulong", "Hint"],
 	"hearts": ["Puso", "Hearts"],
 	"logout": ["MAG-LOG OUT", "LOG OUT"],
