@@ -60,9 +60,11 @@ func _ready() -> void:
 	var start := UI.gem_button(UI.t("start_quiz"), "green", _start_quiz, 90, 30)
 	content.add_child(start)
 	Tutorial.show_steps(self, [
-		{"id": "lesson_study", "text": "This is the lesson. Read each word and its meaning, and say it aloud. Scroll down to see them all."},
+		{"id": "lesson_study", "text": UI.tx("Ito ang aralin. Basahin ang bawat salita at ang kahulugan nito, at bigkasin ito nang malakas. Mag-scroll pababa para makita ang lahat.",
+			"This is the lesson. Read each word and its meaning, and say it aloud. Scroll down to see them all.")},
 		{"id": "lesson_start", "target": start, "wait": true,
-			"text": "Ready? Tap START QUIZ. The quiz asks about the words you just studied."}])
+			"text": UI.tx("Handa ka na? Pindutin ang SIMULAN ANG PAGSUSULIT. Tungkol sa mga salitang pinag-aralan mo ang mga tanong.",
+				"Ready? Tap START QUIZ. The quiz asks about the words you just studied.")}])
 
 
 ## The language's culture: unlocked items are shown in full, locked ones say

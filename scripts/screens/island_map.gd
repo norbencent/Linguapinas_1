@@ -5,6 +5,7 @@ extends Control
 var _preview: PanelContainer
 var _preview_title: Label
 var _preview_map: TextureRect
+var _preview_list: GridContainer
 var _preview_tween: Tween
 var _hovered := ""
 
@@ -73,7 +74,7 @@ func _ready() -> void:
 			Game.region_code = region
 			Game.goto("island"))
 		holder.add_child(b)
-	_build_preview(holder)
+	_build_preview()
 
 	var hint := UI.label(UI.t("tap_island"), 20, UI.INK_SOFT)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -104,22 +105,30 @@ func _ready() -> void:
 	var luzon: TextureButton = holder.get_node("luzon")
 	var first := [{"id": "map_island", "target": luzon,
 		"rect": func(): return island_rect(luzon), "wait": true,
-		"text": "This is the Main Island, Guardian! Each island keeps a pearl that lights up when you master all of its languages. Tap LUZON to start your journey."}]
+		"text": UI.tx("Ito ang Pangunahing Isla, Guardian! May perlas ang bawat isla na sisindi kapag na-master mo ang lahat ng wika nito. Pindutin ang LUZON para simulan ang iyong paglalakbay.",
+			"This is the Main Island, Guardian! Each island keeps a pearl that lights up when you master all of its languages. Tap LUZON to start your journey.")}]
 	var rest := [
 		{"id": "map_pearls", "target": cores,
-			"text": "These are the island pearls. The numbers show how many languages you have mastered (Easy, Medium and Hard passed). Master them all to light the pearl, and light all three to wake the Pearl of the Orient!"},
+			"text": UI.tx("Ito ang mga perlas ng isla. Ipinapakita ng mga numero kung ilang wika na ang na-master mo (naipasa ang Madali, Katamtaman at Mahirap). I-master ang lahat para sumindi ang perlas, at sindihan ang tatlo para gisingin ang Perlas ng Silangan!",
+				"These are the island pearls. The numbers show how many languages you have mastered (Easy, Medium and Hard passed). Master them all to light the pearl, and light all three to wake the Pearl of the Orient!")},
 		{"id": "map_spirit", "target": spirit_button,
-			"text": "Talk to me here any time! Ask me about words and grammar, translate, see how words are said, and let my grammar checker mark your sentences."},
+			"text": UI.tx("Kausapin mo ako rito anumang oras sa Gabay na Espiritu! Magtanong tungkol sa mga salita at gramatika, magsalin, tingnan kung paano binibigkas ang mga salita, at ipasuri ang iyong mga pangungusap.",
+				"Talk to me here any time! Ask me about words and grammar, translate, see how words are said, and let my grammar checker mark your sentences.")},
 		{"id": "map_more", "target": row,
-			"text": "LEADERBOARD shows the best Guardians on this device. STORIES are legends you unlock by lighting the pearls. GABAY is the full guide."},
+			"text": UI.tx("Ipinapakita ng LEADERBOARD ang pinakamahuhusay na Guardian sa device na ito. Ang MGA KUWENTO ay mga alamat na nabubuksan kapag sinindihan mo ang mga perlas. Ang GABAY ang buong gabay ng laro.",
+				"LEADERBOARD shows the best Guardians on this device. STORIES are legends you unlock by lighting the pearls. GABAY is the full guide.")},
 		{"id": "nav_gallery", "target": find_child("nav_gallery", true, false),
-			"text": "GALLERY keeps every cultural element you uncover: food, festivals, clothing, art, dances and music. Spend Phrase Crystals there to unlock more."},
+			"text": UI.tx("Nasa GALLERY ang bawat elemento ng kultura na iyong natuklasan: pagkain, pista, kasuotan, sining, sayaw at musika. Gumamit ng Phrase Crystals doon para magbukas ng iba pa.",
+				"GALLERY keeps every cultural element you uncover: food, festivals, clothing, art, dances and music. Spend Phrase Crystals there to unlock more.")},
 		{"id": "nav_profile", "target": find_child("nav_profile", true, false),
-			"text": "PROFILE shows your hero, rewards, badges and recent quizzes. HOME brings you back to this map and BACK returns to the last screen."},
+			"text": UI.tx("Ipinapakita ng PROFILE ang iyong bayani, mga gantimpala, badge at progreso. Ibinabalik ka ng HOME sa mapang ito, at ng BACK sa nakaraang screen.",
+				"PROFILE shows your hero, rewards, badges and progress. HOME brings you back to this map and BACK returns to the last screen.")},
 		{"id": "map_settings", "target": settings,
-			"text": "SETTINGS: language of the game (Filipino or English), music, sounds and notices. Your progress is saved automatically after every lesson and quiz."},
+			"text": UI.tx("PAGSASAAYOS: wika ng laro (Filipino o English), musika, tunog at abiso. Kusang nase-save ang iyong progreso pagkatapos ng bawat aralin at pagsusulit.",
+				"SETTINGS: language of the game (Filipino or English), music, sounds and notices. Your progress is saved automatically after every lesson and quiz.")},
 		{"id": "map_guide", "target": find_child("guide_button", true, false),
-			"text": "That's the whole tour! Open GABAY whenever you need help: it has every guide page, your Getting Started checklist, and can replay this tutorial. Mabuhay, Guardian!"},
+			"text": UI.tx("Iyan ang buong paglilibot! Buksan ang GABAY kapag kailangan mo ng tulong: nandoon ang lahat ng pahina ng gabay, ang iyong listahan sa Pagsisimula, at maaari mong ulitin ang tutorial na ito. Mabuhay, Guardian!",
+				"That's the whole tour! Open GABAY whenever you need help: it has every guide page, your Getting Started checklist, and can replay this tutorial. Mabuhay, Guardian!")},
 	]
 	var tour := func(): Tutorial.show_steps(self, rest if Tutorial.is_done("results_rewards") else first)
 	if GuidePages.maybe_show(self, "welcome", tour) == null:
@@ -151,49 +160,82 @@ func island_rect(b: TextureButton) -> Rect2:
 
 # ---------------------------------------------------------------- hover preview
 
-## A card over the map area showing the hovered island's language map. It
-## ignores the mouse, so the island underneath keeps its hover and its tap.
-func _build_preview(holder: Control) -> void:
+## A large card over the whole screen with the island's language map and,
+## in clear text, its languages and where they are spoken. It ignores the
+## mouse, so the island underneath keeps its hover and its tap.
+func _build_preview() -> void:
 	_preview = PanelContainer.new()
+	_preview.name = "MapPreview"
 	_preview.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_preview.offset_left = 14
+	_preview.offset_right = -14
+	_preview.offset_top = 96
+	_preview.offset_bottom = -96
 	_preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_preview.visible = false
-	holder.add_child(_preview)
-	var v := UI.vbox(6)
+	add_child(_preview)
+	var v := UI.vbox(8)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_preview.add_child(v)
-	_preview_title = UI.label("", 26, UI.WHITE, false, UI.font_body_black)
+	_preview_title = UI.label("", 30, UI.WHITE, false, UI.font_body_black)
 	_preview_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_preview_title.add_theme_color_override("font_outline_color", Color("3b2208"))
 	_preview_title.add_theme_constant_override("outline_size", 8)
 	v.add_child(_preview_title)
-	_preview_map = UI.image(null, Vector2.ZERO)
+	_preview_map = UI.map_image("luzon", Vector2.ZERO)
 	_preview_map.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_preview_map.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	v.add_child(_preview_map)
-	var tip := UI.label("Pindutin para pumasok" if UI.lang == "fil" else "Tap to explore", 18, UI.WHITE)
+	_preview_list = GridContainer.new()
+	_preview_list.name = "languages"
+	_preview_list.columns = 2
+	_preview_list.add_theme_constant_override("h_separation", 14)
+	_preview_list.add_theme_constant_override("v_separation", 4)
+	_preview_list.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.add_child(_preview_list)
+	var tip := UI.label("Pindutin para pumasok" if UI.lang == "fil" else "Tap to explore", 20, Color("ffe08a"), false, UI.font_body_black)
 	tip.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	tip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	v.add_child(tip)
 
 
+## The island's languages in the map's order and numbering.
+func _fill_preview_list(region: String) -> void:
+	for c in _preview_list.get_children():
+		_preview_list.remove_child(c)
+		c.queue_free()
+	var i := 1
+	for lang in DB.get_languages(region):
+		var entry := UI.vbox(0)
+		entry.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		entry.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var playable := int(lang.playable) == 1
+		var name_l := UI.label("%d. %s" % [i, lang.name], 19, Color("ffe08a") if playable else Color("e8dcc3"), true, UI.font_body_black)
+		name_l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		entry.add_child(name_l)
+		var area := UI.label(UI.LANGUAGE_AREAS.get(lang.name, ""), 14, Color("f3ead8"), true)
+		area.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		entry.add_child(area)
+		_preview_list.add_child(entry)
+		i += 1
+
+
 func _show_preview(region: String) -> void:
 	_hovered = region
 	var color: Color = UI.REGION_COLORS[region]
-	var sb := UI._box(Color(0.08, 0.06, 0.04, 0.88), 18, color.lightened(0.2), 4, 10)
+	var sb := UI._box(Color(0.1, 0.07, 0.04, 0.97), 18, color.lightened(0.2), 4, 14)
 	_preview.add_theme_stylebox_override("panel", sb)
 	var count := DB.get_languages(region).size()
 	_preview_title.text = "%s  ·  %d %s" % [region.to_upper(), count, "wika" if UI.lang == "fil" else "languages"]
 	_preview_map.texture = UI.tex["lang_map_" + region]
+	_fill_preview_list(region)
 	_preview.visible = true
-	_preview.pivot_offset = _preview.size / 2.0
+	# Shown at once, solid and at full size: a zoom or fade-in blurs the
+	# map and its text while it plays (on a phone the tap shows only that).
 	if _preview_tween:
 		_preview_tween.kill()
-	_preview.modulate.a = 0.0
-	_preview.scale = Vector2(0.94, 0.94)
-	_preview_tween = create_tween().set_parallel()
-	_preview_tween.tween_property(_preview, "modulate:a", 1.0, 0.15)
-	_preview_tween.tween_property(_preview, "scale", Vector2.ONE, 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_preview.scale = Vector2.ONE
+	_preview.modulate.a = 1.0
 
 
 func _hide_preview(region: String) -> void:

@@ -83,11 +83,15 @@ func _ready() -> void:
 	content.add_child(UI.gem_button(UI.t("leaderboard").to_upper(), "red", func(): Game.goto("leaderboard"), 88, 30))
 	var reward_pill := content.find_child("reward", true, false)
 	Tutorial.show_steps(self, [{"id": "results_rewards", "target": reward_pill if reward_pill else card,
-		"text": ("Well done! " if r.passed else "Out of hearts? No problem: review the lesson and try again. ")
+		"text": UI.tx(("Magaling! " if r.passed else "Naubos ang puso? Walang problema: balikan ang aralin at subukan muli. ")
+			+ "Ang pagpasa sa mga pagsusulit na Madali ay nagbibigay ng Word Fragments: mag-ipon ng %s para magbukas ng bagong wika. " % DB.cost_text(DB.LANGUAGE_COST)
+			+ "Ang unang pagpasa mo sa bawat antas ay nagbubukas din ng isang elemento ng kultura para sa Gallery.",
+			("Well done! " if r.passed else "Out of hearts? No problem: review the lesson and try again. ")
 			+ "Passing Easy quizzes earns Word Fragments: collect %s to unlock a new language. " % DB.cost_text(DB.LANGUAGE_COST)
-			+ "Your first clear of each level also reveals a cultural element for the Gallery."},
+			+ "Your first clear of each level also reveals a cultural element for the Gallery.")},
 		{"id": "results_home", "target": find_child("nav_home", true, false), "wait": true,
-			"text": "Now tap HOME. I will show you the rest of the Main Island!"}])
+			"text": UI.tx("Ngayon, pindutin ang HOME. Ipapakita ko sa iyo ang iba pang bahagi ng Pangunahing Isla!",
+				"Now tap HOME. I will show you the rest of the Main Island!")}])
 	_celebrate(summary.new_badges.duplicate())
 
 

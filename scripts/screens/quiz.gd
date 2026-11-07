@@ -212,11 +212,14 @@ func _ready() -> void:
 		GuidePages.maybe_show(self, "grammar")
 	Tutorial.show_steps(self, [
 		{"id": "quiz_answer", "target": answer_area,
-			"text": "Pick an answer, then tap CHECK. You have five hearts: a wrong answer costs one heart."},
+			"text": UI.tx("Pumili ng sagot, saka pindutin ang I-TSEK. May limang puso ka: isang puso ang nawawala sa bawat maling sagot.",
+				"Pick an answer, then tap CHECK. You have five hearts: a wrong answer costs one heart.")},
 		{"id": "quiz_spirit", "target": guide,
-			"text": "Stuck? Tap me for a hint. Tap BIGKAS under me to see how the words are said."},
+			"text": UI.tx("Nahihirapan? Pindutin mo ako para sa tulong. Pindutin ang BIGKAS sa ilalim ko para makita kung paano binibigkas ang mga salita.",
+				"Stuck? Tap me for a hint. Tap SAY IT under me to see how the words are said.")},
 		{"id": "quiz_warrior", "target": stage,
-			"text": "Every right answer is a strike against the warrior. Defeat them by finishing the quiz with hearts left!"}])
+			"text": UI.tx("Bawat tamang sagot ay isang tama sa mandirigma. Talunin siya sa pagtatapos ng pagsusulit nang may natitirang puso!",
+				"Every right answer is a strike against the warrior. Defeat them by finishing the quiz with hearts left!")}])
 
 
 func _draw_mark() -> void:

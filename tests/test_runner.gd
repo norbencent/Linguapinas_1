@@ -55,6 +55,7 @@ func _run() -> void:
 	await _test_save_when_locked()
 	await _test_playtime()
 	await _test_progress_across_islands()
+	await _test_tutorial_language()
 	await _test_quality()
 	DB.close()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_DB))
@@ -258,6 +259,12 @@ func _test_back_navigation() -> void:
 	map.find_child("visayas", true, false).mouse_entered.emit()
 	await _frames()
 	check(map._preview.visible and map._preview_map.texture == UI.tex.lang_map_visayas, "hover shows the Visayas map")
+	check(map._preview.size.x > 600 and map._preview_map.texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS,
+		"the preview is large and drawn smoothly")
+	check(map._preview.scale == Vector2.ONE and map._preview.modulate.a == 1.0, "the preview opens solid and unzoomed (no blur)")
+	var names: Array = map._preview_list.find_children("*", "Label", true, false).map(func(l): return l.text)
+	check(names.has("1. Cebuano") and names.has("10. Porohanon") and names.has("Aklan Province"),
+		"the preview lists the island's languages and where they are spoken")
 	map.find_child("visayas", true, false).mouse_exited.emit()
 	await _frames(20)
 	check(not map._preview.visible, "preview hides after hover ends")
@@ -683,7 +690,8 @@ func _test_guide_pages() -> void:
 	Game.goto("guide")
 	await _frames(3)
 	var list := get_tree().current_scene.find_child("checklist", true, false)
-	check(list != null and "do this next" in str(list.find_children("*", "Label", true, false).map(func(l): return l.text)),
+	var list_text := str(list.find_children("*", "Label", true, false).map(func(l): return l.text)) if list else ""
+	check(list != null and ("do this next" in list_text or "gawin ito susunod" in list_text),
 		"the Guide shows the checklist and what to do next")
 	DB.reset_tutorials(uid)
 	check(DB.getting_started(uid)[4][1], "showing tips again keeps the checklist")
@@ -1124,3 +1132,54 @@ func _test_progress_across_islands() -> void:
 		"Tagalog is shown as mastered")
 	check(get_tree().current_scene.find_child("progress_ceb", true, false) != null, "Cebuano is listed too")
 	UI.lang = "fil"
+
+
+## The tutorial and the guide speak the game's language, and name the
+## buttons as they read on screen.
+func _test_tutorial_language() -> void:
+	for topic in GuidePages.GUIDE_TOPICS:
+		check(topic.size() == 3 and topic[2] != "", "guide topic %s has a Filipino name" % topic[1])
+		for page in GuidePages.pages_for(topic[1]):
+			check(page.get("title_fil", "") != "" and page.get("text_fil", "") != "" and page.text_fil != page.text,
+				"guide page '%s' has Filipino text" % page.title)
+	for st in DB.getting_started(Game.user_id()):
+		check(st.size() == 3 and st[2] != st[0], "checklist step '%s' has Filipino text" % st[0])
+	# The first tutorial bubble, in each language.
+	var saved_user := Game.user
+	for lang in ["fil", "en"]:
+		UI.lang = lang
+		Game.user = {}
+		Tutorial._save({}, Tutorial.GUEST)
+		var users := DB.get_users()
+		for u in users:
+			pass
+		Game.goto("title")
+		await _frames(4)
+		var bubble = get_tree().current_scene.find_child("Bubble", true, false)
+		if users.is_empty() and bubble != null:
+			var text: String = " ".join(bubble.find_children("*", "Label", true, false).map(func(l): return l.text))
+			var button: String = UI.t("start")
+			check(button in text, "the %s tutorial names the %s button" % [lang, button])
+			check(("Pindutin" in text) == (lang == "fil"), "the tutorial is in %s" % lang)
+	Tutorial._save({"finished": true}, Tutorial.GUEST)
+	Tutorial._clear()
+	Game.user = saved_user
+	# Guide screen and pop-up buttons in Filipino.
+	UI.lang = "fil"
+	var uid := DB.register_user("tagalista", "").user.id as int
+	Game.user = DB.get_user(uid)
+	DB.mark_tutorial_seen(uid, "welcome")
+	GuidePages.enabled = true
+	Game.goto("guide")
+	await _frames(3)
+	var texts := get_tree().current_scene.find_children("*", "Label", true, false).map(func(l): return l.text)
+	check(texts.has("Pagsisimula") and texts.has("Ang Pangunahing Isla"), "the GABAY screen is in Filipino")
+	await _click(get_tree().current_scene.find_child("topic_quiz", true, false))
+	await _frames(2)
+	var popup := get_tree().current_scene.find_child("TutorialPopup", true, false)
+	var ptexts := popup.find_children("*", "Label", true, false).map(func(l): return l.text)
+	check(ptexts.has("Oras na ng pagsusulit!") and ptexts.any(func(t): return "I-TSEK" in t), "the quiz page is in Filipino and names I-TSEK")
+	check(popup.find_child("next", true, false).text == "TARA NA!", "the pop-up buttons are in Filipino")
+	Game.handle_back()
+	await _frames(2)
+	GuidePages.enabled = false

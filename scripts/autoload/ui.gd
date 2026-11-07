@@ -37,6 +37,40 @@ var tex := {}
 ## UI language: "fil" (Filipino, like the prototype) or "en".
 var lang := "fil"
 
+## Where each language is spoken (shown on the language list and the map preview).
+const LANGUAGE_AREAS := {
+	"Tagalog": "Central and Southern Luzon (Manila, CALABARZON, MIMAROPA)",
+	"Ilocano": "Ilocos Region and parts of La Union",
+	"Pangasinan": "Pangasinan Province",
+	"Kapampangan": "Pampanga and southern Tarlac",
+	"Bikolano": "Bicol Region, southeastern Luzon",
+	"Ibanag": "Cagayan Valley, especially Cagayan",
+	"Kankanaey": "Mountain Province and Benguet",
+	"Ivatan": "Batanes Islands",
+	"Ifugao": "Ifugao Province, Cordillera",
+	"Kalinga": "Kalinga Province, Cordillera",
+	"Cebuano": "Cebu Province and nearby islands",
+	"Hiligaynon": "Western Visayas (Iloilo, Negros Occidental)",
+	"Waray-Waray": "Eastern Visayas (Samar and Leyte)",
+	"Aklanon": "Aklan Province",
+	"Kinaray-a": "Antique Province",
+	"Capiznon": "Capiz Province",
+	"Masbateño": "Masbate Province",
+	"Romblomanon": "Romblon Province",
+	"Cuyonon": "Palawan (Cuyo Islands)",
+	"Porohanon": "Camotes Islands (Poro), Cebu",
+	"Bisaya": "Davao Region, Davao del Sur, Davao Oriental",
+	"Tausug": "Sulu and Tawi-Tawi",
+	"Maguindanaon": "Maguindanao del Sur and Maguindanao del Norte",
+	"Maranao": "Lanao del Sur",
+	"Higaonon": "Misamis Oriental, Bukidnon, parts of Lanao del Norte",
+	"Surigaonon": "Surigao del Norte and Surigao del Sur",
+	"Subanen": "Zamboanga del Norte, Zamboanga del Sur, Zamboanga Sibugay",
+	"Blaan": "South Cotabato, Sarangani, parts of Davao del Sur",
+	"Chavacano": "Zamboanga City and nearby areas",
+	"Yakan": "Basilan and nearby areas",
+}
+
 const STRINGS := {
 	"start": ["SIMULAN", "START"],
 	"setting": ["PAGSASAAYOS", "SETTINGS"],
@@ -91,6 +125,11 @@ const STRINGS := {
 	"type_answer": ["Isulat ang sagot...", "Type your answer..."],
 	"build_hint": ["Pindutin ang mga salita ayon sa tamang ayos...", "Tap the words in the right order..."],
 }
+
+
+## [param fil] when the game is in Filipino, otherwise [param en].
+func tx(fil: String, en: String) -> String:
+	return fil if lang == "fil" else en
 
 
 func t(key: String) -> String:
@@ -537,6 +576,14 @@ func line_edit(placeholder: String, secret := false) -> LineEdit:
 	e.secret = secret
 	e.custom_minimum_size = Vector2(0, 64)
 	return e
+
+
+## A language map (assets/ui/lang_map_<region>.png). Drawn with mipmaps so
+## its small labels stay smooth when the map is shown smaller than its size.
+func map_image(region: String, size: Vector2) -> TextureRect:
+	var img := image(tex["lang_map_" + region], size)
+	img.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	return img
 
 
 func image(texture: Texture2D, size: Vector2) -> TextureRect:

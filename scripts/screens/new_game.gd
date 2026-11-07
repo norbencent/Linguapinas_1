@@ -68,7 +68,8 @@ func _build_card(root: Control, title: String, intro: String) -> void:
 	name_edit.text_submitted.connect(func(_t): _submit())
 	password_edit.text_submitted.connect(func(_t): _submit())
 	Tutorial.show_steps(root, [{"id": "new_name", "target": name_edit,
-		"text": "Type your name here, choose your hero (boy or girl), then tap START ADVENTURE. The password is optional."}])
+		"text": UI.tx("Isulat dito ang iyong pangalan, piliin ang iyong bayani (lalaki o babae), saka pindutin ang SIMULAN ANG PAKIKIPAGSAPALARAN. Hindi kailangan ang password.",
+			"Type your name here, choose your hero (boy or girl), then tap START ADVENTURE. The password is optional.")}])
 
 
 func _pick_avatar(a: String) -> void:

@@ -59,7 +59,8 @@ func _ready() -> void:
 
 	_intro(column)
 	Tutorial.show_steps(self, [{"id": "title_start", "target": start_button, "wait": true,
-		"text": "Mabuhay! Welcome to LinguaPinas. Tap START to begin your adventure."}])
+		"text": UI.tx("Mabuhay! Maligayang pagdating sa LinguaPinas. Pindutin ang SIMULAN para simulan ang iyong paglalakbay.",
+			"Mabuhay! Welcome to LinguaPinas. Tap START to begin your adventure.")}])
 
 
 func _tagline() -> String:

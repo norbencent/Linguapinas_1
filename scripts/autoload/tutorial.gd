@@ -197,11 +197,11 @@ func _make_bubble(step: Dictionary) -> PanelContainer:
 	row.add_child(text)
 	v.add_child(row)
 	var buttons := UI.hbox(10)
-	var skip_b := UI.pill_button("SKIP TUTORIAL", UI.INK_SOFT, skip, 44, 15)
+	var skip_b := UI.pill_button(UI.tx("LAKTAWAN ANG TUTORIAL", "SKIP TUTORIAL"), UI.INK_SOFT, skip, 44, 15)
 	skip_b.name = "skip"
 	buttons.add_child(skip_b)
 	if not step.get("wait", false):
-		var ok := UI.pill_button("GOT IT", Color("6b3fa0"), func():
+		var ok := UI.pill_button(UI.tx("SIGE", "GOT IT"), Color("6b3fa0"), func():
 			mark_done(step.id)
 			_next_step(), 44, 17)
 		ok.name = "got_it"

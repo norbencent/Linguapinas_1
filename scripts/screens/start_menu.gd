@@ -28,4 +28,5 @@ func _ready() -> void:
 	top.offset_top = 20
 	add_child(top)
 	Tutorial.show_steps(self, [{"id": "menu_new", "target": new_game, "wait": true,
-		"text": "First time here? Tap NEW GAME to create your Language Guardian."}])
+		"text": UI.tx("Unang beses mo ba rito? Pindutin ang BAGONG LARO para gumawa ng iyong Language Guardian.",
+			"First time here? Tap NEW GAME to create your Language Guardian.")}])
