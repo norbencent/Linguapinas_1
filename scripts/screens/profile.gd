@@ -2,6 +2,9 @@ extends Control
 ## Player profile (prototype profile screen).
 
 
+var _playtime_label: Label
+
+
 func _ready() -> void:
 	Game.refresh_user()
 	var uid := Game.user_id()
@@ -29,14 +32,24 @@ func _ready() -> void:
 		["Relics", str(rewards.cultural_relic)],
 		["Badge", str(DB.get_badges(uid).size())],
 		["Score", str(DB.get_total_score(uid))],
-		["Playtime", "%d:%02d" % [secs / 3600, (secs / 60) % 60]],
+		["Playtime", Game.format_playtime(secs)],
 	]
 	var card := UI.panel(Color("fdf6e3"), Color("c99a2e"))
 	var v := UI.vbox(6)
 	card.add_child(v)
 	for l in lines:
-		v.add_child(UI.label("%s: %s" % [l[0], l[1]], 24, Color("8b1a1a"), true, UI.font_body_black))
+		var row := UI.label("%s: %s" % [l[0], l[1]], 24, Color("8b1a1a"), true, UI.font_body_black)
+		v.add_child(row)
+		if l[0] == "Playtime":
+			row.name = "playtime"
+			_playtime_label = row
 	content.add_child(card)
+	# Hours:minutes:seconds, ticking while the Profile is open.
+	var tick := Timer.new()
+	tick.wait_time = 1.0
+	tick.autostart = true
+	tick.timeout.connect(func(): _playtime_label.text = "Playtime: " + Game.format_playtime(Game.playtime_seconds()))
+	add_child(tick)
 
 	content.add_child(UI.heading("Rewards", UI.RED, 24))
 	content.add_child(UI.wallet(uid))
