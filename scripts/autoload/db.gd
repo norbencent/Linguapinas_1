@@ -663,20 +663,6 @@ func get_restored_cores(user_id: int) -> Array:
 	return restored
 
 
-## The player's Grammar quiz record for a language: {"played", "passed", "best_score"}.
-func get_grammar_progress(user_id: int, language_code: String) -> Dictionary:
-	var row := _select_one("""SELECT COUNT(*) AS played, COALESCE(MAX(passed), 0) AS passed, COALESCE(MAX(score), 0) AS best
-		FROM quiz_attempts WHERE user_id = ? AND language_code = ? AND category_code = 'grammar';""", [user_id, language_code])
-	return {"played": int(row.get("played", 0)), "passed": int(row.get("passed", 0)) == 1, "best_score": int(row.get("best", 0))}
-
-
-## Levels passed (Easy, Medium, Hard of every playable language) and how many there are.
-func get_level_totals(user_id: int) -> Dictionary:
-	var row := _select_one("""SELECT COUNT(*) AS n FROM progress p JOIN languages l ON l.code = p.language_code
-		WHERE p.user_id = ? AND p.completed = 1 AND l.playable = 1;""", [user_id])
-	return {"passed": int(row.get("n", 0)), "total": get_playable_languages().size() * 3}
-
-
 func get_recent_attempts(user_id: int, limit := 10) -> Array:
 	return _select("""SELECT a.*, l.name AS language_name FROM quiz_attempts a
 		JOIN languages l ON l.code = a.language_code

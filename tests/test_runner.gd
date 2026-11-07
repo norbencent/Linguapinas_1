@@ -53,7 +53,6 @@ func _run() -> void:
 	await _test_play_quiz_through_ui()
 	await _test_easy_touch()
 	await _test_save_when_locked()
-	await _test_profile_progress()
 	await _test_quality()
 	DB.close()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_DB))
@@ -1055,29 +1054,3 @@ func _test_save_when_locked() -> void:
 	check(DB.get_progress(uid, "tl")[1].completed and DB.get_rewards(uid).word_fragment == 10, "TRY AGAIN saves it")
 	check(_scene_is("results") and get_tree().current_scene.find_child("not_saved", true, false) == null, "and the warning goes away")
 	check(DB.record_quiz(uid, "tl", 1, "", 100, 10, 10, 5, true).saved, "normal saves report saved")
-
-
-## The Profile shows the player's progress: levels passed, island pearls,
-## each language level by level with best scores, the Grammar quiz.
-func _test_profile_progress() -> void:
-	var uid := DB.register_user("progressive", "").user.id as int
-	Game.user = DB.get_user(uid)
-	DB.mark_tutorial_seen(uid, "welcome")
-	DB.mark_tutorial_seen(uid, "profile")
-	DB.record_quiz(uid, "tl", 1, "", 110, 10, 10, 5, true)
-	DB.record_quiz(uid, "tl", 2, "grammar", 90, 9, 10, 4, true)
-	check(DB.get_level_totals(uid).passed == 1 and DB.get_level_totals(uid).total == 30, "levels passed counted")
-	check(DB.get_grammar_progress(uid, "tl").passed and DB.get_grammar_progress(uid, "tl").best_score == 90, "grammar quiz progress")
-	UI.lang = "en"
-	Game.goto("profile")
-	await _frames(3)
-	var scr := get_tree().current_scene
-	check(scr.find_child("progress", true, false) != null, "the Profile has a progress section")
-	check("1 / 30" in scr.find_child("levels_passed", true, false).text, "levels passed shown")
-	var tl_texts := scr.find_child("progress_tl", true, false).find_children("*", "Label", true, false).map(func(l): return l.text)
-	check(tl_texts.any(func(t): return "EASY" in t and "110" in t), "Tagalog Easy passed with its best score")
-	check(tl_texts.any(func(t): return "MEDIUM" in t and "next" in t), "Tagalog Medium is next")
-	check(tl_texts.any(func(t): return "GRAMMAR" in t and "90" in t), "Tagalog grammar best score")
-	var ilo_texts := scr.find_child("progress_ilo", true, false).find_children("*", "Label", true, false).map(func(l): return l.text)
-	check(ilo_texts.any(func(t): return "LOCKED" in t), "locked languages say so")
-	UI.lang = "fil"
