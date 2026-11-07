@@ -54,6 +54,7 @@ func _run() -> void:
 	await _test_easy_touch()
 	await _test_save_when_locked()
 	await _test_playtime()
+	await _test_progress_across_islands()
 	await _test_quality()
 	DB.close()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_DB))
@@ -1094,3 +1095,32 @@ func _test_playtime() -> void:
 	var before := label.text
 	await get_tree().create_timer(2.2).timeout
 	check(label.text != before and label.text.begins_with("Playtime: 1:00:"), "and it keeps ticking while the Profile is open (%s -> %s)" % [before, label.text])
+
+
+## Moving to another island keeps the first island's progress, and the
+## Profile shows every island, not only the current one.
+func _test_progress_across_islands() -> void:
+	var uid := DB.register_user("islandhopper", "").user.id as int
+	Game.login(DB.get_user(uid))
+	DB.mark_tutorial_seen(uid, "welcome")
+	DB.mark_tutorial_seen(uid, "profile")
+	for d in [1, 2, 3]:
+		DB.record_quiz(uid, "tl", d, "", 120, 10, 10, 5, true)
+	DB.record_quiz(uid, "ceb", 1, "", 115, 9, 10, 3, true)
+	Game.logout()
+	Game.login(DB.login_user("islandhopper", "").user)
+	await _frames(2)
+	var tl := DB.get_progress(uid, "tl")
+	check(tl[1].completed and tl[2].completed and tl[3].completed, "Tagalog progress is kept after playing in the Visayas")
+	UI.lang = "en"
+	Game.goto("profile")
+	await _frames(3)
+	var texts := get_tree().current_scene.find_children("*", "Label", true, false).map(func(l): return l.text)
+	check(texts.has("Current island: Visayas"), "the Profile names the current island")
+	check(texts.any(func(t): return t.begins_with("Luzon: 3 levels passed")), "Luzon's progress is still shown")
+	check(texts.any(func(t): return t.begins_with("Visayas: 1 level passed")), "Visayas progress is shown")
+	var row := get_tree().current_scene.find_child("progress_tl", true, false)
+	check(row != null and row.find_children("*", "Label", true, false).any(func(l): return "MASTERED" in l.text),
+		"Tagalog is shown as mastered")
+	check(get_tree().current_scene.find_child("progress_ceb", true, false) != null, "Cebuano is listed too")
+	UI.lang = "fil"

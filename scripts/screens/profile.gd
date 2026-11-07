@@ -25,8 +25,8 @@ func _ready() -> void:
 	var secs := int(Game.user.get("playtime", 0))
 	var lines := [
 		["Name", Game.user.display_name],
-		["Island", DB.get_region(region).get("name", "-")],
-		["Language", last.get("name", "-")],
+		["Current island", DB.get_region(region).get("name", "-")],
+		["Current language", last.get("name", "-")],
 		["Fragment", str(rewards.word_fragment)],
 		["Crystal", str(rewards.phrase_crystal)],
 		["Relics", str(rewards.cultural_relic)],
@@ -43,6 +43,17 @@ func _ready() -> void:
 		if l[0] == "Playtime":
 			row.name = "playtime"
 			_playtime_label = row
+	# Every island keeps its own progress: moving to another island does not
+	# start over, so each island is listed, not only the current one.
+	var islands := UI.vbox(2)
+	islands.name = "islands"
+	for r in DB.get_regions():
+		var levels := DB.get_completed_level_count(uid, r.code)
+		var pearl := DB.get_pearl_progress(uid, r.code)
+		var lit := DB.is_core_restored(uid, r.code)
+		islands.add_child(UI.label("%s: %d %s passed · %d/%d mastered%s" % [r.name, levels, "level" if levels == 1 else "levels",
+			pearl.mastered, pearl.total, " · pearl lit" if lit else ""], 18, UI.REGION_COLORS[r.code].darkened(0.25), true, UI.font_body_black))
+	v.add_child(islands)
 	content.add_child(card)
 	# Hours:minutes:seconds, ticking while the Profile is open.
 	var tick := Timer.new()
@@ -59,16 +70,33 @@ func _ready() -> void:
 
 	content.add_child(UI.heading("Progress", UI.RED, 24))
 	var any := false
-	for lang in DB.get_playable_languages():
-		var p := DB.get_progress(uid, lang.code)
-		if p[1].completed or p[2].completed or p[3].completed:
-			any = true
+	for r in DB.get_regions():
+		var rows: Array = []
+		for lang in DB.get_languages(r.code):
+			if int(lang.playable) != 1:
+				continue
+			var p := DB.get_progress(uid, lang.code)
+			if not (p[1].completed or p[2].completed or p[3].completed):
+				continue
 			var row := UI.row_panel()
+			row.name = "progress_" + str(lang.code)
 			var h := UI.hbox(10)
 			row.add_child(h)
-			var n := UI.label(lang.name, 22, UI.INK, true, UI.font_body_black)
-			h.add_child(n)
+			var info := UI.vbox(0)
+			info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			info.add_child(UI.label(lang.name, 22, UI.INK, true, UI.font_body_black))
+			var passed := [1, 2, 3].filter(func(d): return p[d].completed)
+			var done := " ".join(passed.map(func(d): return DB.DIFFICULTY_NAMES[d] + " ✔"))
+			info.add_child(UI.label(done + (" · MASTERED" if passed.size() == 3 else ""), 15,
+				UI.GREEN if passed.size() == 3 else UI.INK_SOFT, true, UI.font_body_black))
+			h.add_child(info)
 			h.add_child(UI.level_gems(p))
+			rows.append(row)
+		if rows.is_empty():
+			continue
+		any = true
+		content.add_child(UI.label(r.name, 20, UI.REGION_COLORS[r.code].darkened(0.25), false, UI.font_body_black))
+		for row in rows:
 			content.add_child(row)
 	if not any:
 		content.add_child(UI.label("No levels completed yet.", 19, UI.INK_SOFT, true))
