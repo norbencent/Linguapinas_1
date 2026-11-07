@@ -36,6 +36,8 @@ var recovered := false
 ## Automatic backups kept per database file.
 const BACKUPS_KEPT := 7
 var last_error := ""
+## How long a save waits for another program that has the database open.
+const BUSY_TIMEOUT_MS := 5000
 
 
 func _ready() -> void:
@@ -58,6 +60,9 @@ func open(path: String) -> bool:
 			return false
 	# Security: deleted rows (e.g. a deleted player) are overwritten on disk.
 	_exec("PRAGMA secure_delete = ON;")
+	# If another program (e.g. DB Browser for SQLite) is using the file, wait
+	# for it instead of failing the save at once.
+	_exec("PRAGMA busy_timeout = %d;" % BUSY_TIMEOUT_MS)
 	_create_schema()
 	_migrate()
 	_seed_content()
@@ -385,24 +390,34 @@ func record_quiz(user_id: int, language_code: String, difficulty: int, category_
 		score: int, correct: int, total: int, hearts_left: int, passed: bool) -> Dictionary:
 	var cores_before := get_restored_cores(user_id)
 	var first_clear: bool = category_code == "" and passed and not get_progress(user_id, language_code)[difficulty].completed
-	_exec("BEGIN TRANSACTION;")
-	_exec("""INSERT INTO quiz_attempts(user_id, language_code, difficulty, category_code, score, correct, total,
-		hearts_left, passed) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);""",
-		[user_id, language_code, difficulty, category_code, score, correct, total, hearts_left, 1 if passed else 0])
-	# Only full (all-category) quizzes count toward unlocking and the leaderboard.
 	var counts := category_code == ""
-	if counts:
-		_exec("""INSERT INTO progress(user_id, language_code, difficulty, best_score, completed) VALUES(?, ?, ?, ?, ?)
-			ON CONFLICT(user_id, language_code, difficulty) DO UPDATE SET
-			best_score = max(best_score, excluded.best_score), completed = max(completed, excluded.completed);""",
-			[user_id, language_code, difficulty, score if passed else 0, 1 if passed else 0])
 	var reward_kind: String = REWARD_FOR_DIFFICULTY[difficulty]
 	var reward_amount := 0
 	if passed:
 		reward_amount = correct if first_clear else maxi(1, int(ceil(correct * REPLAY_REWARD_SHARE)))
-	if reward_amount > 0:
-		add_reward(user_id, reward_kind, reward_amount)
-	_exec("COMMIT;")
+	# All or nothing: the attempt, the progress and the reward are saved
+	# together. If the file is busy or read-only, nothing is half-saved and
+	# the caller is told ("saved": false) so the player can try again.
+	if not _exec("BEGIN IMMEDIATE;"):
+		return _not_saved(reward_kind, counts)
+	var ok := _exec("""INSERT INTO quiz_attempts(user_id, language_code, difficulty, category_code, score, correct, total,
+		hearts_left, passed) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);""",
+		[user_id, language_code, difficulty, category_code, score, correct, total, hearts_left, 1 if passed else 0])
+	# Only full (all-category) quizzes count toward unlocking and the leaderboard.
+	if ok and counts:
+		ok = _exec("""INSERT INTO progress(user_id, language_code, difficulty, best_score, completed) VALUES(?, ?, ?, ?, ?)
+			ON CONFLICT(user_id, language_code, difficulty) DO UPDATE SET
+			best_score = max(best_score, excluded.best_score), completed = max(completed, excluded.completed);""",
+			[user_id, language_code, difficulty, score if passed else 0, 1 if passed else 0])
+	if ok and reward_amount > 0:
+		ok = add_reward(user_id, reward_kind, reward_amount)
+	if ok:
+		ok = _exec("COMMIT;")
+	if not ok:
+		var error := last_error
+		_exec("ROLLBACK;")
+		last_error = error
+		return _not_saved(reward_kind, counts)
 	# Clearing a level for the first time reveals one of the language's culture items.
 	var revealed: Dictionary = reveal_culture(user_id, language_code) if first_clear else {}
 
@@ -413,11 +428,16 @@ func record_quiz(user_id: int, language_code: String, difficulty: int, category_
 	if get_restored_cores(user_id).size() == get_regions().size() and _award_badge(user_id, "pearl"):
 		new_badges.append("pearl")
 	return {"new_badges": new_badges, "reward_kind": reward_kind, "reward_amount": reward_amount, "counts": counts,
-		"first_clear": first_clear, "revealed": revealed}
+		"first_clear": first_clear, "revealed": revealed, "saved": true, "error": ""}
 
 
-func add_reward(user_id: int, kind: String, amount: int) -> void:
-	_exec("""INSERT INTO rewards(user_id, kind, amount) VALUES(?, ?, ?)
+func _not_saved(reward_kind: String, counts: bool) -> Dictionary:
+	return {"new_badges": [], "reward_kind": reward_kind, "reward_amount": 0, "counts": counts,
+		"first_clear": false, "revealed": {}, "saved": false, "error": last_error}
+
+
+func add_reward(user_id: int, kind: String, amount: int) -> bool:
+	return _exec("""INSERT INTO rewards(user_id, kind, amount) VALUES(?, ?, ?)
 		ON CONFLICT(user_id, kind) DO UPDATE SET amount = amount + excluded.amount;""", [user_id, kind, amount])
 
 
