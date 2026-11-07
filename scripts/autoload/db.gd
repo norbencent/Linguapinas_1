@@ -583,8 +583,8 @@ func reset_tutorials(user_id: int) -> void:
 	_exec("DELETE FROM tutorial_seen WHERE user_id = ? AND key NOT LIKE 'visit:%';", [user_id])
 
 
-## The Getting Started checklist on the Guide screen: [[step, done], ...] in
-## the order a new player should do them.
+## The Getting Started checklist on the Guide screen: [[step, done, step in
+## Filipino], ...] in the order a new player should do them.
 func getting_started(user_id: int) -> Array:
 	var has := func(sql: String) -> bool:
 		return not _select_one(sql, [user_id]).is_empty()
@@ -592,18 +592,18 @@ func getting_started(user_id: int) -> Array:
 	for r in get_regions():
 		mastered += get_mastered_language_count(user_id, r.code)
 	return [
-		["Create your Guardian", true],
-		["Study your first lesson (ARALIN)", has.call("SELECT 1 AS x FROM progress WHERE user_id = ? AND lesson_done = 1;")],
-		["Pass an Easy quiz", has.call("SELECT 1 AS x FROM progress WHERE user_id = ? AND difficulty = 1 AND completed = 1;")],
-		["Uncover a cultural element", not get_unlocked_culture(user_id).is_empty()],
-		["Look at the Culture Gallery", has_seen_tutorial(user_id, "visit:gallery")],
-		["Talk with your Guiding Spirit", has_seen_tutorial(user_id, "visit:spirit")],
-		["Try the Grammar quiz", has.call("SELECT 1 AS x FROM quiz_attempts WHERE user_id = ? AND category_code = 'grammar';")],
-		["Pass a Medium quiz", has.call("SELECT 1 AS x FROM progress WHERE user_id = ? AND difficulty = 2 AND completed = 1;")],
-		["Pass a Hard quiz", has.call("SELECT 1 AS x FROM progress WHERE user_id = ? AND difficulty = 3 AND completed = 1;")],
-		["Unlock a new language with Word Fragments", has.call("SELECT 1 AS x FROM unlocked_languages WHERE user_id = ?;")],
-		["Master a language (Easy, Medium and Hard)", mastered > 0],
-		["Light an island pearl", not get_restored_cores(user_id).is_empty()],
+		["Create your Guardian", true, "Gumawa ng iyong Guardian"],
+		["Study your first lesson", has.call("SELECT 1 AS x FROM progress WHERE user_id = ? AND lesson_done = 1;"), "Pag-aralan ang iyong unang ARALIN"],
+		["Pass an Easy quiz", has.call("SELECT 1 AS x FROM progress WHERE user_id = ? AND difficulty = 1 AND completed = 1;"), "Ipasa ang isang pagsusulit na Madali"],
+		["Uncover a cultural element", not get_unlocked_culture(user_id).is_empty(), "Tumuklas ng isang elemento ng kultura"],
+		["Look at the Culture Gallery", has_seen_tutorial(user_id, "visit:gallery"), "Tingnan ang Gallery ng Kultura"],
+		["Talk with your Guiding Spirit", has_seen_tutorial(user_id, "visit:spirit"), "Kausapin ang iyong Gabay na Espiritu"],
+		["Try the Grammar quiz", has.call("SELECT 1 AS x FROM quiz_attempts WHERE user_id = ? AND category_code = 'grammar';"), "Subukan ang pagsusulit sa Gramatika"],
+		["Pass a Medium quiz", has.call("SELECT 1 AS x FROM progress WHERE user_id = ? AND difficulty = 2 AND completed = 1;"), "Ipasa ang isang pagsusulit na Katamtaman"],
+		["Pass a Hard quiz", has.call("SELECT 1 AS x FROM progress WHERE user_id = ? AND difficulty = 3 AND completed = 1;"), "Ipasa ang isang pagsusulit na Mahirap"],
+		["Unlock a new language with Word Fragments", has.call("SELECT 1 AS x FROM unlocked_languages WHERE user_id = ?;"), "Magbukas ng bagong wika gamit ang Word Fragments"],
+		["Master a language (Easy, Medium and Hard)", mastered > 0, "I-master ang isang wika (Madali, Katamtaman at Mahirap)"],
+		["Light an island pearl", not get_restored_cores(user_id).is_empty(), "Sindihan ang isang perlas ng isla"],
 	]
 
 

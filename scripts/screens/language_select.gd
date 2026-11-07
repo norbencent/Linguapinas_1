@@ -3,38 +3,6 @@ extends Control
 ## under the island's language map. Tap the map to see it full screen.
 
 ## Where each language is spoken, as labelled on the language maps.
-const AREAS := {
-	"Tagalog": "Central and Southern Luzon (Manila, CALABARZON, MIMAROPA)",
-	"Ilocano": "Ilocos Region and parts of La Union",
-	"Pangasinan": "Pangasinan Province",
-	"Kapampangan": "Pampanga and southern Tarlac",
-	"Bikolano": "Bicol Region, southeastern Luzon",
-	"Ibanag": "Cagayan Valley, especially Cagayan",
-	"Kankanaey": "Mountain Province and Benguet",
-	"Ivatan": "Batanes Islands",
-	"Ifugao": "Ifugao Province, Cordillera",
-	"Kalinga": "Kalinga Province, Cordillera",
-	"Cebuano": "Cebu Province and nearby islands",
-	"Hiligaynon": "Western Visayas (Iloilo, Negros Occidental)",
-	"Waray-Waray": "Eastern Visayas (Samar and Leyte)",
-	"Aklanon": "Aklan Province",
-	"Kinaray-a": "Antique Province",
-	"Capiznon": "Capiz Province",
-	"Masbateño": "Masbate Province",
-	"Romblomanon": "Romblon Province",
-	"Cuyonon": "Palawan (Cuyo Islands)",
-	"Porohanon": "Camotes Islands (Poro), Cebu",
-	"Bisaya": "Davao Region, Davao del Sur, Davao Oriental",
-	"Tausug": "Sulu and Tawi-Tawi",
-	"Maguindanaon": "Maguindanao del Sur and Maguindanao del Norte",
-	"Maranao": "Lanao del Sur",
-	"Higaonon": "Misamis Oriental, Bukidnon, parts of Lanao del Norte",
-	"Surigaonon": "Surigao del Norte and Surigao del Sur",
-	"Subanen": "Zamboanga del Norte, Zamboanga del Sur, Zamboanga Sibugay",
-	"Blaan": "South Cotabato, Sarangani, parts of Davao del Sur",
-	"Chavacano": "Zamboanga City and nearby areas",
-	"Yakan": "Basilan and nearby areas",
-}
 
 
 func _ready() -> void:
@@ -66,8 +34,8 @@ func _ready() -> void:
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		h.add_child(info)
 		info.add_child(UI.label(lang.name, 26, UI.INK if playable else UI.INK_SOFT, true, UI.font_body_black))
-		if AREAS.has(lang.name):
-			info.add_child(UI.label(AREAS[lang.name], 15, UI.INK_SOFT, true))
+		if UI.LANGUAGE_AREAS.has(lang.name):
+			info.add_child(UI.label(UI.LANGUAGE_AREAS[lang.name], 15, UI.INK_SOFT, true))
 		var code: String = lang.code
 		if playable and DB.is_language_unlocked(uid, code):
 			h.add_child(UI.level_gems(DB.get_progress(uid, code)))
@@ -92,11 +60,12 @@ func _ready() -> void:
 
 	if first_open:
 		Tutorial.show_steps(self, [{"id": "language_pick", "target": first_open, "wait": true,
-			"text": "%s is free to play! Other languages cost %s, which you earn in Easy quizzes. Tap %s."
+			"text": UI.tx("Libreng laruin ang %s! Ang ibang wika ay nagkakahalaga ng %s, na makukuha mo sa mga pagsusulit na Madali. Pindutin ang %s.",
+				"%s is free to play! Other languages cost %s, which you earn in Easy quizzes. Tap %s.")
 				% [first_name, DB.cost_text(DB.LANGUAGE_COST), first_name.to_upper()]}])
 
 func _add_map(content: VBoxContainer, code: String) -> void:
-	var map := UI.image(UI.tex["lang_map_" + code], Vector2(0, 420))
+	var map := UI.map_image(code, Vector2(0, 420))
 	content.add_child(map)
 	UI.clickable(map, func(): _show_map(code)).set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var hint := UI.label("Pindutin ang mapa para palakihin" if UI.lang == "fil" else "Tap the map to enlarge", 16, UI.INK_SOFT)
@@ -110,7 +79,7 @@ func _show_map(code: String) -> void:
 	overlay.color = Color(0, 0, 0, 0.85)
 	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
-	var img := UI.image(UI.tex["lang_map_" + code], Vector2.ZERO)
+	var img := UI.map_image(code, Vector2.ZERO)
 	img.set_anchors_preset(Control.PRESET_FULL_RECT)
 	img.offset_left = 8
 	img.offset_right = -8

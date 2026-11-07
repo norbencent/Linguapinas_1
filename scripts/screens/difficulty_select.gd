@@ -83,7 +83,8 @@ func _ready() -> void:
 
 	_grammar_section(content, lang, progress)
 	Tutorial.show_steps(self, [{"id": "level_easy", "target": easy_start, "wait": true,
-		"text": "Every language has three levels: EASY, MEDIUM and HARD. Begin with EASY: tap START to open its lesson."}])
+		"text": UI.tx("May tatlong antas ang bawat wika: MADALI, KATAMTAMAN at MAHIRAP. Magsimula sa MADALI: pindutin ang SIMULAN para buksan ang aralin nito.",
+			"Every language has three levels: EASY, MEDIUM and HARD. Begin with EASY: tap START to open its lesson.")}])
 
 
 ## Grammar quiz: opens after Easy, rewards Phrase Crystals.
