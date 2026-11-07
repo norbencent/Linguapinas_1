@@ -52,6 +52,8 @@ func _run() -> void:
 	await _test_guide_pages()
 	await _test_play_quiz_through_ui()
 	await _test_easy_touch()
+	await _test_save_when_locked()
+	await _test_profile_progress()
 	await _test_quality()
 	DB.close()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_DB))
@@ -1017,3 +1019,65 @@ func _test_easy_touch() -> void:
 		await _tap_at(origin + (Vector2(spot) + Vector2(0.5, 0.5)) * s)
 		await _frames(3)
 		check(spot.x >= 0 and _scene_is("island") and Game.region_code == region, "tapping the sea next to %s opens it" % region)
+
+
+## Another program holding the database (e.g. DB Browser for SQLite with
+## unsaved changes): the result is not half-saved, the player is told, and
+## TRY AGAIN saves it once the file is free.
+func _test_save_when_locked() -> void:
+	var uid := DB.register_user("locked", "").user.id as int
+	Game.user = DB.get_user(uid)
+	Game.language_code = "tl"
+	Game.region_code = "luzon"
+	Game.difficulty = 1
+	Game.category_code = ""
+	var other := SQLite.new()
+	other.path = DB.db_path
+	other.verbosity_level = SQLite.QUIET
+	check(other.open_db() and other.query("BEGIN IMMEDIATE;"), "another program locks the database")
+	var args := [uid, "tl", 1, "", 100, 10, 10, 5, true]
+	var s: Dictionary = DB.record_quiz.callv(args)
+	check(not s.saved and "locked" in s.error, "a locked database is reported, not ignored")
+	check(DB.get_progress(uid, "tl")[1].completed == false and DB.get_rewards(uid).word_fragment == 0
+		and DB._select_one("SELECT COUNT(*) AS n FROM quiz_attempts WHERE user_id = ?;", [uid]).n == 0,
+		"nothing is half-saved")
+	Game.last_result = {"passed": true, "score": 100, "correct": 10, "total": 10, "hearts": 5, "summary": s, "save_args": args}
+	Game.goto("results")
+	await _frames(3)
+	var panel := get_tree().current_scene.find_child("not_saved", true, false)
+	check(panel != null, "the Results screen says the progress was not saved")
+	var texts := get_tree().current_scene.find_children("*", "Label", true, false).map(func(l): return l.text)
+	check(not texts.any(func(t): return "unlocked" in t), "nothing is shown as unlocked when it was not saved")
+	other.query("ROLLBACK;")
+	other.close_db()
+	panel.find_child("try_again", true, false).pressed.emit()
+	await _frames(4)
+	check(DB.get_progress(uid, "tl")[1].completed and DB.get_rewards(uid).word_fragment == 10, "TRY AGAIN saves it")
+	check(_scene_is("results") and get_tree().current_scene.find_child("not_saved", true, false) == null, "and the warning goes away")
+	check(DB.record_quiz(uid, "tl", 1, "", 100, 10, 10, 5, true).saved, "normal saves report saved")
+
+
+## The Profile shows the player's progress: levels passed, island pearls,
+## each language level by level with best scores, the Grammar quiz.
+func _test_profile_progress() -> void:
+	var uid := DB.register_user("progressive", "").user.id as int
+	Game.user = DB.get_user(uid)
+	DB.mark_tutorial_seen(uid, "welcome")
+	DB.mark_tutorial_seen(uid, "profile")
+	DB.record_quiz(uid, "tl", 1, "", 110, 10, 10, 5, true)
+	DB.record_quiz(uid, "tl", 2, "grammar", 90, 9, 10, 4, true)
+	check(DB.get_level_totals(uid).passed == 1 and DB.get_level_totals(uid).total == 30, "levels passed counted")
+	check(DB.get_grammar_progress(uid, "tl").passed and DB.get_grammar_progress(uid, "tl").best_score == 90, "grammar quiz progress")
+	UI.lang = "en"
+	Game.goto("profile")
+	await _frames(3)
+	var scr := get_tree().current_scene
+	check(scr.find_child("progress", true, false) != null, "the Profile has a progress section")
+	check("1 / 30" in scr.find_child("levels_passed", true, false).text, "levels passed shown")
+	var tl_texts := scr.find_child("progress_tl", true, false).find_children("*", "Label", true, false).map(func(l): return l.text)
+	check(tl_texts.any(func(t): return "EASY" in t and "110" in t), "Tagalog Easy passed with its best score")
+	check(tl_texts.any(func(t): return "MEDIUM" in t and "next" in t), "Tagalog Medium is next")
+	check(tl_texts.any(func(t): return "GRAMMAR" in t and "90" in t), "Tagalog grammar best score")
+	var ilo_texts := scr.find_child("progress_ilo", true, false).find_children("*", "Label", true, false).map(func(l): return l.text)
+	check(ilo_texts.any(func(t): return "LOCKED" in t), "locked languages say so")
+	UI.lang = "fil"

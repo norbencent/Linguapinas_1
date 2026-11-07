@@ -29,6 +29,9 @@ func _ready() -> void:
 	guide.add_child(UI.label(say, 20, UI.INK, true))
 	content.add_child(guide)
 
+	if not summary.get("saved", true):
+		content.add_child(_not_saved_panel(r))
+
 	var card := UI.panel()
 	var v := UI.vbox(8)
 	card.add_child(v)
@@ -45,7 +48,7 @@ func _ready() -> void:
 	v.add_child(UI.wallet(Game.user_id(), 16))
 	if not summary.counts:
 		v.add_child(UI.label("Category practice earns rewards, but only full quizzes unlock levels and count on the leaderboard.", 16, UI.INK_SOFT, true))
-	elif r.passed and Game.difficulty < DB.HARD:
+	elif r.passed and Game.difficulty < DB.HARD and summary.get("saved", true):
 		v.add_child(UI.label("%s unlocked!" % Game.difficulty_name(Game.difficulty + 1), 22, UI.GREEN, true))
 	content.add_child(card)
 
@@ -86,6 +89,31 @@ func _ready() -> void:
 		{"id": "results_home", "target": find_child("nav_home", true, false), "wait": true,
 			"text": "Now tap HOME. I will show you the rest of the Main Island!"}])
 	_celebrate(summary.new_badges.duplicate())
+
+
+## Shown when the result could not be written to the database (for example
+## another program has linguapinas.db open). TRY AGAIN saves it again.
+func _not_saved_panel(r: Dictionary) -> Control:
+	var p := UI.panel(Color("fbdcd9"), UI.RED)
+	p.name = "not_saved"
+	var v := UI.vbox(8)
+	p.add_child(v)
+	var fil := UI.lang == "fil"
+	v.add_child(UI.label("HINDI NA-SAVE ANG IYONG PROGRESO" if fil else "YOUR PROGRESS WAS NOT SAVED", 22, UI.RED, true, UI.font_body_black))
+	v.add_child(UI.label(("Hindi maisulat ang resulta sa database (%s). Kung bukas ang linguapinas.db sa ibang program (gaya ng DB Browser for SQLite), isara muna ito, saka pindutin ang SUBUKAN MULI."
+		if fil else "The result could not be written to the database (%s). If linguapinas.db is open in another program (such as DB Browser for SQLite), close it, then tap TRY AGAIN.")
+		% str(r.summary.get("error", "")), 17, UI.INK, true))
+	var again := UI.pill_button("SUBUKAN MULI" if fil else "TRY AGAIN", UI.RED, func():
+		var summary: Dictionary = DB.record_quiz.callv(r.save_args)
+		r.summary = summary
+		if summary.saved:
+			UI.toast("Na-save na!" if fil else "Saved!")
+			Game.goto("results", false)
+		else:
+			UI.message(self, "Hindi pa rin na-save" if fil else "Still not saved", summary.error), 52, 20)
+	again.name = "try_again"
+	v.add_child(again)
+	return p
 
 
 ## Plays the pearl animation for each newly lit pearl, one after another.
