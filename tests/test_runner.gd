@@ -52,6 +52,7 @@ func _run() -> void:
 	await _test_guide_pages()
 	await _test_play_quiz_through_ui()
 	await _test_easy_touch()
+	await _test_save_when_locked()
 	await _test_quality()
 	DB.close()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_DB))
@@ -1017,3 +1018,39 @@ func _test_easy_touch() -> void:
 		await _tap_at(origin + (Vector2(spot) + Vector2(0.5, 0.5)) * s)
 		await _frames(3)
 		check(spot.x >= 0 and _scene_is("island") and Game.region_code == region, "tapping the sea next to %s opens it" % region)
+
+
+## Another program holding the database (e.g. DB Browser for SQLite with
+## unsaved changes): the result is not half-saved, the player is told, and
+## TRY AGAIN saves it once the file is free.
+func _test_save_when_locked() -> void:
+	var uid := DB.register_user("locked", "").user.id as int
+	Game.user = DB.get_user(uid)
+	Game.language_code = "tl"
+	Game.region_code = "luzon"
+	Game.difficulty = 1
+	Game.category_code = ""
+	var other := SQLite.new()
+	other.path = DB.db_path
+	other.verbosity_level = SQLite.QUIET
+	check(other.open_db() and other.query("BEGIN IMMEDIATE;"), "another program locks the database")
+	var args := [uid, "tl", 1, "", 100, 10, 10, 5, true]
+	var s: Dictionary = DB.record_quiz.callv(args)
+	check(not s.saved and "locked" in s.error, "a locked database is reported, not ignored")
+	check(DB.get_progress(uid, "tl")[1].completed == false and DB.get_rewards(uid).word_fragment == 0
+		and DB._select_one("SELECT COUNT(*) AS n FROM quiz_attempts WHERE user_id = ?;", [uid]).n == 0,
+		"nothing is half-saved")
+	Game.last_result = {"passed": true, "score": 100, "correct": 10, "total": 10, "hearts": 5, "summary": s, "save_args": args}
+	Game.goto("results")
+	await _frames(3)
+	var panel := get_tree().current_scene.find_child("not_saved", true, false)
+	check(panel != null, "the Results screen says the progress was not saved")
+	var texts := get_tree().current_scene.find_children("*", "Label", true, false).map(func(l): return l.text)
+	check(not texts.any(func(t): return "unlocked" in t), "nothing is shown as unlocked when it was not saved")
+	other.query("ROLLBACK;")
+	other.close_db()
+	panel.find_child("try_again", true, false).pressed.emit()
+	await _frames(4)
+	check(DB.get_progress(uid, "tl")[1].completed and DB.get_rewards(uid).word_fragment == 10, "TRY AGAIN saves it")
+	check(_scene_is("results") and get_tree().current_scene.find_child("not_saved", true, false) == null, "and the warning goes away")
+	check(DB.record_quiz(uid, "tl", 1, "", 100, 10, 10, 5, true).saved, "normal saves report saved")

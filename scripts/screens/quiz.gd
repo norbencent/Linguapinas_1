@@ -491,11 +491,12 @@ func _finish() -> void:
 	var passed := hearts > 0
 	var score := Game.score_for(points, hearts, Game.difficulty) if passed else points
 	var category := _category()
-	var summary := DB.record_quiz(Game.user_id(), Game.language_code, Game.difficulty, category,
-		score, correct_count, questions.size(), maxi(hearts, 0), passed)
+	var save_args := [Game.user_id(), Game.language_code, Game.difficulty, category,
+		score, correct_count, questions.size(), maxi(hearts, 0), passed]
+	var summary: Dictionary = DB.record_quiz.callv(save_args)
 	Game.last_result = {
 		"passed": passed, "score": score, "correct": correct_count, "total": questions.size(),
-		"hearts": maxi(hearts, 0), "summary": summary,
+		"hearts": maxi(hearts, 0), "summary": summary, "save_args": save_args,
 	}
 	Game.goto("results")
 
