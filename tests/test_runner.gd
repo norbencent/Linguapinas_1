@@ -53,6 +53,7 @@ func _run() -> void:
 	await _test_play_quiz_through_ui()
 	await _test_easy_touch()
 	await _test_save_when_locked()
+	await _test_playtime()
 	await _test_quality()
 	DB.close()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_DB))
@@ -1054,3 +1055,42 @@ func _test_save_when_locked() -> void:
 	check(DB.get_progress(uid, "tl")[1].completed and DB.get_rewards(uid).word_fragment == 10, "TRY AGAIN saves it")
 	check(_scene_is("results") and get_tree().current_scene.find_child("not_saved", true, false) == null, "and the warning goes away")
 	check(DB.record_quiz(uid, "tl", 1, "", 100, 10, 10, 5, true).saved, "normal saves report saved")
+
+
+## Play time follows the real clock (not frame times), stops while the game
+## is in the background, and the Profile shows it ticking as h:mm:ss.
+func _test_playtime() -> void:
+	var uid := DB.register_user("clockwatcher", "").user.id as int
+	Game.login(DB.get_user(uid))
+	DB.mark_tutorial_seen(uid, "welcome")
+	DB.mark_tutorial_seen(uid, "profile")
+	await _frames(2)
+	Game._unsaved_playtime = 0.0
+	var t0 := Time.get_ticks_msec()
+	OS.delay_msec(1500)  # one long, slow frame
+	await _frames(2)
+	var counted := Game._unsaved_playtime
+	var real := (Time.get_ticks_msec() - t0) / 1000.0
+	check(absf(counted - real) < 0.3, "a slow frame counts in full (%.2f s of %.2f s)" % [counted, real])
+	Game._notification(NOTIFICATION_APPLICATION_PAUSED)
+	var paused_at := Game._unsaved_playtime
+	OS.delay_msec(800)
+	await _frames(3)
+	check(Game._unsaved_playtime == paused_at, "no play time while the game is in the background")
+	Game._notification(NOTIFICATION_APPLICATION_RESUMED)
+	await _frames(3)
+	check(Game._unsaved_playtime - paused_at < 0.3, "the background time is not added when the game comes back")
+	Game._last_tick_usec = Time.get_ticks_usec() - 3600 * 1000000
+	await _frames(1)
+	check(Game._unsaved_playtime < 20.0, "a long sleep of the device is not counted")
+	check(Game.format_playtime(3725) == "1:02:05", "play time shown as h:mm:ss")
+	DB.add_playtime(uid, 3600)
+	Game.goto("profile")
+	await _frames(3)
+	var shown := Game.playtime_seconds()
+	var label: Label = get_tree().current_scene.find_child("playtime", true, false)
+	check(label != null and label.text.begins_with("Playtime: 1:00:") and Game.format_playtime(shown - 1) <= label.text.get_slice(" ", 1)
+		and label.text.get_slice(" ", 1) <= Game.format_playtime(shown + 1), "the Profile shows the play time with seconds (%s)" % label.text)
+	var before := label.text
+	await get_tree().create_timer(2.2).timeout
+	check(label.text != before and label.text.begins_with("Playtime: 1:00:"), "and it keeps ticking while the Profile is open (%s -> %s)" % [before, label.text])

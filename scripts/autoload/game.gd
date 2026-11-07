@@ -40,7 +40,15 @@ var settings_return := "title"   # where Settings' Exit button goes
 ## Screens that can be opened without a player.
 const PUBLIC_SCREENS := ["title", "menu", "new_game", "continue", "settings"]
 const PLAYTIME_SAVE_EVERY := 30.0
+## Play time is measured with the real clock, not by adding up frame times:
+## on a slow phone, or while a screen loads, Godot shortens long frames, so
+## frame times add up to less than the time really played. A gap longer than
+## this (the device slept, the game was stopped in the debugger) is not counted.
+const MAX_FRAME_GAP := 10.0
 var _unsaved_playtime := 0.0
+var _last_tick_usec := 0
+## False while the game is in the background or its window is not in front.
+var _counting := true
 
 # ---------------------------------------------------------------- back navigation
 #
@@ -61,13 +69,17 @@ var back_action: Variant = null          # String screen, BACK or Callable
 var overlays: Array[Node] = []           # pop-ups closed first by the back key
 
 
-func _process(delta: float) -> void:
-	if not is_logged_in():
+func _process(_delta: float) -> void:
+	var now := Time.get_ticks_usec()
+	var elapsed := 0.0 if _last_tick_usec == 0 else (now - _last_tick_usec) / 1000000.0
+	_last_tick_usec = now
+	if not is_logged_in() or not _counting:
 		return
-	_unsaved_playtime += delta
+	elapsed = minf(elapsed, MAX_FRAME_GAP)
+	_unsaved_playtime += elapsed
 	if _unsaved_playtime >= PLAYTIME_SAVE_EVERY:
 		save_playtime()
-	_break_timer += delta
+	_break_timer += elapsed
 	if _break_timer >= BREAK_EVERY:
 		_break_timer = 0.0
 		if break_reminder_on() and get_tree().current_scene:
@@ -118,6 +130,13 @@ func _fit_window() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_APPLICATION_PAUSED:
 		save_playtime()
+	# Count play time only while the game is being played.
+	if what in [NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT]:
+		save_playtime()
+		_counting = false
+	elif what in [NOTIFICATION_APPLICATION_RESUMED, NOTIFICATION_APPLICATION_FOCUS_IN]:
+		_counting = true
+		_last_tick_usec = Time.get_ticks_usec()
 	if what == NOTIFICATION_APPLICATION_PAUSED:
 		Sound.set_background(true)  # compatibility: stay quiet behind other apps
 	elif what == NOTIFICATION_APPLICATION_RESUMED:
@@ -130,6 +149,18 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		get_viewport().set_input_as_handled()
 		handle_back()
+
+
+## Total play time of the current player in seconds, including the part
+## not written to the database yet.
+func playtime_seconds() -> int:
+	if not is_logged_in():
+		return 0
+	return int(DB.get_user(user_id()).get("playtime", 0)) + int(_unsaved_playtime)
+
+
+static func format_playtime(secs: int) -> String:
+	return "%d:%02d:%02d" % [secs / 3600, (secs / 60) % 60, secs % 60]
 
 
 func save_playtime() -> void:
