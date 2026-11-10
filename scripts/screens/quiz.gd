@@ -10,6 +10,7 @@ var correct_count := 0
 var _finished := false
 var points := 0
 var hint_used_on_question := false
+var hint_reveal := 0  # letters shown so far on a typed question
 var answered := false
 var selected := ""
 
@@ -248,13 +249,15 @@ func _refresh_bar() -> void:
 	if hints_left > 0:
 		hint_label.text = "%s x%d" % [UI.t("hint"), hints_left]
 	else:
-		hint_label.text = "Relic: +1 %s" % UI.t("hint")
+		# Free hints used up: show how many Relics the player can spend.
+		hint_label.text = "%s x%d\n1 = +1 %s" % ["Relic", _relics(), UI.t("hint")]
 
 
 func _show_question() -> void:
 	answered = false
 	selected = ""
 	hint_used_on_question = false
+	hint_reveal = 0
 	mark.visible = false
 	feedback_label.text = ""
 	explain_label.text = ""
@@ -382,19 +385,55 @@ func _update_built() -> void:
 	built_label.text = " ".join(built) if not built.is_empty() else UI.t("build_hint")
 
 
+func _relics() -> int:
+	return int(DB.get_rewards(Game.user_id()).get("cultural_relic", 0))
+
+
+func _hint_message(text: String, color := Color("5a3591")) -> void:
+	# Always visible on the quiz screen (toasts are hidden when notifications are off).
+	feedback_label.text = text
+	feedback_label.add_theme_color_override("font_color", color)
+
+
+func _hint_can_help(q: Dictionary) -> bool:
+	match q.type:
+		"choice":
+			for b in option_buttons:
+				if b.get_meta("option") != q.answer and not b.disabled:
+					return true
+			return false
+		"build":
+			return built != Array(q.answer.split(" ", false))
+		"typed", "grammar":
+			return hint_reveal < _reveal_limit(q.answer)
+	return false
+
+
+func _reveal_limit(answer: String) -> int:
+	# Never give away the whole word: keep at least the last letter hidden.
+	return maxi(1, answer.length() - 1)
+
+
 func _use_hint() -> void:
 	if answered:
 		return
+	var q: Dictionary = questions[index]
+	if not _hint_can_help(q):
+		# Nothing more to reveal: don't take a hint or a Relic for nothing.
+		Sound.play("wrong")
+		_hint_message(UI.tx("Wala nang maipapakita pa sa tanong na ito.", "Nothing more to reveal on this question."))
+		return
+	var used_relic := false
 	if hints_left <= 0:
 		# Out of free hints: a Cultural Relic buys one more.
 		if not DB.spend(Game.user_id(), DB.HINT_COST):
 			Sound.play("wrong")
-			UI.toast("No hints left. Earn %s on Hard to buy more." % DB.REWARD_NAMES.cultural_relic)
+			_hint_message(UI.tx("Wala ka nang Relic. Kumuha ng Cultural Relic sa Hard para sa dagdag na tulong.",
+				"No Relics left. Earn Cultural Relics on Hard for extra hints."), UI.RED)
 			return
 		hints_left += 1
-		UI.toast("-%s: +1 hint" % DB.cost_text(DB.HINT_COST))
+		used_relic = true
 	Sound.click()
-	var q: Dictionary = questions[index]
 	match q.type:
 		"choice":
 			var removed := 0
@@ -414,13 +453,20 @@ func _use_hint() -> void:
 					if not b.disabled and b.text == target[built.size()]:
 						_add_tile(b)
 						break
-		"typed", "grammar":
-			var reveal := mini(q.answer.length(), maxi(2, q.answer.length() / 2))
-			typed_edit.placeholder_text = "%s..." % q.answer.substr(0, reveal)
 	hints_left -= 1
 	var hint_region := Spirit.region_of(Game.language_code)
-	feedback_label.text = "%s: %s" % [Spirit.spirit_name(hint_region), Spirit.line(hint_region, "hint")]
-	feedback_label.add_theme_color_override("font_color", Color("5a3591"))
+	var text := "%s: %s" % [Spirit.spirit_name(hint_region), Spirit.line(hint_region, "hint")]
+	if q.type in ["typed", "grammar"]:
+		# Each hint shows more letters, in the message (placeholder text vanishes once you type).
+		var first := maxi(2, q.answer.length() / 2) if hint_reveal == 0 else hint_reveal + 2
+		hint_reveal = mini(_reveal_limit(q.answer), first)
+		var start: String = q.answer.substr(0, hint_reveal)
+		typed_edit.placeholder_text = "%s..." % start
+		text += "\n%s %s..." % [UI.tx("Nagsisimula sa:", "Starts with:"), start]
+	if used_relic:
+		text += "\n" + UI.tx("-1 Relic (natitira: %d)", "-1 Relic (%d left)") % _relics()
+		UI.toast("-%s: +1 hint" % DB.cost_text(DB.HINT_COST))
+	_hint_message(text)
 	hint_used_on_question = true
 	_refresh_bar()
 
