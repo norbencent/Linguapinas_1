@@ -384,6 +384,30 @@ func _test_battle_stage() -> void:
 	quiz._answer("definitely wrong")
 	await _frames(2)
 	check(quiz.stage.enemy.animation == "attack", "wrong answer makes the warrior attack")
+	# Relic hints in the quiz: free hints first, then 1 Relic each, never wasted.
+	quiz._next()
+	await _frames(2)
+	var ruid: int = Game.user_id()
+	var have: int = DB.get_rewards(ruid).cultural_relic
+	DB.add_reward(ruid, "cultural_relic", 2)
+	quiz.hints_left = 0
+	var hq: Dictionary = quiz.questions[quiz.index]
+	quiz._use_hint()
+	check(DB.get_rewards(ruid).cultural_relic == have + 1, "a Relic buys an extra hint in the quiz")
+	check(quiz.feedback_label.text.contains("Relic"), "the quiz says a Relic was used")
+	check(quiz.hint_label.text.contains("Relic x%d" % (have + 1)), "the quiz shows how many Relics are left")
+	for i in 4:
+		quiz._use_hint()
+	check(not quiz._hint_can_help(hq), "hints run out of things to reveal")
+	var left: int = DB.get_rewards(ruid).cultural_relic
+	quiz._use_hint()
+	check(DB.get_rewards(ruid).cultural_relic == left, "no Relic is spent when the hint can't help")
+	quiz._next()
+	await _frames(2)
+	DB.spend(ruid, {"cultural_relic": DB.get_rewards(ruid).cultural_relic})
+	quiz._use_hint()
+	check(quiz.feedback_label.text != "" and DB.get_rewards(ruid).cultural_relic == 0, "with no Relics the quiz explains why there's no hint")
+	DB.add_reward(ruid, "cultural_relic", have)
 	Game.leave_warning = Callable()  # the test leaves the quiz half-way
 
 
