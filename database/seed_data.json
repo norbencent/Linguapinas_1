@@ -1,5 +1,5 @@
 {
- "version": 4,
+ "version": 5,
  "regions": [
   {
    "code": "luzon",
@@ -2249,6 +2249,14 @@
    "title": "Bonok-Bonok Festival",
    "description": "Surigao City's yearly festival in honor of its patron, San Nicolas de Tolentino, with street dancing inspired by the region's indigenous rituals.",
    "image": "bonok_bonok_festival"
+  },
+  {
+   "region_code": "mindanao",
+   "language_code": "sgd",
+   "kind": "Wildlife",
+   "title": "Dinagat Bushy-tailed Cloud Rat",
+   "description": "A rare, furry tree-dwelling rodent with a long bushy tail, found only on Dinagat Island. Known from a single 1975 specimen, it was not seen again until 2012. It is endangered because mining and logging are destroying its forest home.",
+   "image": "dinagat_cloud_rat"
   },
   {
    "region_code": "mindanao",
