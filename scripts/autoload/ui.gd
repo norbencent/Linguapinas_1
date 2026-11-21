@@ -685,14 +685,28 @@ func reward_guide() -> VBoxContainer:
 	return v
 
 
+## The item's picture in assets/culture/: a real photo (<image>.jpg) if there is
+## one, else the drawn card (<image>.png). "" if neither exists.
+func culture_image_path(item: Dictionary) -> String:
+	var image := str(item.get("image", ""))
+	if image == "":
+		return ""
+	for ext in ["jpg", "png"]:
+		var path := "res://assets/culture/%s.%s" % [image, ext]
+		if ResourceLoader.exists(path):
+			return path
+	return ""
+
+
 ## A culture item's picture from assets/culture/, or null if there is none.
 func culture_picture(item: Dictionary, height := 180) -> TextureRect:
-	var image := str(item.get("image", ""))
-	var path := "res://assets/culture/%s.png" % image
-	if image == "" or not ResourceLoader.exists(path):
+	var path := culture_image_path(item)
+	if path == "":
 		return null
 	var r := TextureRect.new()
 	r.texture = load(path)
+	# Photos are bigger than the card: mipmaps keep them sharp, not grainy, when scaled down.
+	r.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	# Full width of the card, height following the picture's shape.
 	r.expand_mode = TextureRect.EXPAND_FIT_HEIGHT_PROPORTIONAL
 	r.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED

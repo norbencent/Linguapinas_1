@@ -2,9 +2,8 @@
 
 Writes assets/culture/<image>.png (640x360): the region's colors, a woven
 pattern, an icon for the kind of item (festival, food, wildlife, ...) and
-its name. These are placeholders: to use a real photo or drawing instead,
-save it as assets/culture/<image>.png with the same name (any size, it is
-cropped to fit) and the game shows it.
+its name. These are placeholders: a real photo saved as
+assets/culture/<image>.jpg is shown instead, and no card is drawn for it.
 
 Run from the project root:  python tools/art/make_culture_cards.py
 Pass --all to redraw cards that already exist (by default existing files,
@@ -259,6 +258,8 @@ def main() -> int:
     made = 0
     for item in items:
         path = os.path.join(OUT, item["image"] + ".png")
+        if os.path.exists(os.path.join(OUT, item["image"] + ".jpg")):
+            continue  # a real photo is used instead
         if os.path.exists(path) and not redraw:
             continue
         draw_card(item).save(path, optimize=True)
