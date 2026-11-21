@@ -733,7 +733,7 @@ func culture_card(item: Dictionary, unlocked: bool, on_buy := Callable()) -> Pan
 			var b := pill_button("UNLOCK · %d %s" % [DB.CULTURE_COST.phrase_crystal, REWARD_SHORT.phrase_crystal],
 				REWARD_COLORS.phrase_crystal, on_buy, 52, 18)
 			b.name = "unlock"
-			b.disabled = not DB.can_afford(Game.user_id(), DB.CULTURE_COST)
+			# Always tappable: if the player is short, a reminder explains why.
 			v.add_child(b)
 	return card
 

@@ -511,7 +511,27 @@ func _test_new_screens() -> void:
 	Game.goto("language")
 	await _frames(3)
 	var row := get_tree().current_scene.find_child("locked_ilo", true, false)
-	check(row != null and row.find_child("unlock", true, false).disabled, "Ilocano locked, button off without fragments")
+	check(row != null and not row.find_child("unlock", true, false).disabled, "Ilocano locked, UNLOCK still tappable")
+	# Short of Word Fragments: tapping UNLOCK shows the reminder and spends nothing.
+	DB.add_reward(uid, "word_fragment", 2)
+	await _click(row.find_child("unlock", true, false))
+	await _frames(3)
+	var pop := get_tree().current_scene.find_child("ResourcePopup", true, false)
+	check(pop != null and _scene_is("language"), "not enough fragments shows the reminder")
+	if pop:
+		var title_text: String = pop.find_child("title", true, false).text
+		check(title_text.contains("Word Fragments"), "reminder names Word Fragments")
+		var amounts := pop.find_children("amount", "Label", true, false)
+		check(amounts.size() == 2 and amounts[0].text == "2" and amounts[1].text == str(DB.LANGUAGE_COST.word_fragment),
+			"reminder shows balance 2 and the cost")
+		check(pop.find_child("ok", true, false) != null and pop.find_child("cancel", true, false) != null
+			and pop.find_child("close", true, false) != null, "reminder has OK, CANCEL and X")
+		await _click(pop.find_child("ok", true, false))
+		await _frames(3)
+		check(not is_instance_valid(pop) or not pop.is_inside_tree(), "OK closes the reminder")
+	check(DB.get_rewards(uid).word_fragment == 2 and not DB.is_language_unlocked(uid, "ilo"),
+		"no fragments spent and nothing unlocked when short")
+	DB.spend(uid, {"word_fragment": 2})
 	Game.language_code = "ilo"
 	Game.goto("difficulty")
 	await _frames(3)
@@ -560,6 +580,23 @@ func _test_new_screens() -> void:
 		await _frames(1)
 	await _frames(3)
 	check(_scene_is("results") and Game.last_result.summary.reward_kind == "phrase_crystal", "grammar quiz pays crystals")
+	# Gallery: short of Phrase Crystals, UNLOCK shows the reminder and spends nothing.
+	DB.spend(uid, {"phrase_crystal": DB.get_rewards(uid).phrase_crystal})
+	Game.region_code = "visayas"
+	Game.goto("gallery")
+	await _frames(3)
+	var count_before := DB.get_unlocked_culture(uid).size()
+	await _click(get_tree().current_scene.find_child("unlock", true, false))
+	await _frames(3)
+	var cpop := get_tree().current_scene.find_child("ResourcePopup", true, false)
+	check(cpop != null and cpop.find_child("title", true, false).text.contains("Phrase Crystals"),
+		"not enough crystals shows the reminder")
+	check(DB.get_unlocked_culture(uid).size() == count_before and DB.get_rewards(uid).phrase_crystal == 0,
+		"no crystals spent and nothing unlocked when short")
+	if cpop:
+		Game.handle_back()
+		await _frames(2)
+		check(not is_instance_valid(cpop) or not cpop.is_inside_tree(), "back key closes the reminder")
 	# Gallery: buy a locked item with crystals.
 	DB.add_reward(uid, "phrase_crystal", 5)
 	Game.region_code = "visayas"
