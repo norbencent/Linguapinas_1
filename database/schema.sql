@@ -81,7 +81,8 @@ CREATE TABLE IF NOT EXISTS culture_items (
     kind          TEXT NOT NULL,
     title         TEXT NOT NULL,
     description   TEXT NOT NULL,
-    image         TEXT NOT NULL DEFAULT ''
+    image         TEXT NOT NULL DEFAULT '',
+    crystals_only INTEGER NOT NULL DEFAULT 0  -- 1: never revealed by quizzes, only bought
 );
 
 -- Regional stories unlocked by restoring a Language Core.

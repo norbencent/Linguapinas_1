@@ -1,7 +1,7 @@
 """Draw an illustrated card for every culture item in database/seed_data.json.
 
 Writes assets/culture/<image>.png (640x360): the region's colors, a woven
-pattern, an icon for the kind of item (festival, food, landmark, ...) and
+pattern, an icon for the kind of item (festival, food, wildlife, ...) and
 its name. These are placeholders: to use a real photo or drawing instead,
 save it as assets/culture/<image>.png with the same name (any size, it is
 cropped to fit) and the game shows it.
@@ -176,9 +176,48 @@ def icon_music(d):
     d.line([180, 150, 130, 186], fill=INK, width=7)
 
 
+def icon_wildlife(d):
+    # Dinagat bushy-tailed cloud rat sitting on a branch, its long bushy tail hanging down.
+    fur, belly, dark = (150, 110, 78), (228, 205, 170), (92, 62, 40)
+    # Long bushy tail first (behind the body): puffs curving down, thick then tapering.
+    for i in range(14):
+        t = i / 13
+        x = 158 + 40 * t + 10 * math.sin(t * 3.0)
+        y = 96 + 84 * t
+        r = 22 - 8 * t
+        d.ellipse([x - r, y - r, x + r, y + r], fill=dark if t > 0.72 else fur, outline=INK, width=3)
+    for i in range(14):                                                     # fur tufts on the tail
+        t = i / 13
+        x = 158 + 40 * t + 10 * math.sin(t * 3.0)
+        y = 96 + 84 * t
+        r = 22 - 8 * t
+        d.ellipse([x - r + 3, y - r + 3, x + r - 3, y + r - 3], fill=dark if t > 0.72 else fur)
+    d.line([4, 124, 236, 106], fill=(110, 70, 34), width=14)              # branch
+    d.line([4, 124, 236, 106], fill=INK, width=2)
+    for x, y in ((26, 122), (226, 108)):
+        d.ellipse([x - 16, y - 26, x + 16, y - 4], fill=(70, 140, 60), outline=INK, width=3)  # leaves
+    d.ellipse([40, 38, 176, 122], fill=fur, outline=INK, width=5)         # body
+    d.ellipse([70, 70, 140, 118], fill=belly)                              # belly
+    d.ellipse([22, 14, 100, 84], fill=fur, outline=INK, width=5)           # head
+    for x in (34, 88):                                                      # round ears
+        d.ellipse([x - 14, 0, x + 14, 28], fill=fur, outline=INK, width=4)
+        d.ellipse([x - 7, 7, x + 7, 21], fill=(230, 160, 150))
+    d.ellipse([40, 36, 54, 50], fill=(20, 10, 4))                           # eyes
+    d.ellipse([68, 36, 82, 50], fill=(20, 10, 4))
+    d.ellipse([44, 38, 49, 43], fill=(255, 255, 255))
+    d.ellipse([72, 38, 77, 43], fill=(255, 255, 255))
+    d.ellipse([55, 54, 67, 64], fill=(200, 110, 110), outline=INK, width=2)  # nose
+    for side in (-1, 1):                                                    # whiskers
+        for dy in (-4, 4):
+            d.line([61 + side * 10, 60, 61 + side * 34, 58 + dy * 2], fill=INK, width=2)
+    for x in (74, 136):                                                     # paws on the branch
+        d.ellipse([x - 13, 108, x + 13, 124], fill=dark, outline=INK, width=3)
+
+
 ICONS = {"landmark": icon_landmark, "heritage": icon_heritage, "festival": icon_festival,
          "food": icon_food, "clothing": icon_clothing, "textile": icon_textile, "art": icon_art,
-         "craft": icon_craft, "dance": icon_dance, "music": icon_music}
+         "craft": icon_craft, "dance": icon_dance, "music": icon_music,
+         "wildlife": icon_wildlife}
 
 
 def draw_card(item):
