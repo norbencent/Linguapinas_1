@@ -726,9 +726,14 @@ func culture_card(item: Dictionary, unlocked: bool, on_buy := Callable()) -> Pan
 	card.add_child(v)
 	var pic := culture_picture(item)
 	if pic:
-		if not unlocked:
-			pic.modulate = Color(0.35, 0.33, 0.3)
-		v.add_child(pic)
+		if unlocked:
+			pic.name = "photo"
+			v.add_child(pic)
+		else:
+			# Locked: the photo stays hidden (blurred, dark, padlock) until unlocked.
+			var cover := LockedPhoto.make(pic.texture, int(pic.custom_minimum_size.y))
+			pic.free()
+			v.add_child(cover)
 	var tags := hbox(6)
 	v.add_child(tags)
 	tags.add_child(pill(str(item.kind).to_upper(), region_color if unlocked else Color("8d8170"), 16))

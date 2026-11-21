@@ -452,6 +452,30 @@ func _test_culture() -> void:
 	var pics := get_tree().current_scene.find_children("*", "TextureRect", true, false).filter(
 		func(t): return t.texture != null and t.texture.resource_path.begins_with("res://assets/culture/"))
 	check(pics.size() == DB.get_culture_items("visayas").size(), "gallery shows a picture for every Visayas item")
+	# Locked items hide their photo (blurred + padlock); only unlocked items show it clearly.
+	var lock_uid := DB.register_user("lockfan", "").user.id as int
+	Game.user = DB.get_user(lock_uid)
+	DB.reveal_culture(lock_uid, "ceb")
+	var shown_title: String = DB.get_unlocked_culture(lock_uid)[0]
+	Game.goto("gallery")
+	await _frames(3)
+	var gal := get_tree().current_scene
+	var clear_photos := gal.find_children("photo", "TextureRect", true, false)
+	var covers := gal.find_children("locked_photo", "TextureRect", true, false)
+	check(clear_photos.size() == 1 and covers.size() == DB.get_culture_items("visayas").size() - 1,
+		"only the unlocked item shows its photo; the rest are locked")
+	check(covers.all(func(c): return c is LockedPhoto and c.material is ShaderMaterial),
+		"locked photos are covered (blurred, with a padlock)")
+	var rat_card := gal.find_child("culture_" + str(DB.get_culture_items("visayas").filter(
+		func(c): return c.title == shown_title)[0].image), true, false)
+	check(rat_card != null and rat_card.find_child("photo", true, false) != null, "the level's revealed item shows its photo")
+	DB.add_reward(lock_uid, "phrase_crystal", DB.CULTURE_COST.phrase_crystal)
+	var buy_btn := gal.find_child("unlock", true, false)
+	await _click(buy_btn)
+	await _frames(3)
+	check(get_tree().current_scene.find_children("photo", "TextureRect", true, false).size() == 2,
+		"buying with 5 Phrase Crystals shows the photo")
+	Game.user = DB.login_user("juan", "secret1").user
 
 
 func _test_reward_economy() -> void:
