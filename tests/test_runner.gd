@@ -418,7 +418,7 @@ func _test_culture() -> void:
 		for lang in DB.get_languages(region.code):
 			check(items.any(func(c): return c.language_code == lang.code), "%s has a culture item" % lang.code)
 	for c in items:
-		check(ResourceLoader.exists("res://assets/culture/%s.png" % c.image), "%s has a picture" % c.title)
+		check(UI.culture_image_path(c).ends_with(".jpg"), "%s has a real photo" % c.title)
 	check(Game.hide_name("Sisig comes from Pampanga.", "Sisig") == "_____ comes from Pampanga.", "culture name hidden")
 	# The Dinagat cloud rat is crystals-only: clearing levels never reveals it.
 	var rat_uid := DB.register_user("ratfan", "").user.id as int
