@@ -177,31 +177,41 @@ def icon_music(d):
 
 
 def icon_wildlife(d):
-    # Dinagat bushy-tailed cloud rat sitting on a branch, its bushy tail hanging down.
+    # Dinagat bushy-tailed cloud rat sitting on a branch, its long bushy tail hanging down.
     fur, belly, dark = (150, 110, 78), (228, 205, 170), (92, 62, 40)
-    d.line([6, 150, 234, 132], fill=(110, 70, 34), width=14)           # branch
-    d.line([6, 150, 234, 132], fill=INK, width=2)
-    for x, y in ((40, 147), (200, 135)):
+    # Long bushy tail first (behind the body): puffs curving down, thick then tapering.
+    for i in range(14):
+        t = i / 13
+        x = 158 + 40 * t + 10 * math.sin(t * 3.0)
+        y = 96 + 84 * t
+        r = 22 - 8 * t
+        d.ellipse([x - r, y - r, x + r, y + r], fill=dark if t > 0.72 else fur, outline=INK, width=3)
+    for i in range(14):                                                     # fur tufts on the tail
+        t = i / 13
+        x = 158 + 40 * t + 10 * math.sin(t * 3.0)
+        y = 96 + 84 * t
+        r = 22 - 8 * t
+        d.ellipse([x - r + 3, y - r + 3, x + r - 3, y + r - 3], fill=dark if t > 0.72 else fur)
+    d.line([4, 124, 236, 106], fill=(110, 70, 34), width=14)              # branch
+    d.line([4, 124, 236, 106], fill=INK, width=2)
+    for x, y in ((26, 122), (226, 108)):
         d.ellipse([x - 16, y - 26, x + 16, y - 4], fill=(70, 140, 60), outline=INK, width=3)  # leaves
-    # Bushy tail: overlapping puffs curling down below the branch.
-    for i, (x, y, r) in enumerate(((150, 146, 19), (160, 164, 20), (165, 180, 18), (158, 188, 11))):
-        d.ellipse([x - r, y - r, x + r, y + r], fill=fur if i % 2 == 0 else dark, outline=INK, width=3)
-    d.ellipse([28, 60, 166, 150], fill=fur, outline=INK, width=5)         # body
-    d.ellipse([60, 92, 130, 146], fill=belly)                              # belly
-    d.ellipse([18, 34, 96, 104], fill=fur, outline=INK, width=5)           # head
-    for x in (30, 74):                                                      # round ears
-        d.ellipse([x - 14, 18, x + 14, 46], fill=fur, outline=INK, width=4)
-        d.ellipse([x - 7, 25, x + 7, 39], fill=(230, 160, 150))
-    d.ellipse([36, 56, 50, 70], fill=(20, 10, 4))                           # eyes
-    d.ellipse([62, 56, 76, 70], fill=(20, 10, 4))
-    d.ellipse([40, 58, 45, 63], fill=(255, 255, 255))
-    d.ellipse([66, 58, 71, 63], fill=(255, 255, 255))
-    d.ellipse([50, 74, 62, 84], fill=(200, 110, 110), outline=INK, width=2)  # nose
+    d.ellipse([40, 38, 176, 122], fill=fur, outline=INK, width=5)         # body
+    d.ellipse([70, 70, 140, 118], fill=belly)                              # belly
+    d.ellipse([22, 14, 100, 84], fill=fur, outline=INK, width=5)           # head
+    for x in (34, 88):                                                      # round ears
+        d.ellipse([x - 14, 0, x + 14, 28], fill=fur, outline=INK, width=4)
+        d.ellipse([x - 7, 7, x + 7, 21], fill=(230, 160, 150))
+    d.ellipse([40, 36, 54, 50], fill=(20, 10, 4))                           # eyes
+    d.ellipse([68, 36, 82, 50], fill=(20, 10, 4))
+    d.ellipse([44, 38, 49, 43], fill=(255, 255, 255))
+    d.ellipse([72, 38, 77, 43], fill=(255, 255, 255))
+    d.ellipse([55, 54, 67, 64], fill=(200, 110, 110), outline=INK, width=2)  # nose
     for side in (-1, 1):                                                    # whiskers
         for dy in (-4, 4):
-            d.line([56 + side * 10, 80, 56 + side * 34, 78 + dy * 2], fill=INK, width=2)
-    for x in (60, 120):                                                     # paws on the branch
-        d.ellipse([x - 13, 136, x + 13, 152], fill=dark, outline=INK, width=3)
+            d.line([61 + side * 10, 60, 61 + side * 34, 58 + dy * 2], fill=INK, width=2)
+    for x in (74, 136):                                                     # paws on the branch
+        d.ellipse([x - 13, 108, x + 13, 124], fill=dark, outline=INK, width=3)
 
 
 ICONS = {"landmark": icon_landmark, "heritage": icon_heritage, "festival": icon_festival,
