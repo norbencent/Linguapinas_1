@@ -51,7 +51,7 @@ func _ready() -> void:
 			info.add_child(UI.label("%s · %s" % [UI.t("locked"), DB.cost_text(DB.LANGUAGE_COST)], 16, UI.RED, true))
 			var buy := UI.pill_button("UNLOCK", UI.REWARD_COLORS.word_fragment, func(): _buy(code), 52, 18)
 			buy.name = "unlock"
-			buy.disabled = not DB.can_afford(uid, DB.LANGUAGE_COST)
+			# Always tappable: if the player is short, a reminder explains why.
 			buy.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			h.add_child(buy)
 		else:
@@ -94,6 +94,9 @@ func _show_map(code: String) -> void:
 
 
 func _buy(code: String) -> void:
+	# Not enough Word Fragments: show the reminder, unlock nothing, spend nothing.
+	if not ResourcePopup.check(self, DB.LANGUAGE_COST, str(DB.get_language(code).get("name", ""))):
+		return
 	var r := DB.unlock_language(Game.user_id(), code)
 	if r.ok:
 		Sound.play("win")

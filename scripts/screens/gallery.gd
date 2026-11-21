@@ -61,6 +61,9 @@ func _show(region_code: String) -> void:
 
 
 func _buy(title: String) -> void:
+	# Not enough Phrase Crystals: show the reminder, unlock nothing, spend nothing.
+	if not ResourcePopup.check(self, DB.CULTURE_COST, title):
+		return
 	var r := DB.unlock_culture(Game.user_id(), title)
 	if r.ok:
 		Sound.play("win")
