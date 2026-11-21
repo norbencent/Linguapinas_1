@@ -146,6 +146,8 @@ func _migrate() -> void:
 		_exec("ALTER TABLE culture_items ADD COLUMN language_code TEXT NOT NULL DEFAULT '';")
 	if not "image" in culture_cols:
 		_exec("ALTER TABLE culture_items ADD COLUMN image TEXT NOT NULL DEFAULT '';")
+	if not "crystals_only" in culture_cols:
+		_exec("ALTER TABLE culture_items ADD COLUMN crystals_only INTEGER NOT NULL DEFAULT 0;")
 
 
 func get_setting(key: String, default_value := "") -> String:
@@ -195,9 +197,10 @@ func _seed_content() -> void:
 	for t in data.tips:
 		_exec("INSERT INTO tips(language_code, tip) VALUES(?, ?);", [t.language_code, t.tip])
 	for c in data.culture_items:
-		_exec("""INSERT INTO culture_items(region_code, language_code, kind, title, description, image)
-			VALUES(?, ?, ?, ?, ?, ?);""",
-			[c.region_code, c.get("language_code", ""), c.kind, c.title, c.description, c.get("image", "")])
+		_exec("""INSERT INTO culture_items(region_code, language_code, kind, title, description, image, crystals_only)
+			VALUES(?, ?, ?, ?, ?, ?, ?);""",
+			[c.region_code, c.get("language_code", ""), c.kind, c.title, c.description, c.get("image", ""),
+			1 if c.get("crystals_only", false) else 0])
 	for s in data.stories:
 		_exec("INSERT INTO stories(region_code, title, body) VALUES(?, ?, ?);", [s.region_code, s.title, s.body])
 	set_setting("content_version", str(version))
@@ -526,6 +529,11 @@ func get_unlocked_culture(user_id: int) -> Array:
 	return out
 
 
+## True if the item can only be unlocked with Phrase Crystals.
+func is_crystals_only(item: Dictionary) -> bool:
+	return int(item.get("crystals_only", 0)) == 1
+
+
 ## Reveals the next locked culture item of the language (or, when they are
 ## all unlocked, of its region). Returns the item, or {} if none is left.
 func reveal_culture(user_id: int, language_code: String) -> Dictionary:
@@ -533,7 +541,8 @@ func reveal_culture(user_id: int, language_code: String) -> Dictionary:
 	if lang.is_empty():
 		return {}
 	var have := get_unlocked_culture(user_id)
-	var items := get_culture_items(lang.region_code)
+	# Crystals-only items (e.g. the Dinagat cloud rat) are never revealed by quizzes.
+	var items := get_culture_items(lang.region_code).filter(func(c): return int(c.get("crystals_only", 0)) == 0)
 	var own := items.filter(func(c): return c.language_code == language_code and not c.title in have)
 	var rest := items.filter(func(c): return c.language_code != language_code and not c.title in have)
 	var pick: Dictionary = own[0] if not own.is_empty() else (rest[0] if not rest.is_empty() else {})

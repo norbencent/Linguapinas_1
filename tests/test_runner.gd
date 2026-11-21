@@ -420,6 +420,20 @@ func _test_culture() -> void:
 	for c in items:
 		check(ResourceLoader.exists("res://assets/culture/%s.png" % c.image), "%s has a picture" % c.title)
 	check(Game.hide_name("Sisig comes from Pampanga.", "Sisig") == "_____ comes from Pampanga.", "culture name hidden")
+	# The Dinagat cloud rat is crystals-only: clearing levels never reveals it.
+	var rat_uid := DB.register_user("ratfan", "").user.id as int
+	var rat := "Dinagat Bushy-tailed Cloud Rat"
+	check(DB.get_culture_items("mindanao").any(func(c): return c.title == rat and DB.is_crystals_only(c)),
+		"cloud rat is a crystals-only Mindanao item")
+	for i in 30:
+		DB.reveal_culture(rat_uid, "sgd")
+	check(not DB.is_culture_unlocked(rat_uid, rat), "clearing levels never reveals the cloud rat")
+	check(DB.get_culture_items("mindanao").all(func(c): return c.title == rat or DB.is_culture_unlocked(rat_uid, c.title)),
+		"every other Mindanao item can still be revealed")
+	check(not DB.unlock_culture(rat_uid, rat).ok, "cloud rat stays locked without crystals")
+	DB.add_reward(rat_uid, "phrase_crystal", DB.CULTURE_COST.phrase_crystal)
+	check(DB.unlock_culture(rat_uid, rat).ok and DB.get_rewards(rat_uid).phrase_crystal == 0,
+		"5 Phrase Crystals unlock the cloud rat")
 	# Full quizzes include culture questions; category practice does not.
 	for d in [1, 2, 3]:
 		var qs := Game.build_quiz("war", d)

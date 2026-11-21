@@ -262,7 +262,9 @@ static func _culture(q: String, lang_code: String, region: String) -> Dictionary
 		if q == title or (q.length() >= 4 and (title.begins_with(q) or q in title)):
 			var unlocked := DB.is_culture_unlocked(Game.user_id(), c.title)
 			var text := "%s%s (%s): %s" % [_opener(region), c.title, str(c.kind).to_lower(), c.description]
-			if not unlocked:
+			if not unlocked and DB.is_crystals_only(c):
+				text += " It is a special item in your Gallery: only %s can unlock it." % DB.cost_text(DB.CULTURE_COST)
+			elif not unlocked:
 				text += " It is still locked in your Gallery: clear a new level to reveal it, or unlock it with %s." % DB.cost_text(DB.CULTURE_COST)
 			return _reply("culture", text, [], region, DB.get_language(lang_code).get("name", ""))
 	return {}

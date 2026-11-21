@@ -728,7 +728,11 @@ func culture_card(item: Dictionary, unlocked: bool, on_buy := Callable()) -> Pan
 		v.add_child(label("%s · %s" % [t("locked"), item.kind], 24, Color("5f5446"), true, font_body_black))
 		var how := "Clear a level in %s to reveal it" % lang.name if not lang.is_empty() \
 			else "Clear levels in %s to reveal it" % DB.get_region(item.region_code).get("name", "")
-		v.add_child(label("%s, or unlock it now for %s." % [how, DB.cost_text(DB.CULTURE_COST)], 17, Color("5f5446"), true))
+		if DB.is_crystals_only(item):
+			v.add_child(label("Special item: it can only be unlocked with %s." % DB.cost_text(DB.CULTURE_COST),
+				17, Color("5f5446"), true))
+		else:
+			v.add_child(label("%s, or unlock it now for %s." % [how, DB.cost_text(DB.CULTURE_COST)], 17, Color("5f5446"), true))
 		if on_buy.is_valid():
 			var b := pill_button("UNLOCK · %d %s" % [DB.CULTURE_COST.phrase_crystal, REWARD_SHORT.phrase_crystal],
 				REWARD_COLORS.phrase_crystal, on_buy, 52, 18)
