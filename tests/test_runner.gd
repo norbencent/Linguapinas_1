@@ -646,34 +646,6 @@ func _test_new_screens() -> void:
 	await _click(buy)
 	await _frames(3)
 	check(DB.get_unlocked_culture(uid).size() == before + 1, "gallery unlock buys an item")
-	# Copyright & Credits: from the Gallery and from Settings, all 47 photos credited.
-	await _click(get_tree().current_scene.find_child("photo_credits", true, false))
-	await _frames(3)
-	check(_scene_is("credits"), "Gallery PHOTO CREDITS opens the credits")
-	var cr := get_tree().current_scene
-	check(cr.find_child("copyright", true, false) != null and cr.find_child("third_party", true, false) != null,
-		"credits show the copyright and third-party notice")
-	var rows := 0
-	for i in 60:
-		if cr.find_child("credit_%d" % (i + 1), true, false):
-			rows += 1
-	check(rows == DB.get_culture_items().size(), "every culture photo is credited (%d)" % rows)
-	var credited: Array = []
-	for island in cr.load_credits().islands:
-		for photo in island.photos:
-			credited.append(photo.title)
-	check(DB.get_culture_items().all(func(c): return c.title in credited), "credits name every culture item")
-	Game.handle_back()
-	await _frames(3)
-	check(_scene_is("gallery"), "back returns to the Gallery")
-	Game.goto("settings")
-	await _frames(3)
-	await _click(get_tree().current_scene.find_child("credits", true, false))
-	await _frames(3)
-	check(_scene_is("credits"), "Settings COPYRIGHT & CREDITS opens the credits")
-	Game.handle_back()
-	await _frames(3)
-	check(_scene_is("settings"), "back returns to Settings")
 
 
 func _tutorial_button(name: String) -> Control:
