@@ -79,6 +79,9 @@ func _ready() -> void:
 
 	v.add_child(UI.gem_button(UI.t("save"), "green", _save, 84, 34))
 	v.add_child(UI.gem_button(UI.t("exit"), "red", _exit, 84, 34))
+	var credits := UI.pill_button(UI.tx("COPYRIGHT AT CREDITS", "COPYRIGHT & CREDITS"), Color("8a5a2b"), func(): Game.goto("credits"), 56, 22)
+	credits.name = "credits"
+	v.add_child(credits)
 	if Game.is_logged_in():
 		v.add_child(UI.pill_button(UI.t("logout"), UI.INK_SOFT, Game.logout, 56, 22))
 	GuidePages.maybe_show(self, "settings")

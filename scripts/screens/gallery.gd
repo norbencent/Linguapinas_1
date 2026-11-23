@@ -22,6 +22,9 @@ func _ready() -> void:
 		+ "You can also unlock any element now with %s." % DB.cost_text(DB.CULTURE_COST), 17, UI.INK, true))
 	wallet_holder = UI.vbox(0)
 	iv.add_child(wallet_holder)
+	var credits := UI.pill_button(UI.tx("PINAGMULAN NG MGA LARAWAN", "PHOTO CREDITS"), Color("8a5a2b"), func(): Game.goto("credits"), 48, 18)
+	credits.name = "photo_credits"
+	iv.add_child(credits)
 	content.add_child(intro)
 
 	var row := UI.hbox(8)

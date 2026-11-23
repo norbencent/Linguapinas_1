@@ -20,6 +20,7 @@ const SCENES := {
 	"spirit": "res://scenes/guiding_spirit.tscn",
 	"profile": "res://scenes/profile.tscn",
 	"guide": "res://scenes/guide.tscn",
+	"credits": "res://scenes/credits.tscn",
 }
 
 const MAX_HEARTS := 5
@@ -38,7 +39,7 @@ var last_result: Dictionary = {}  # filled by the quiz for the results screen
 var settings_return := "title"   # where Settings' Exit button goes
 
 ## Screens that can be opened without a player.
-const PUBLIC_SCREENS := ["title", "menu", "new_game", "continue", "settings"]
+const PUBLIC_SCREENS := ["title", "menu", "new_game", "continue", "settings", "credits"]
 const PLAYTIME_SAVE_EVERY := 30.0
 ## Play time is measured with the real clock, not by adding up frame times:
 ## on a slow phone, or while a screen loads, Godot shortens long frames, so

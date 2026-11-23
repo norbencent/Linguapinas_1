@@ -1,0 +1,269 @@
+{
+ "title": "LINGUAPINAS: Copyright and Photo Credits",
+ "copyright": "© 2026 LINGUAPINAS. All rights reserved.",
+ "about": "LINGUAPINAS, including its game design, program code, characters, user interface, text, quizzes and original artwork, was created by Group 7 (Dagalea, Norbencent A.; Kadusali, Angel T.; Andrade, Rolan E.) as a capstone project of Don Jose Ecleo Memorial Foundation College of Science and Technology, BSIT 4th Year.",
+ "third_party_heading": "Third-Party Photographs",
+ "third_party": "The 47 photographs shown in the Cultural Gallery of LINGUAPINAS are not owned by the developers of LINGUAPINAS. All rights to these photographs belong to their respective photographers, owners and sources.",
+ "used_only_intro": "These photographs are used only:",
+ "used_only": [
+  "for educational and research purposes, to show and preserve Philippine languages and culture;",
+  "in a non-commercial game. LINGUAPINAS is not sold, and no money is earned from these photographs;",
+  "within the game only, as pictures of each cultural element after the player unlocks it."
+ ],
+ "fair_use": "This use is made in good faith under the principle of fair use in Section 185 of Republic Act No. 8293, the Intellectual Property Code of the Philippines. No claim of ownership is made over any of these photographs.",
+ "contact": "If you own any of these photographs and want it credited differently or removed from the game, please contact [EMAIL OR CONTACT PERSON]. It will be corrected or removed right away.",
+ "credits_heading": "Photo Credits",
+ "islands": [
+  {
+   "island": "Luzon",
+   "photos": [
+    {
+     "title": "Pahiyas Festival",
+     "source": "Rappler",
+     "url": "https://www.rappler.com/culture-desk/travel/pahiyas-festival-brings-color-anew-streets-lucban-quezon-2025/"
+    },
+    {
+     "title": "Barong Tagalog",
+     "source": "Donn Delica",
+     "url": "https://share.google/3vGmUuWqXihO4cwQD"
+    },
+    {
+     "title": "Intramuros",
+     "source": "The Manila Hotel (Facebook)",
+     "url": "https://www.facebook.com/TheManilaHotel/posts/a-magnificent-aerial-view-of-the-walled-city-of-intramuros-one-can-explore-this-/1056253673202157/"
+    },
+    {
+     "title": "Vigan",
+     "source": "Meandering Mentor",
+     "url": "https://meanderingmentor.com/10-things-to-do-in-vigan/"
+    },
+    {
+     "title": "Pinakbet",
+     "source": "Wikipedia",
+     "url": "https://tl.wikipedia.org/wiki/Pinakbet"
+    },
+    {
+     "title": "Vigan Empanada",
+     "source": "Fudbol Ilocos (Facebook)",
+     "url": "https://www.facebook.com/fudbol.ilocos/"
+    },
+    {
+     "title": "Dagupan Bangus",
+     "source": "Dagupan Bangus PH",
+     "url": "https://www.dagupanbangusph.com/"
+    },
+    {
+     "title": "Sisig",
+     "source": "Wikipedia",
+     "url": "https://en.wikipedia.org/wiki/Sisig"
+    },
+    {
+     "title": "Giant Lantern Festival",
+     "source": "Global Times (Facebook)",
+     "url": "https://www.facebook.com/globaltimesnews/posts/inpicsits-a-feast-of-lights-and-colors-as-53-giant-lantern-installations-light-u/1017327307106143/"
+    },
+    {
+     "title": "Bicol Express",
+     "source": "Bicolana's Kitchen",
+     "url": "https://www.bicolanaskitchen.com/bicol-express.htm"
+    },
+    {
+     "title": "Pancit Batil Patung",
+     "source": "Ang Sarap",
+     "url": "https://www.angsarap.net/2012/09/14/pancit-batil-patong/"
+    },
+    {
+     "title": "Sagada Hanging Coffins",
+     "source": "Wikimedia Commons",
+     "url": "https://commons.wikimedia.org/wiki/File:Hanging_Coffins_of_Sagada.jpg"
+    },
+    {
+     "title": "Ivatan Stone Houses",
+     "source": "billionBricks",
+     "url": "https://billionbricks.org/blog/lessons-ivatan-homes-natural-cooling-strategies/"
+    },
+    {
+     "title": "Vakul",
+     "source": "Facebook group post",
+     "url": "https://www.facebook.com/groups/1022560929298411/posts/1177534100467759/"
+    },
+    {
+     "title": "Hudhud Chants",
+     "source": "Sutori",
+     "url": "https://www.sutori.com/es/historia/the-history-of-dancing-in-philippines--Hsx9wiCeRSbeZCZ7xpwcuaWP"
+    },
+    {
+     "title": "Batok",
+     "source": "Fred Wissink",
+     "url": "https://fredwissink.com/in-search-of-the-kalinga/"
+    }
+   ]
+  },
+  {
+   "island": "Visayas",
+   "photos": [
+    {
+     "title": "Sinulog",
+     "source": "TBO Academy",
+     "url": "https://products.tboacademy.com/thephilippines/events.aspx"
+    },
+    {
+     "title": "Lechon",
+     "source": "Delish PH",
+     "url": "https://delish.ph/news-stories/cangs-lechon-cebu-roast-pig-manila/"
+    },
+    {
+     "title": "Dinagyang",
+     "source": "VacationHive",
+     "url": "https://www.vacationhive.com/spots/dinagyang-festival"
+    },
+    {
+     "title": "La Paz Batchoy",
+     "source": "Pinterest",
+     "url": "https://ph.pinterest.com/pin/la-paz-batchoy-noodle-soup-with-beef-marrow--180425528795249144/"
+    },
+    {
+     "title": "Pintados Festival",
+     "source": "National Museum of the Philippines – Iloilo (Facebook)",
+     "url": "https://www.facebook.com/nationalmuseum.iloilo/photos/pintados-de-passi-festival-is-celebrated-every-3rd-week-of-march-performers-pain/1131167761028712/"
+    },
+    {
+     "title": "Ati-Atihan",
+     "source": "",
+     "url": "https://share.google/vyUrWV2YCvdaz83VT"
+    },
+    {
+     "title": "Piña Cloth",
+     "source": "The Textile Anthropologist",
+     "url": "https://thetextileanthropologist.substack.com/p/pina-cloth-labor-legacy-and-the-fragility"
+    },
+    {
+     "title": "Binirayan Festival",
+     "source": "Hellotravel",
+     "url": "https://www.hellotravel.com/events/binirayan-festival"
+    },
+    {
+     "title": "Capiz Shell Windows",
+     "source": "Lazada Philippines",
+     "url": "https://www.lazada.com.ph/tag/capiz-door-panel/"
+    },
+    {
+     "title": "Rodeo Masbateño",
+     "source": "Rodeo Festival (Facebook)",
+     "url": "https://www.facebook.com/rodeofestival/"
+    },
+    {
+     "title": "Romblon Marble",
+     "source": "Ben Goes Where",
+     "url": "https://bengoeswhere.com/2025/04/06/romblon-weekend-at-the-marble-capital-of-the-philippines/"
+    },
+    {
+     "title": "Cuyo Fort",
+     "source": "Flickr",
+     "url": "https://www.flickr.com/photos/23247497@N07/16565032019"
+    },
+    {
+     "title": "Kinilaw",
+     "source": "Pinterest",
+     "url": "https://www.pinterest.com/pin/238127899019983862/"
+    }
+   ]
+  },
+  {
+   "island": "Mindanao",
+   "photos": [
+    {
+     "title": "Kadayawan",
+     "source": "Homes.ph",
+     "url": "https://homes.ph/davao/tourism/the-august-awakening-why-davaos-august-2026-kadayawan-festival-is-the-king-of-festivals"
+    },
+    {
+     "title": "Durian",
+     "source": "Top Fruits",
+     "url": "https://topfruits.com.my/durian-farming/"
+    },
+    {
+     "title": "Pangalay",
+     "source": "SEA Heritage History (Facebook)",
+     "url": "https://www.facebook.com/SEAheritagehistory/posts/pangalay-also-known-as-daling-daling-or-mengalai-in-sabah-is-the-traditional-fin/546289602570195/"
+    },
+    {
+     "title": "Pastil",
+     "source": "The Book Nook Community (Facebook)",
+     "url": "https://www.facebook.com/groups/thebooknookcommunity/posts/426616898755621/"
+    },
+    {
+     "title": "Kulintang",
+     "source": "Pakaraguian (Facebook)",
+     "url": "https://www.facebook.com/pakaraguian/"
+    },
+    {
+     "title": "Okir",
+     "source": "Pinterest",
+     "url": "https://www.pinterest.com/emilyazalea/maranao/"
+    },
+    {
+     "title": "Torogan",
+     "source": "Filipina Architect",
+     "url": "https://filipinaarchitect.com/barmm-barangay-halls-reviving-the-traditional-torogan-design-to-a-contemporary-use/"
+    },
+    {
+     "title": "Singkil",
+     "source": "Wikipedia",
+     "url": "https://en.wikipedia.org/wiki/Singkil"
+    },
+    {
+     "title": "Kaamulan Festival",
+     "source": "Flickr",
+     "url": "https://www.flickr.com/photos/eazy360/27861354957"
+    },
+    {
+     "title": "Bonok-Bonok Festival",
+     "source": "Instagram",
+     "url": "https://www.instagram.com/p/C_slwmgyaKm/"
+    },
+    {
+     "title": "Buklog",
+     "source": "UNESCO Intangible Cultural Heritage",
+     "url": "https://ich.unesco.org/en/photo-pop-up-00973?photoID=12802"
+    },
+    {
+     "title": "Mabal Tabih",
+     "source": "Philippine Studies UK",
+     "url": "https://philippinestudies.uk/mapping/items/show/27587?tour=30&index=4"
+    },
+    {
+     "title": "Fort Pilar",
+     "source": "Department of Tourism",
+     "url": "https://www.tourism.gov.ph/article/useful-phrases-in-chavacano-for-traveling/"
+    },
+    {
+     "title": "Curacha",
+     "source": "Tripadvisor",
+     "url": "https://www.tripadvisor.com/LocationPhotoDirectLink-g580109-d793725-i423175158-Alavar_Seafood_Restaurant-Zamboanga_City_Zamboanga_Sibugay_Province_Zambo.html"
+    },
+    {
+     "title": "Yakan Weaving",
+     "source": "SunStar Gallery",
+     "url": "https://gallery.sunstar.com.ph/Travel/Zamboanga-Philippines/i-chBqvFX"
+    },
+    {
+     "title": "T'nalak",
+     "source": "The Textile Atlas",
+     "url": "https://www.thetextileatlas.com/craft-stories/tnalak-weaving-philippines"
+    },
+    {
+     "title": "Malong",
+     "source": "Zambongga",
+     "url": "https://zambongga.weebly.com/about-malong.html"
+    },
+    {
+     "title": "Dinagat Bushy-tailed Cloud Rat",
+     "source": "BioLib",
+     "url": "https://www.biolib.cz/en/image/id126195/"
+    }
+   ]
+  }
+ ],
+ "closing": "All photographs remain the property of their respective owners."
+}
